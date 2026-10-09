@@ -3666,7 +3666,7 @@ components:
               description: |
                 Broker-side RE2/J regular expression (`SubscriptionPattern`).
                 Requires the consumer group protocol (`group.protocol=consumer`);
-                with the classic protocol the request fails.
+                with the classic protocol the request returns `400`.
 
     ConsumerSubscriptionResponse:
       type: array

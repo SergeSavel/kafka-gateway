@@ -20,6 +20,7 @@ import org.apache.kafka.clients.consumer.InvalidOffsetException;
 import org.apache.kafka.clients.consumer.SubscriptionPattern;
 import org.apache.kafka.common.TopicPartition;
 import pro.savel.kafka.common.*;
+import pro.savel.kafka.common.exceptions.BadRequestException;
 import pro.savel.kafka.consumer.requests.*;
 import pro.savel.kafka.consumer.responses.*;
 
@@ -194,11 +195,22 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
             if (request.getTopics() != null)
                 consumer.subscribe(request.getTopics());
             else if (request.getPattern() != null)
-                consumer.subscribe(new SubscriptionPattern(request.getPattern()));
+                subscribeToPattern(consumer, request.getPattern());
             else
                 throw new IllegalArgumentException("Topic list or pattern must be specified");
             return new ConsumerResponseBearer(requestBearer, HttpResponseStatus.NO_CONTENT, null);
         }, ctx::writeAndFlush);
+    }
+
+    private static void subscribeToPattern(org.apache.kafka.clients.consumer.Consumer<byte[], byte[]> consumer,
+                                           String pattern) {
+        try {
+            consumer.subscribe(new SubscriptionPattern(pattern));
+        } catch (UnsupportedOperationException e) {
+            // Broker-side patterns exist only in the consumer group protocol; with the classic one
+            // this is a client configuration error, not a gateway failure.
+            throw new BadRequestException("Pattern subscription requires group.protocol=consumer.", e);
+        }
     }
 
     private void processUnsubscribe(ChannelHandlerContext ctx, RequestBearer requestBearer) {
