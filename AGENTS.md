@@ -89,6 +89,7 @@ These are intentional design choices — do not flag as issues:
 - **Sequential access guaranteed externally** — each KafkaConsumer instance must be called strictly sequentially by
   clients; server does not enforce per-instance synchronization. KafkaAdmin and KafkaProducer are thread-safe and may be
   called concurrently
+- **Error responses close the connection** — every error response is written through the `HttpUtils.write…AndClose` helpers, which announce the close with `Connection: close`; only successful responses honor keep-alive
 
 ## Code Conventions
 
