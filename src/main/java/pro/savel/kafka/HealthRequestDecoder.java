@@ -34,7 +34,7 @@ public class HealthRequestDecoder extends ChannelInboundHandlerAdapter {
                 if (httpRequest.method() == HttpMethod.GET) {
                     HttpUtils.writeOk(ctx, httpRequest, "{\"status\":\"UP\"}", HttpUtils.ASCII_APPLICATION_JSON_CHARSET_UTF8);
                 } else {
-                    HttpUtils.writeMethodNotAllowedAndClose(ctx, null);
+                    HttpUtils.writeMethodNotAllowedAndClose(ctx, HttpMethod.GET);
                 }
             } finally {
                 ReferenceCountUtil.release(msg);

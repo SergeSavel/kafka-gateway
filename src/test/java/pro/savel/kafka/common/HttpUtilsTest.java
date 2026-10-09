@@ -92,6 +92,29 @@ class HttpUtilsTest {
     }
 
     @Test
+    void writeMethodNotAllowedAndClose_namesAllowedMethodInCanonicalCase() {
+        var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
+
+        HttpUtils.writeMethodNotAllowedAndClose(channel.pipeline().firstContext(), "bad method", HttpMethod.POST);
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        var allow = false;
+        var connectionClose = false;
+        for (var header : response.headers()) {
+            if ("Allow".contentEquals(header.getKey()) && "POST".contentEquals(header.getValue()))
+                allow = true;
+            if ("Connection".contentEquals(header.getKey()) && "close".contentEquals(header.getValue()))
+                connectionClose = true;
+        }
+        assertTrue(allow, "Allow must name the accepted method, in canonical case for case-sensitive clients");
+        assertTrue(connectionClose);
+        assertFalse(channel.isOpen());
+        response.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
     void writeOk_keepAliveRequest_leavesConnectionOpen() {
         var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");

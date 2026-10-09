@@ -44,7 +44,7 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
             } catch (BadRequestException e) {
                 HttpUtils.writeBadRequestAndClose(ctx, Utils.combineErrorMessage(e));
             } catch (MethodNotAllowedException e) {
-                HttpUtils.writeMethodNotAllowedAndClose(ctx, Utils.combineErrorMessage(e));
+                HttpUtils.writeMethodNotAllowedAndClose(ctx, Utils.combineErrorMessage(e), e.allowedMethod());
             } catch (Exception e) {
                 logger.error("An unexpected error occurred while decoding version request.", e);
                 HttpUtils.writeInternalServerErrorAndClose(ctx, Utils.combineErrorMessage(e));
@@ -72,7 +72,7 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
             HttpUtils.writeOk(ctx, httpRequest, version != null ? version : "unknown",
                     HttpUtils.ASCII_TEXT_PLAIN_CHARSET_UTF8);
         } else {
-            throw new MethodNotAllowedException("Unsupported HTTP method.");
+            throw new MethodNotAllowedException("Unsupported HTTP method.", HttpMethod.GET);
         }
     }
 }

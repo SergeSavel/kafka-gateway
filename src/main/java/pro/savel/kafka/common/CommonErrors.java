@@ -18,11 +18,14 @@ import io.netty.channel.ChannelHandlerContext;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.common.errors.*;
 import pro.savel.kafka.common.exceptions.HttpStatusException;
+import pro.savel.kafka.common.exceptions.MethodNotAllowedException;
 
 public abstract class CommonErrors {
     public static boolean handle(ChannelHandlerContext ctx, Throwable error) {
         var handled = true;
         switch (error) {
+            case MethodNotAllowedException me ->
+                    HttpUtils.writeMethodNotAllowedAndClose(ctx, Utils.combineErrorMessage(error), me.allowedMethod());
             case HttpStatusException ge ->
                     HttpUtils.writeHttpResponseAndClose(ctx, ge.status(), Utils.combineErrorMessage(error));
             // No Thread.currentThread().interrupt() here: handle() runs on whatever thread delivered

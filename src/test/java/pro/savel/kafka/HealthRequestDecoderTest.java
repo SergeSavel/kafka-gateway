@@ -89,6 +89,7 @@ class HealthRequestDecoderTest {
 
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        assertEquals("GET", response.headers().get(HttpHeaderNames.ALLOW));
         response.release();
         channel.finishAndReleaseAll();
     }

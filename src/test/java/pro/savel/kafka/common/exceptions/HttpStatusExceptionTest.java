@@ -14,6 +14,7 @@
 
 package pro.savel.kafka.common.exceptions;
 
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.junit.jupiter.api.Test;
 
@@ -36,8 +37,9 @@ class HttpStatusExceptionTest {
 
     @Test
     void methodNotAllowed_returns405() {
-        var ex = new MethodNotAllowedException("method");
+        var ex = new MethodNotAllowedException("method", HttpMethod.POST);
         assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, ex.status());
+        assertEquals(HttpMethod.POST, ex.allowedMethod());
     }
 
     @Test

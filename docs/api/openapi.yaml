@@ -26,7 +26,7 @@ info:
     - `401` — not authenticated (gateway Basic auth failure, Kafka `AuthenticationException`)
     - `403` — not authorized (Kafka `AuthorizationException`, broker ACLs)
     - `404` — unknown instance, unknown route, or the described entity does not exist
-    - `405` — unsupported HTTP method
+    - `405` — unsupported HTTP method; the `Allow` header names the method the route accepts
     - `406` — binary response format (`application/octet-stream`) requested for an operation that answers in JSON only
     - `409` — conflict (topic exists, group not empty, reassignment or rebalance in progress, commit rejected after a rebalance, illegal client state, invalid consumer offset)
     - `413` — request body too large (`netty.maxJsonRequestBytes` for JSON, `netty.maxRequestBytes` for any request)
@@ -2029,6 +2029,10 @@ components:
           schema: {$ref: '#/components/schemas/ErrorMessage'}
     MethodNotAllowed:
       description: Unsupported HTTP method
+      headers:
+        Allow:
+          description: The method the route accepts
+          schema: {type: string}
       content:
         text/plain:
           schema: {$ref: '#/components/schemas/ErrorMessage'}

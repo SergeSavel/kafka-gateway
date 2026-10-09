@@ -18,6 +18,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.apache.kafka.common.config.ConfigException;
 import org.apache.kafka.common.errors.*;
@@ -57,8 +59,11 @@ class CommonErrorsTest {
     }
 
     @Test
-    void handle_methodNotAllowed_returns405() {
-        assertTrue(CommonErrors.handle(ctx, new MethodNotAllowedException("mna")));
+    void handle_methodNotAllowed_returns405WithAllow() {
+        assertTrue(CommonErrors.handle(ctx, new MethodNotAllowedException("mna", HttpMethod.POST)));
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        assertEquals("POST", response.headers().get(HttpHeaderNames.ALLOW));
     }
 
     @Test

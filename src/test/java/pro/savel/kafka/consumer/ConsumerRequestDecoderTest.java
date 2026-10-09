@@ -168,6 +168,28 @@ class ConsumerRequestDecoderTest {
         response.release();
     }
 
+    @Test
+    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost() {
+        assertFalse(channel.writeInbound(
+                new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/consumer/poll")));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        assertEquals("POST", response.headers().get(HttpHeaderNames.ALLOW));
+        response.release();
+    }
+
+    @Test
+    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet() {
+        assertFalse(channel.writeInbound(
+                new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/consumer")));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        assertEquals("GET", response.headers().get(HttpHeaderNames.ALLOW));
+        response.release();
+    }
+
     private static FullHttpRequest pollRequest(long timeout) {
         return pollRequestWithBody("{\"consumerId\":\"consumer-1\",\"token\":\"token-1\",\"timeout\":" + timeout + "}");
     }

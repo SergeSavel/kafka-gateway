@@ -80,6 +80,28 @@ class ProducerRequestDecoderTest {
         assertEquals("orders-producer", ((ProducerCreateRequest) bearer.request()).getName());
     }
 
+    @Test
+    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost() {
+        assertFalse(channel.writeInbound(
+                new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/producer/create")));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        assertEquals("POST", response.headers().get(HttpHeaderNames.ALLOW));
+        response.release();
+    }
+
+    @Test
+    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet() {
+        assertFalse(channel.writeInbound(
+                new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/producer")));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        assertEquals("GET", response.headers().get(HttpHeaderNames.ALLOW));
+        response.release();
+    }
+
     private static FullHttpRequest createRequest(String name) {
         var body = Unpooled.copiedBuffer("{\"name\":\"" + name + "\",\"config\":{\"bootstrap.servers\":\"kafka:9092\"},"
                 + "\"expirationTimeout\":60000}", StandardCharsets.UTF_8);

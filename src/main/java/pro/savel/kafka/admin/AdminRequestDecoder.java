@@ -145,7 +145,7 @@ public class AdminRequestDecoder extends ChannelInboundHandlerAdapter {
             } catch (BadRequestException e) {
                 HttpUtils.writeBadRequestAndClose(ctx, Utils.combineErrorMessage(e));
             } catch (MethodNotAllowedException e) {
-                HttpUtils.writeMethodNotAllowedAndClose(ctx, Utils.combineErrorMessage(e));
+                HttpUtils.writeMethodNotAllowedAndClose(ctx, Utils.combineErrorMessage(e), e.allowedMethod());
             } catch (Exception e) {
                 logger.error("An unexpected error occurred while decoding admin request.", e);
                 HttpUtils.writeInternalServerErrorAndClose(ctx, Utils.combineErrorMessage(e));
@@ -176,7 +176,7 @@ public class AdminRequestDecoder extends ChannelInboundHandlerAdapter {
 
     private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException {
         if (httpRequest.method() != method)
-            throw new MethodNotAllowedException("Unsupported HTTP method.");
+            throw new MethodNotAllowedException("Unsupported HTTP method.", method);
     }
 
     private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {

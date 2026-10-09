@@ -95,7 +95,7 @@ These are intentional design choices — do not flag as issues:
 
 - **Style:** Braces on new lines (Allman style), 4-space indent, no tabs
 - **HTTP response headers:** names are always written in canonical case (`Content-Type`, `Content-Length`,
-  `Connection`, `Transfer-Encoding`) via the constants in `HttpUtils` — never via Netty's lowercase
+  `Connection`, `Transfer-Encoding`, `Allow`) via the constants in `HttpUtils` — never via Netty's lowercase
   `HttpHeaderNames` or helpers like `HttpUtil.setTransferEncodingChunked`; a major client matches header names
   case-sensitively
 - **Lombok:** `@Data`, `@Getter`, `@Builder` on DTOs and request/response classes

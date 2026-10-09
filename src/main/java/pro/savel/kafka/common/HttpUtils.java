@@ -20,6 +20,7 @@ import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
@@ -41,6 +42,7 @@ public abstract class HttpUtils {
     public static final AsciiString ASCII_CONTENT_LENGTH = AsciiString.cached("Content-Length");
     public static final AsciiString ASCII_CONNECTION = AsciiString.cached("Connection");
     public static final AsciiString ASCII_TRANSFER_ENCODING = AsciiString.cached("Transfer-Encoding");
+    public static final AsciiString ASCII_ALLOW = AsciiString.cached("Allow");
     public static final AsciiString ASCII_APPLICATION_JSON_CHARSET_UTF8 = AsciiString.cached(APPLICATION_JSON_CHARSET_UTF8);
     public static final AsciiString ASCII_APPLICATION_OCTET_STREAM = AsciiString.cached(APPLICATION_OCTET_STREAM);
     public static final AsciiString ASCII_TEXT_PLAIN_CHARSET_UTF8 = AsciiString.cached(TEXT_PLAIN_CHARSET_UTF8);
@@ -104,12 +106,16 @@ public abstract class HttpUtils {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.NOT_FOUND, message);
     }
 
-    public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx) {
-        writeMethodNotAllowedAndClose(ctx, null);
+    public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx, HttpMethod allowedMethod) {
+        writeMethodNotAllowedAndClose(ctx, null, allowedMethod);
     }
 
-    public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx, String message) {
-        writeHttpResponseAndClose(ctx, HttpResponseStatus.METHOD_NOT_ALLOWED, message);
+    public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx, String message,
+                                                     HttpMethod allowedMethod) {
+        var httpResponse = createHttpResponse(HttpResponseStatus.METHOD_NOT_ALLOWED, message,
+                ASCII_TEXT_PLAIN_CHARSET_UTF8);
+        httpResponse.headers().set(ASCII_ALLOW, allowedMethod.asciiName());
+        writeAndClose(ctx, httpResponse);
     }
 
     public static void writeNotAcceptableAndClose(ChannelHandlerContext ctx, String message) {
@@ -162,7 +168,10 @@ public abstract class HttpUtils {
 
     public static void writeHttpResponseAndClose(ChannelHandlerContext ctx, HttpResponseStatus status, String message,
                                                  AsciiString contentType) {
-        var httpResponse = createHttpResponse(status, message, contentType);
+        writeAndClose(ctx, createHttpResponse(status, message, contentType));
+    }
+
+    private static void writeAndClose(ChannelHandlerContext ctx, FullHttpResponse httpResponse) {
         httpResponse.headers().set(ASCII_CONNECTION, HttpHeaderValues.CLOSE);
         var future = ctx.writeAndFlush(httpResponse);
         future.addListener(ChannelFutureListener.CLOSE);
