@@ -75,6 +75,8 @@ public abstract class CommonErrors {
                     HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(error));
             case UnknownMemberIdException ignored ->
                     HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(error));
+            case RebalanceInProgressException ignored ->
+                    HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(error));
             case TopicExistsException ignored ->
                     HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(error));
             case ReassignmentInProgressException ignored ->

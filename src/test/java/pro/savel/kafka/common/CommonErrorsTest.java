@@ -125,6 +125,13 @@ class CommonErrorsTest {
     }
 
     @Test
+    void handle_rebalanceInProgressException_returnsConflict() {
+        assertTrue(CommonErrors.handle(ctx, new RebalanceInProgressException("rebalancing")));
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.CONFLICT, response.status());
+    }
+
+    @Test
     void handle_unknownTopicIdException_returnsBadRequest() {
         assertTrue(CommonErrors.handle(ctx, new UnknownTopicIdException("uti")));
         FullHttpResponse response = channel.readOutbound();

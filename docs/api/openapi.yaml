@@ -28,7 +28,7 @@ info:
     - `404` — unknown instance, unknown route, or the described entity does not exist
     - `405` — unsupported HTTP method
     - `406` — binary response format (`application/octet-stream`) requested for an operation that answers in JSON only
-    - `409` — conflict (topic exists, group not empty, reassignment in progress, illegal client state, invalid consumer offset)
+    - `409` — conflict (topic exists, group not empty, reassignment or rebalance in progress, commit rejected after a rebalance, illegal client state, invalid consumer offset)
     - `413` — request body too large (`netty.maxJsonRequestBytes` for JSON, `netty.maxRequestBytes` for any request)
     - `500` — internal error (interrupted, unexpected)
     - `503` — the consumer is being closed (released or expired) while the request is in flight
@@ -1669,6 +1669,9 @@ paths:
     post:
       tags: [consumer]
       summary: Commit the current offsets synchronously
+      description: |
+        `409` when a rebalance is in progress or has already reassigned the
+        partitions; poll again to rejoin the group before retrying the commit.
       operationId: consumerCommit
       requestBody: {$ref: '#/components/requestBodies/ConsumerInstanceRef'}
       responses:
@@ -1677,6 +1680,7 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
         '503': {$ref: '#/components/responses/ServiceUnavailable'}
         '504': {$ref: '#/components/responses/GatewayTimeout'}

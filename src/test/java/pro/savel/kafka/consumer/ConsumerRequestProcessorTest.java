@@ -17,6 +17,7 @@ package pro.savel.kafka.consumer;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -28,6 +29,7 @@ import org.apache.kafka.common.Node;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.errors.RebalanceInProgressException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import pro.savel.kafka.common.RequestBearer;
@@ -245,6 +247,40 @@ class ConsumerRequestProcessorTest {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         doThrow(new OffsetOutOfRangeException(Map.of())).when(consumer).commitSync();
+
+        var request = new ConsumerCommitRequest();
+        request.setConsumerId(wrapper.getId());
+        request.setToken(wrapper.getToken());
+
+        channel.writeInbound(bearer(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.CONFLICT, response.status());
+        response.release();
+    }
+
+    @Test
+    void processCommit_commitFailedAfterRebalance_returnsConflict() {
+        var wrapper = addWrapper();
+        var consumer = wrapper.getConsumer();
+        doThrow(new CommitFailedException()).when(consumer).commitSync();
+
+        var request = new ConsumerCommitRequest();
+        request.setConsumerId(wrapper.getId());
+        request.setToken(wrapper.getToken());
+
+        channel.writeInbound(bearer(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.CONFLICT, response.status());
+        response.release();
+    }
+
+    @Test
+    void processCommit_rebalanceInProgress_returnsConflict() {
+        var wrapper = addWrapper();
+        var consumer = wrapper.getConsumer();
+        doThrow(new RebalanceInProgressException("rebalancing")).when(consumer).commitSync();
 
         var request = new ConsumerCommitRequest();
         request.setConsumerId(wrapper.getId());

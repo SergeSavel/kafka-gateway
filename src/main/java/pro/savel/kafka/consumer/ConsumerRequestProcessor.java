@@ -16,6 +16,7 @@ package pro.savel.kafka.consumer;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.apache.kafka.clients.consumer.CommitFailedException;
 import org.apache.kafka.clients.consumer.InvalidOffsetException;
 import org.apache.kafka.clients.consumer.SubscriptionPattern;
 import org.apache.kafka.common.TopicPartition;
@@ -42,6 +43,10 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
     @Override
     protected boolean handleSpecificError(ChannelHandlerContext ctx, Throwable error) {
         if (error instanceof InvalidOffsetException e) {
+            HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(e));
+            return true;
+        }
+        if (error instanceof CommitFailedException e) {
             HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(e));
             return true;
         }
