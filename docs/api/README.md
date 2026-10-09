@@ -4,6 +4,8 @@ The API is described as an [OpenAPI 3.1](https://spec.openapis.org/oas/v3.1.0) s
 
 - `openapi.yaml` — the full specification (admin, producer and consumer modules)
 
+The version in `openapi.yaml` is the `${version}` placeholder; the distribution build (`installDist`, `distZip`, `distTar`) replaces it with the project version from `build.gradle.kts`.
+
 Validate the spec:
 
 ```bash

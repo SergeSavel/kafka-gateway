@@ -78,8 +78,12 @@ tasks.jar {
 listOf(tasks.distZip, tasks.distTar).forEach { distTask ->
     distTask.configure {
         val distributionDir = "${project.name}-${project.version}"
+        val projectVersion = project.version.toString()
         from(fileTree("docs")) {
             into("docs")
+            filesMatching("**/openapi.yaml") {
+                filter { line -> line.replace("\${version}", projectVersion) }
+            }
         }
         eachFile {
             if (relativePath.segments.first() == distributionDir)
@@ -89,8 +93,12 @@ listOf(tasks.distZip, tasks.distTar).forEach { distTask ->
 }
 
 tasks.installDist {
+    val projectVersion = project.version.toString()
     from(fileTree("docs")) {
         into("docs")
+        filesMatching("**/openapi.yaml") {
+            filter { line -> line.replace("\${version}", projectVersion) }
+        }
     }
 }
 
