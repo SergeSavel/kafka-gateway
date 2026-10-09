@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Log4j's shutdown hook would stop logging while the gateway's own hook is still shutting down,
+     dropping its last messages. Every event is flushed as it is written (no async loggers or buffered
+     appenders), so nothing is lost without the hook; adding either would need LogManager.shutdown(). -->
 <Configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xmlns="https://logging.apache.org/xml/ns"
                xsi:schemaLocation="
                    https://logging.apache.org/xml/ns
-                   https://logging.apache.org/xml/ns/log4j-config-2.xsd">
+                   https://logging.apache.org/xml/ns/log4j-config-2.xsd"
+               shutdownHook="disable">
     <Appenders>
         <Console name="CONSOLE">
             <PatternLayout pattern="%d [%t] %p %c - %m%n"/>
