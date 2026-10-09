@@ -15,6 +15,7 @@
 package pro.savel.kafka.admin;
 
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.GroupState;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.acl.AccessControlEntry;
 import org.apache.kafka.common.acl.AccessControlEntryFilter;
@@ -32,6 +33,7 @@ import pro.savel.kafka.admin.data.AdminAclBindingFilter;
 import pro.savel.kafka.admin.requests.group.AdminAlterConsumerGroupOffsetsRequest;
 
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -139,6 +141,41 @@ class AdminRequestMapperTest {
         var expectedPattern = new ResourcePattern(ResourceType.GROUP, "test-group", PatternType.PREFIXED);
         var expectedEntry = new AccessControlEntry("User:bob", "127.0.0.1", AclOperation.WRITE, AclPermissionType.DENY);
         assertEquals(new AclBinding(expectedPattern, expectedEntry), result);
+    }
+
+    @Test
+    void mapGroupState_null_returnsNull() {
+        assertNull(AdminRequestMapper.mapGroupState(null));
+    }
+
+    @Test
+    void mapGroupState_kafkaName_mapsCaseInsensitively() {
+        assertEquals(GroupState.PREPARING_REBALANCE, AdminRequestMapper.mapGroupState("PreparingRebalance"));
+        assertEquals(GroupState.STABLE, AdminRequestMapper.mapGroupState("stable"));
+    }
+
+    @Test
+    void mapGroupState_responseEnumName_mapsCaseInsensitively() {
+        assertEquals(GroupState.PREPARING_REBALANCE, AdminRequestMapper.mapGroupState("PREPARING_REBALANCE"));
+        assertEquals(GroupState.NOT_READY, AdminRequestMapper.mapGroupState("not_ready"));
+    }
+
+    @Test
+    void mapGroupState_unknownName_returnsUnknown() {
+        assertEquals(GroupState.UNKNOWN, AdminRequestMapper.mapGroupState("not-a-real-state"));
+    }
+
+    @Test
+    void mapGroupState_responseEnumName_isLocaleIndependent() {
+        // Turkish uppercases 'i' to dotted 'İ', which would turn "preparing_rebalance" into a name
+        // that matches no enum constant.
+        var previousDefault = Locale.getDefault();
+        Locale.setDefault(Locale.forLanguageTag("tr-TR"));
+        try {
+            assertEquals(GroupState.PREPARING_REBALANCE, AdminRequestMapper.mapGroupState("preparing_rebalance"));
+        } finally {
+            Locale.setDefault(previousDefault);
+        }
     }
 
     @Test

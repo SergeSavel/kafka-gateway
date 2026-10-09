@@ -15,6 +15,7 @@
 package pro.savel.kafka.admin;
 
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.GroupState;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.acl.*;
 import org.apache.kafka.common.resource.PatternType;
@@ -28,6 +29,7 @@ import pro.savel.kafka.admin.requests.group.AdminAlterConsumerGroupOffsetsReques
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class AdminRequestMapper {
@@ -100,6 +102,24 @@ public class AdminRequestMapper {
         var operation = AclOperation.valueOf(source.getOperation());
         var permissionType = AclPermissionType.valueOf(source.getPermissionType());
         return new AccessControlEntry(principal, host, operation, permissionType);
+    }
+
+    /**
+     * Accepts, case-insensitively, both Kafka's own state names ({@code PreparingRebalance}) and the
+     * enum names the list-groups response carries ({@code PREPARING_REBALANCE}), so that a state read
+     * from a response can be passed back as a filter. Null for null, {@code UNKNOWN} for anything else.
+     */
+    public static GroupState mapGroupState(String source) {
+        if (source == null)
+            return null;
+        var state = GroupState.parse(source);
+        if (state != GroupState.UNKNOWN)
+            return state;
+        try {
+            return GroupState.valueOf(source.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException e) {
+            return GroupState.UNKNOWN;
+        }
     }
 
     public static Map<TopicPartition, OffsetAndMetadata> mapTopicPartitionOffsetMetadata(Collection<AdminAlterConsumerGroupOffsetsRequest.TopicPartitionOffsetMetadata> source) {

@@ -63,6 +63,7 @@ import pro.savel.kafka.common.SynchronousBlockingTaskExecutor;
 import pro.savel.kafka.common.contract.Serde;
 import pro.savel.kafka.common.contract.TopicPartition;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1015,6 +1016,46 @@ class AdminRequestProcessorTest {
         request.setAdminId(wrapper.getId());
         request.setToken(wrapper.getToken());
         request.setInStates(List.of("not-a-real-state"));
+
+        channel.writeInbound(bearer(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
+        response.release();
+    }
+
+    @Test
+    void processListGroups_groupStatesInBothNamings_areAccepted() {
+        var wrapper = addWrapper();
+        var admin = wrapper.getAdmin();
+        var result = mock(ListGroupsResult.class);
+        when(result.all()).thenReturn(KafkaFuture.completedFuture(List.of()));
+        when(admin.listGroups(any(ListGroupsOptions.class))).thenReturn(result);
+
+        var request = new AdminListGroupsRequest();
+        request.setAdminId(wrapper.getId());
+        request.setToken(wrapper.getToken());
+        // Kafka's own names and the enum names a list-groups response carries, in any case.
+        request.setInStates(List.of("PreparingRebalance", "COMPLETING_REBALANCE", "not_ready", "stable"));
+
+        channel.writeInbound(bearer(request));
+
+        AdminResponseBearer response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.getStatus());
+        var optionsCaptor = ArgumentCaptor.forClass(ListGroupsOptions.class);
+        verify(admin).listGroups(optionsCaptor.capture());
+        assertEquals(Set.of(GroupState.PREPARING_REBALANCE, GroupState.COMPLETING_REBALANCE,
+                GroupState.NOT_READY, GroupState.STABLE), optionsCaptor.getValue().groupStates());
+    }
+
+    @Test
+    void processListGroups_nullGroupState_returnsBadRequest() {
+        var wrapper = addWrapper();
+
+        var request = new AdminListGroupsRequest();
+        request.setAdminId(wrapper.getId());
+        request.setToken(wrapper.getToken());
+        request.setInStates(Collections.singletonList(null));
 
         channel.writeInbound(bearer(request));
 

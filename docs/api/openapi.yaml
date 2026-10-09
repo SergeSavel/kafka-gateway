@@ -3041,11 +3041,11 @@ components:
             inStates:
               type: array
               description: |
-                Filter by group states, case-insensitive: `Stable`, `Empty`, `Dead`,
-                `PreparingRebalance`, `CompletingRebalance`, `Assigning`,
-                `Reconciling`, `NotReady`. Any other value returns `400`. Note that
-                multi-word states are written without underscores here, unlike the
-                `groupState` values in responses.
+                Filter by group states, case-insensitive, either as `groupState` in
+                the response (`STABLE`, `EMPTY`, `DEAD`, `PREPARING_REBALANCE`,
+                `COMPLETING_REBALANCE`, `ASSIGNING`, `RECONCILING`, `NOT_READY`) or
+                as Kafka names them (`Stable`, `PreparingRebalance`, ...). Any other
+                value returns `400`.
               items: {type: string}
             timeoutMs: {type: integer, minimum: 1}
 

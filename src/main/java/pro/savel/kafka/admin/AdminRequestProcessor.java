@@ -647,7 +647,7 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         if (request.getInStates() != null) {
             var groupStates = new HashSet<GroupState>();
             for (String groupStateName : request.getInStates()) {
-                var groupState = GroupState.parse(groupStateName);
+                var groupState = AdminRequestMapper.mapGroupState(groupStateName);
                 if (groupState == null || groupState == GroupState.UNKNOWN) {
                     HttpUtils.writeBadRequestAndClose(ctx, "Invalid group state: '" + groupStateName + "'.");
                     return;
