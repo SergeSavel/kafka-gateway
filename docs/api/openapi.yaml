@@ -45,8 +45,12 @@ info:
     url: https://www.apache.org/licenses/LICENSE-2.0
 
 servers:
-  - url: http://localhost:8086
-    description: Local gateway
+  - url: http://{host}:8086
+    description: Gateway
+    variables:
+      host:
+        default: localhost
+        description: Gateway host name or address
 
 security:
   - basicAuth: []
