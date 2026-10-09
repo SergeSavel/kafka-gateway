@@ -212,8 +212,6 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         try {
             consumer.subscribe(new SubscriptionPattern(pattern));
         } catch (UnsupportedOperationException e) {
-            // Broker-side patterns exist only in the consumer group protocol; with the classic one
-            // this is a client configuration error, not a gateway failure.
             throw new BadRequestException("Pattern subscription requires group.protocol=consumer.", e);
         }
     }

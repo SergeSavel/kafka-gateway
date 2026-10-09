@@ -434,7 +434,6 @@ class ConsumerRequestProcessorTest {
     void processSubscribe_patternWithClassicProtocol_returnsBadRequest() {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
-        // What ClassicKafkaConsumer does: broker-side patterns need the consumer group protocol.
         doThrow(new UnsupportedOperationException("not supported with the CLASSIC protocol"))
                 .when(consumer).subscribe(any(SubscriptionPattern.class));
 

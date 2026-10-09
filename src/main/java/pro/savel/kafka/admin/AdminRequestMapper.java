@@ -107,7 +107,7 @@ public class AdminRequestMapper {
     /**
      * Accepts, case-insensitively, both Kafka's own state names ({@code PreparingRebalance}) and the
      * enum names the list-groups response carries ({@code PREPARING_REBALANCE}), so that a state read
-     * from a response can be passed back as a filter. Null for null, {@code UNKNOWN} for anything else.
+     * from a response can be passed back as a filter.
      */
     public static GroupState mapGroupState(String source) {
         if (source == null)

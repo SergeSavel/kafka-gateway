@@ -506,8 +506,6 @@ class AdminRequestProcessorTest {
 
     @Test
     void processCreateTopic_emptyResultValues_stillWritesResponse() {
-        // The response used to be written from inside a loop over values(), so an empty map left
-        // the request unanswered and the connection stuck with reading suspended.
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(CreateTopicsResult.class);
@@ -1060,7 +1058,6 @@ class AdminRequestProcessorTest {
         var request = new AdminListGroupsRequest();
         request.setAdminId(wrapper.getId());
         request.setToken(wrapper.getToken());
-        // Kafka's own names and the enum names a list-groups response carries, in any case.
         request.setInStates(List.of("PreparingRebalance", "COMPLETING_REBALANCE", "not_ready", "stable"));
 
         channel.writeInbound(bearer(request));
