@@ -6,25 +6,34 @@ info:
     HTTP gateway exposing Kafka Producer, Consumer and AdminClient APIs over HTTP.
 
     ## Instances
-    Every operation (except `POST /admin/create` and `GET /admin`) requires `adminId`
-    (instance UUID) and `token` (ownership token returned by `POST /admin/create`).
-    Instances expire after `expirationTimeout` milliseconds of inactivity (timer resets
-    on every request); use `POST /admin/touch` to keep an instance alive.
+    `POST /admin/create`, `POST /producer/create` and `POST /consumer/create` return
+    an instance `id` and an ownership `token`. Every other operation on an instance
+    requires the id (`adminId`, `producerId` or `consumerId`) and the token; only the
+    list operations (`GET /admin`, `GET /producer`, `GET /consumer`) do not.
+    Instances expire after `expirationTimeout` milliseconds of inactivity (the timer
+    resets on every request); use the `touch` operations to keep an instance alive.
 
     ## Authentication
     HTTP Basic auth is **optional and server-dependent**: it is enabled only when a
-    `users.json` file is present in the gateway working directory.
+    `users.json` file is present in the gateway working directory. `/health` and
+    `/version` never require it.
 
     ## Errors
-    Error responses carry a `text/plain` body with the error message and **close the
-    connection** (`Connection: close`). Status codes:
-    - `400` — bad request (invalid JSON, validation failure, unknown topic/partition, invalid Kafka request)
-    - `401` — not authenticated (Kafka `AuthenticationException`)
+    Error responses carry a `text/plain` body with the error message (empty when
+    there is no message), and the gateway **closes the connection** after sending
+    them. Status codes:
+    - `400` — bad request (invalid JSON, validation failure, invalid token, unknown topic/partition, invalid Kafka request or client config)
+    - `401` — not authenticated (gateway Basic auth failure, Kafka `AuthenticationException`)
     - `403` — not authorized (Kafka `AuthorizationException`, broker ACLs)
-    - `404` — unknown admin instance or unknown route
+    - `404` — unknown instance, unknown route, or the described entity does not exist
     - `405` — unsupported HTTP method
-    - `409` — conflict (topic exists, group not empty, reassignment in progress, illegal state)
-    - `500` — internal error (timeout, interrupted, unexpected)
+    - `406` — binary response format (`application/octet-stream`) requested for an operation that answers in JSON only
+    - `409` — conflict (topic exists, group not empty, reassignment in progress, illegal client state, invalid consumer offset)
+    - `413` — request body too large (`netty.maxJsonRequestBytes` for JSON, `netty.maxRequestBytes` for any request)
+    - `500` — internal error (interrupted, unexpected)
+    - `503` — the consumer is being closed (released or expired) while the request is in flight
+    - `504` — Kafka did not respond within the client timeout
+    - `505` — HTTP version other than 1.1
 
     ## JSON conventions
     - Unknown properties in request bodies are rejected (`400`).
@@ -50,7 +59,7 @@ tags:
   - name: topics
     description: Topic management
   - name: configs
-    description: Topic and broker configuration
+    description: Topic, broker and group configuration
   - name: cluster
     description: Cluster metadata
   - name: scram
@@ -74,6 +83,7 @@ paths:
       tags: [system]
       summary: Health check
       operationId: health
+      security: []
       responses:
         '200':
           description: Gateway is running
@@ -92,6 +102,7 @@ paths:
       tags: [system]
       summary: Get the gateway version
       operationId: version
+      security: []
       responses:
         '200':
           description: Implementation version from the jar manifest
@@ -161,13 +172,15 @@ paths:
     post:
       tags: [lifecycle]
       summary: Release (close) an admin instance
+      description: |
+        Releasing an unknown (already released or expired) instance is a no-op and
+        returns `204`; a wrong token for an existing instance returns `400`.
       operationId: adminRelease
       requestBody: {$ref: '#/components/requestBodies/AdminInstanceRef'}
       responses:
         '204': {description: Instance released}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
-        '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /admin/touch:
@@ -210,14 +223,18 @@ paths:
                   internal: false
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-topic:
     post:
       tags: [topics]
       summary: Describe a topic by name or topic id
-      description: Exactly one of `topicName` and `topicId` must be provided, otherwise `400`.
+      description: |
+        Specify `topicName` or `topicId`. When both are provided, `topicId` is
+        used. `400` when neither is provided.
       operationId: adminDescribeTopic
       requestBody:
         required: true
@@ -248,8 +265,10 @@ paths:
                     isr: [1, 2]
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/create-topic:
     post:
@@ -272,9 +291,11 @@ paths:
               schema: {$ref: '#/components/schemas/AdminCreateTopicResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/create-topics:
     post:
@@ -334,8 +355,10 @@ paths:
         '204': {description: Topic deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-topics:
     post:
@@ -388,8 +411,10 @@ paths:
         '204': {description: Partitions created}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-records:
     post:
@@ -409,8 +434,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDeleteRecordsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-topic-configs:
     post:
@@ -430,8 +457,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminConfigResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-broker-configs:
     post:
@@ -451,8 +480,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminConfigResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-group-configs:
     post:
@@ -472,8 +503,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminConfigResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/alter-topic-config:
     post:
@@ -489,8 +522,10 @@ paths:
         '200': {description: "Config entry set, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/alter-group-config:
     post:
@@ -506,8 +541,10 @@ paths:
         '200': {description: "Config entry set, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/set-topic-config:
     post:
@@ -524,8 +561,10 @@ paths:
         '200': {description: "Config entry set, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-topic-config:
     post:
@@ -541,8 +580,10 @@ paths:
         '200': {description: "Config entry deleted, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-group-config:
     post:
@@ -558,8 +599,10 @@ paths:
         '200': {description: "Config entry deleted, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-cluster:
     post:
@@ -579,8 +622,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeClusterResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-features:
     post:
@@ -600,8 +645,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeFeaturesResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-log-dirs:
     post:
@@ -621,8 +668,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeLogDirsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/update-feature:
     post:
@@ -638,8 +687,10 @@ paths:
         '200': {description: "Feature updated, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-user-scram-credentials:
     post:
@@ -659,8 +710,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeUserScramCredentialsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/upsert-user-scram-credentials:
     post:
@@ -676,8 +729,10 @@ paths:
         '200': {description: "Credential upserted, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-user-scram-credentials:
     post:
@@ -693,8 +748,10 @@ paths:
         '200': {description: "Credential deleted, empty body"}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-acls:
     post:
@@ -714,8 +771,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeAclsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/create-acls:
     post:
@@ -731,8 +790,10 @@ paths:
         '204': {description: ACLs created}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-acls:
     post:
@@ -748,8 +809,10 @@ paths:
         '204': {description: ACLs deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-producers:
     post:
@@ -769,8 +832,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeProducersResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/abort-transaction:
     post:
@@ -789,8 +854,10 @@ paths:
         '204': {description: Transaction aborted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-groups:
     post:
@@ -810,8 +877,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListGroupsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-classic-group:
     post:
@@ -827,8 +896,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeClassicGroupResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-consumer-group:
     post:
@@ -844,8 +915,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeConsumerGroupResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-share-group:
     post:
@@ -861,8 +934,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeShareGroupResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/describe-streams-group:
     post:
@@ -878,8 +953,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminDescribeStreamsGroupResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-consumer-group-offsets:
     post:
@@ -909,8 +986,10 @@ paths:
                   metadata: ""
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/alter-consumer-group-offsets:
     post:
@@ -927,9 +1006,11 @@ paths:
         '204': {description: Offsets altered}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-consumer-group-offsets:
     post:
@@ -945,8 +1026,10 @@ paths:
         '204': {description: Offsets deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/remove-members-from-consumer-group:
     post:
@@ -963,23 +1046,27 @@ paths:
         '204': {description: Members removed}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-consumer-group:
     post:
       tags: [groups]
       summary: Delete an empty consumer group
       operationId: adminDeleteConsumerGroup
-      requestBody: {$ref: '#/components/requestBodies/AdminGroupIdRequest'}
+      requestBody: {$ref: '#/components/requestBodies/AdminDeleteGroupRequest'}
       responses:
         '204': {description: Group deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-consumer-groups:
     post:
@@ -991,23 +1078,27 @@ paths:
         '204': {description: Groups deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-share-group:
     post:
       tags: [groups]
       summary: Delete an empty share group
       operationId: adminDeleteShareGroup
-      requestBody: {$ref: '#/components/requestBodies/AdminGroupIdRequest'}
+      requestBody: {$ref: '#/components/requestBodies/AdminDeleteGroupRequest'}
       responses:
         '204': {description: Group deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-share-groups:
     post:
@@ -1019,23 +1110,27 @@ paths:
         '204': {description: Groups deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-streams-group:
     post:
       tags: [groups]
       summary: Delete an empty streams group
       operationId: adminDeleteStreamsGroup
-      requestBody: {$ref: '#/components/requestBodies/AdminGroupIdRequest'}
+      requestBody: {$ref: '#/components/requestBodies/AdminDeleteGroupRequest'}
       responses:
         '204': {description: Group deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/delete-streams-groups:
     post:
@@ -1047,9 +1142,11 @@ paths:
         '204': {description: Groups deleted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-earliest-offsets:
     post:
@@ -1065,8 +1162,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-earliest-local-offsets:
     post:
@@ -1082,8 +1181,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-latest-offsets:
     post:
@@ -1099,8 +1200,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-latest-tiered-offsets:
     post:
@@ -1116,8 +1219,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-max-timestamp-offsets:
     post:
@@ -1133,8 +1238,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /admin/list-timestamp-offsets:
     post:
@@ -1154,8 +1261,10 @@ paths:
               schema: {$ref: '#/components/schemas/AdminListOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /producer:
     get:
@@ -1214,13 +1323,15 @@ paths:
     post:
       tags: [producer]
       summary: Release (close) a producer instance
+      description: |
+        Releasing an unknown (already released or expired) instance is a no-op and
+        returns `204`; a wrong token for an existing instance returns `400`.
       operationId: producerRelease
       requestBody: {$ref: '#/components/requestBodies/ProducerInstanceRef'}
       responses:
         '204': {description: Instance released}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
-        '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /producer/touch:
@@ -1319,8 +1430,11 @@ paths:
                 description: Binary format v1 — see the operation description
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /producer/get-partitions:
     post:
@@ -1340,8 +1454,10 @@ paths:
               schema: {$ref: '#/components/schemas/ProducerPartitionsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /producer/begin-transaction:
     post:
@@ -1354,9 +1470,11 @@ paths:
         '204': {description: Transaction begun}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /producer/commit-transaction:
     post:
@@ -1368,9 +1486,11 @@ paths:
         '204': {description: Transaction committed}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /producer/abort-transaction:
     post:
@@ -1382,9 +1502,11 @@ paths:
         '204': {description: Transaction aborted}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer:
     get:
@@ -1447,13 +1569,15 @@ paths:
     post:
       tags: [consumer]
       summary: Release (close) a consumer instance
+      description: |
+        Releasing an unknown (already released or expired) instance is a no-op and
+        returns `204`; a wrong token for an existing instance returns `400`.
       operationId: consumerRelease
       requestBody: {$ref: '#/components/requestBodies/ConsumerInstanceRef'}
       responses:
         '204': {description: Instance released}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
-        '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /consumer/touch:
@@ -1474,9 +1598,10 @@ paths:
       tags: [consumer]
       summary: Poll for messages
       description: |
-        The request body is always JSON. The response format is selected by the
-        `Accept` header (falls back to the request `Content-Type` when `Accept`
-        is absent or `*/*`):
+        The request body is always JSON. The response is streamed with
+        `Transfer-Encoding: chunked`; its format is selected by the `Accept`
+        header (falls back to the request `Content-Type` when `Accept` is absent
+        or `*/*`):
 
         - `application/json` — messages with string key/value/headers (UTF-8)
         - `application/octet-stream` — binary format v1:
@@ -1534,8 +1659,11 @@ paths:
                 description: Binary format v1 — see the operation description
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
 
   /consumer/commit:
     post:
@@ -1547,8 +1675,11 @@ paths:
         '204': {description: Offsets committed}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/seek:
     post:
@@ -1565,6 +1696,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /consumer/seek-to-beginning:
@@ -1578,6 +1710,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /consumer/seek-to-end:
@@ -1591,6 +1724,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /consumer/get-position:
@@ -1611,8 +1745,12 @@ paths:
               schema: {$ref: '#/components/schemas/ConsumerPositionResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/assign:
     post:
@@ -1625,6 +1763,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /consumer/get-assignment:
@@ -1648,7 +1787,9 @@ paths:
     post:
       tags: [consumer]
       summary: Subscribe to topics by list or regex pattern
-      description: Provide either `topics` or `pattern`.
+      description: |
+        Provide `topics` or `pattern`; when both are provided, `topics` is used.
+        `400` when neither is provided.
       operationId: consumerSubscribe
       requestBody:
         required: true
@@ -1660,6 +1801,7 @@ paths:
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /consumer/unsubscribe:
@@ -1710,8 +1852,11 @@ paths:
               schema: {$ref: '#/components/schemas/ConsumerPartitionsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/list-partitions:
     post:
@@ -1733,8 +1878,11 @@ paths:
               schema: {$ref: '#/components/schemas/ConsumerListPartitionsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/list-topics:
     post:
@@ -1756,6 +1904,8 @@ paths:
         '401': {$ref: '#/components/responses/Unauthorized'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/get-group-metadata:
     post:
@@ -1797,8 +1947,11 @@ paths:
                       metadata: null
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/get-beginning-offsets:
     post:
@@ -1814,8 +1967,11 @@ paths:
               schema: {$ref: '#/components/schemas/ConsumerOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
   /consumer/get-end-offsets:
     post:
@@ -1831,8 +1987,11 @@ paths:
               schema: {$ref: '#/components/schemas/ConsumerOffsetsResponse'}
         '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
         '404': {$ref: '#/components/responses/NotFound'}
         '500': {$ref: '#/components/responses/InternalServerError'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
+        '504': {$ref: '#/components/responses/GatewayTimeout'}
 
 components:
   securitySchemes:
@@ -1845,7 +2004,7 @@ components:
 
   responses:
     BadRequest:
-      description: Invalid JSON, validation failure or Kafka invalid request
+      description: Invalid JSON, validation failure, invalid token or Kafka invalid request
       content:
         text/plain:
           schema: {$ref: '#/components/schemas/ErrorMessage'}
@@ -1860,7 +2019,7 @@ components:
         text/plain:
           schema: {$ref: '#/components/schemas/ErrorMessage'}
     NotFound:
-      description: Unknown admin instance or route
+      description: Unknown instance or route, or the described entity does not exist
       content:
         text/plain:
           schema: {$ref: '#/components/schemas/ErrorMessage'}
@@ -1904,6 +2063,15 @@ components:
       content:
         application/json:
           schema: {$ref: '#/components/schemas/AdminGroupIdRequest'}
+          example:
+            adminId: 550e8400-e29b-41d4-a716-446655440000
+            token: 9f2c1b3a-7d4e-4e8f-b6a1-2d5c3e9f8a7b
+            groupId: orders-group
+    AdminDeleteGroupRequest:
+      required: true
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/AdminDeleteGroupRequest'}
           example:
             adminId: 550e8400-e29b-41d4-a716-446655440000
             token: 9f2c1b3a-7d4e-4e8f-b6a1-2d5c3e9f8a7b
@@ -1966,9 +2134,11 @@ components:
       properties:
         adminId:
           type: string
+          minLength: 1
           description: Admin instance id returned by `POST /admin/create`
         token:
           type: string
+          minLength: 1
           description: Ownership token returned by `POST /admin/create`
 
     AdminGroupIdRequest:
@@ -1983,6 +2153,17 @@ components:
             includeAuthorizedOperations:
               type: boolean
               description: Include ACL operations authorized for the caller
+            timeoutMs: {type: integer, minimum: 1}
+
+    AdminDeleteGroupRequest:
+      allOf:
+        - $ref: '#/components/schemas/AdminInstanceRef'
+        - type: object
+          required: [groupId]
+          properties:
+            groupId:
+              type: string
+              minLength: 1
             timeoutMs: {type: integer, minimum: 1}
 
     AdminGroupIdsRequest:
@@ -2017,35 +2198,39 @@ components:
         id: {type: integer}
         host: {type: string}
         port: {type: integer}
-        rack: {type: string, nullable: true}
+        rack: {type: [string, 'null']}
         fenced: {type: boolean}
 
     PartitionInfo:
       type: object
       properties:
         partition: {type: integer}
-        leader: {$ref: '#/components/schemas/Node'}
+        leader:
+          description: Null when the partition has no leader
+          oneOf:
+            - $ref: '#/components/schemas/Node'
+            - type: 'null'
         replicas:
           type: array
           items: {$ref: '#/components/schemas/Node'}
         isr:
           type: array
           description: In-sync replica broker ids
-          items: {type: integer, nullable: true}
+          items: {type: [integer, 'null']}
         elr:
           type: array
           description: Eligible leader replica broker ids
-          items: {type: integer, nullable: true}
+          items: {type: [integer, 'null']}
         lastKnownElr:
           type: array
           description: Last known eligible leader replica broker ids
-          items: {type: integer, nullable: true}
+          items: {type: [integer, 'null']}
 
     ConfigEntry:
       type: object
       properties:
         name: {type: string}
-        value: {type: string, nullable: true}
+        value: {type: [string, 'null']}
         source:
           type: string
           description: Config source (e.g. `DYNAMIC_TOPIC_CONFIG`, `DEFAULT_CONFIG`)
@@ -2055,7 +2240,7 @@ components:
         type:
           type: string
           description: Config data type (e.g. `STRING`, `INT`, `LONG`, `BOOLEAN`, `LIST`, `PASSWORD`)
-        documentation: {type: string, nullable: true}
+        documentation: {type: [string, 'null']}
 
     AdminConfigResponse:
       type: array
@@ -2067,8 +2252,8 @@ components:
       properties:
         name:
           type: string
-          description: Human-readable instance name
-          minLength: 1
+          description: Human-readable instance name; must not be blank
+          pattern: '\S'
         config:
           type: object
           description: Arbitrary Kafka client properties (`bootstrap.servers`, SASL, etc.)
@@ -2099,8 +2284,12 @@ components:
         properties:
           id: {type: string}
           name: {type: string}
-          owner: {type: string}
-          username: {type: string, nullable: true}
+          owner:
+            type: [string, 'null']
+            description: Basic auth user that created the instance; null when auth is disabled
+          username:
+            type: [string, 'null']
+            description: SASL username from the `sasl.jaas.config` of the instance
           expiresAt:
             type: integer
             format: int64
@@ -2127,7 +2316,7 @@ components:
               description: Include internal topics
             pattern:
               type: string
-              description: Regex to filter topic names
+              description: Java regular expression; only topics whose whole name matches are returned
             timeoutMs: {type: integer, minimum: 1}
 
     AdminListTopicsResponse:
@@ -2152,7 +2341,8 @@ components:
               description: Kafka topic UUID as a base64url string
             includeAuthorizedOperations: {type: boolean}
             timeoutMs: {type: integer, minimum: 1}
-      description: Exactly one of `topicName` and `topicId` must be provided.
+      description: |
+        Specify `topicName` or `topicId`. When both are provided, `topicId` is used.
 
     AdminDescribeTopicResponse:
       type: object
@@ -2163,8 +2353,7 @@ components:
         name: {type: string}
         internal: {type: boolean}
         authorizedOperations:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/AclOperation'}
         partitions:
           type: array
@@ -2203,10 +2392,12 @@ components:
       type: object
       properties:
         topicId:
-          type: string
-          description: Created topic UUID as a base64url string
-        numPartitions: {type: integer, nullable: true}
-        replicationFactor: {type: integer, nullable: true}
+          type: [string, 'null']
+          description: |
+            Created topic UUID as a base64url string; null in a failed entry of
+            `/admin/create-topics`
+        numPartitions: {type: [integer, 'null']}
+        replicationFactor: {type: [integer, 'null']}
 
     TopicSpec:
       type: object
@@ -2256,8 +2447,7 @@ components:
               type: boolean
               description: Whether this topic was created
             errorMessage:
-              type: string
-              nullable: true
+              type: [string, 'null']
               description: Error message when `success` is false
             topicName: {type: string}
 
@@ -2333,19 +2523,16 @@ components:
       type: object
       properties:
         topicId:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Topic UUID as a base64url string, present when deleting by ids
         topicName:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Topic name, present when deleting by names
         success:
           type: boolean
           description: Whether this topic was deleted
         errorMessage:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Error message when `success` is false
 
     AdminDeleteTopicsResponse:
@@ -2455,13 +2642,20 @@ components:
       type: object
       properties:
         clusterId: {type: string}
-        controller: {$ref: '#/components/schemas/Node'}
+        controller:
+          deprecated: true
+          description: Deprecated, use `controllerId` and `nodes`. Null when there is no controller.
+          oneOf:
+            - $ref: '#/components/schemas/Node'
+            - type: 'null'
+        controllerId:
+          type: [integer, 'null']
+          description: Id of the controller node; null when there is no controller
         nodes:
           type: array
           items: {$ref: '#/components/schemas/Node'}
         authorizedOperations:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/AclOperation'}
 
     AdminDescribeFeaturesResponse:
@@ -2484,9 +2678,8 @@ components:
               minVersionLevel: {type: integer}
               maxVersionLevel: {type: integer}
         finalizedFeaturesEpoch:
-          type: integer
+          type: [integer, 'null']
           format: int64
-          nullable: true
 
     AdminDescribeClusterRequest:
       allOf:
@@ -2556,8 +2749,7 @@ components:
       properties:
         path: {type: string}
         errorMessage:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Error querying this log dir, if any
         replicaInfos:
           type: array
@@ -2566,7 +2758,7 @@ components:
     BrokersLogDirsDescription:
       type: object
       properties:
-        brokerId: {type: integer, nullable: true}
+        brokerId: {type: [integer, 'null']}
         logDirs:
           type: array
           items: {$ref: '#/components/schemas/LogDirDescription'}
@@ -2579,11 +2771,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/AdminInstanceRef'
         - type: object
-          required: [users]
           properties:
             users:
               type: array
-              minItems: 1
+              description: User names; omit or pass an empty array to describe all users
               items:
                 type: string
                 minLength: 1
@@ -2624,7 +2815,7 @@ components:
               description: May be an empty string
             iterations:
               type: integer
-              description: Omit to use the broker default
+              description: Omit to use 4096
             timeoutMs: {type: integer, minimum: 1}
 
     AdminDeleteUserScramCredentialsRequest:
@@ -2663,18 +2854,24 @@ components:
 
     AclResourcePattern:
       type: object
+      required: [resourceType, name, patternType]
       properties:
-        resourceType: {type: string}
-        name: {type: string, nullable: true}
-        patternType: {type: string}
+        resourceType: {$ref: '#/components/schemas/ResourceType'}
+        name: {type: string}
+        patternType: {$ref: '#/components/schemas/PatternType'}
 
     AclAccessControlEntry:
       type: object
+      required: [principal, host, operation, permissionType]
       properties:
-        principal: {type: string}
-        host: {type: string}
-        operation: {type: string}
-        permissionType: {type: string}
+        principal:
+          type: string
+          description: Principal, e.g. `User:alice`
+        host:
+          type: string
+          description: Host, `*` for any host
+        operation: {$ref: '#/components/schemas/AclOperation'}
+        permissionType: {$ref: '#/components/schemas/AclPermissionType'}
 
     AclBinding:
       type: object
@@ -2689,8 +2886,7 @@ components:
       properties:
         resourceType: {$ref: '#/components/schemas/ResourceType'}
         name:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Omit to match any name
         patternType: {$ref: '#/components/schemas/PatternType'}
 
@@ -2699,12 +2895,10 @@ components:
       required: [operation, permissionType]
       properties:
         principal:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Omit to match any principal
         host:
-          type: string
-          nullable: true
+          type: [string, 'null']
           description: Omit to match any host
         operation: {$ref: '#/components/schemas/AclOperation'}
         permissionType: {$ref: '#/components/schemas/AclPermissionType'}
@@ -2774,13 +2968,11 @@ components:
           format: int64
           description: Epoch millis
         currentTransactionStartOffset:
-          type: integer
+          type: [integer, 'null']
           format: int64
-          nullable: true
           description: Present only while a transaction is open
         coordinatorEpoch:
-          type: integer
-          nullable: true
+          type: [integer, 'null']
 
     PartitionProducerState:
       type: object
@@ -2816,15 +3008,15 @@ components:
       properties:
         groupId: {type: string}
         type:
-          type: string
-          nullable: true
-          description: Group type (`consumer`, `classic`, `share`, `streams`)
+          type: [string, 'null']
+          description: Group type (`CONSUMER`, `CLASSIC`, `SHARE`, `STREAMS`, `UNKNOWN`)
         protocol:
-          type: string
-          nullable: true
+          type: [string, 'null']
         groupState:
-          type: string
-          nullable: true
+          type: [string, 'null']
+          description: |
+            Group state (`STABLE`, `EMPTY`, `DEAD`, `PREPARING_REBALANCE`,
+            `COMPLETING_REBALANCE`, `ASSIGNING`, `RECONCILING`, `NOT_READY`, `UNKNOWN`)
         simpleConsumerGroup: {type: boolean}
 
     AdminListGroupsRequest:
@@ -2834,7 +3026,9 @@ components:
           properties:
             withTypes:
               type: array
-              description: Filter by group types
+              description: |
+                Filter by group types, case-insensitive: `consumer`, `classic`,
+                `share`, `streams`. Any other value returns `400`.
               items: {type: string}
             withProtocolTypes:
               type: array
@@ -2842,7 +3036,12 @@ components:
               items: {type: string}
             inStates:
               type: array
-              description: Filter by group states
+              description: |
+                Filter by group states, case-insensitive: `Stable`, `Empty`, `Dead`,
+                `PreparingRebalance`, `CompletingRebalance`, `Assigning`,
+                `Reconciling`, `NotReady`. Any other value returns `400`. Note that
+                multi-word states are written without underscores here, unlike the
+                `groupState` values in responses.
               items: {type: string}
             timeoutMs: {type: integer, minimum: 1}
 
@@ -2854,34 +3053,32 @@ components:
       type: object
       properties:
         consumerId: {type: string}
-        groupInstanceId: {type: string, nullable: true}
+        groupInstanceId: {type: [string, 'null']}
         clientId: {type: string}
         host: {type: string}
         assignment:
           type: array
           items: {$ref: '#/components/schemas/TopicPartition'}
         targetAssignment:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/TopicPartition'}
-        memberEpoch: {type: integer, nullable: true}
-        upgraded: {type: boolean, nullable: true}
+        memberEpoch: {type: [integer, 'null']}
+        upgraded: {type: [boolean, 'null']}
 
     AdminDescribeClassicGroupResponse:
       type: object
       properties:
         groupId: {type: string}
-        protocol: {type: string, nullable: true}
-        protocolData: {type: string, nullable: true}
+        protocol: {type: [string, 'null']}
+        protocolData: {type: [string, 'null']}
         members:
           type: array
           items: {$ref: '#/components/schemas/GroupMemberDescription'}
-        state: {type: string, nullable: true}
+        state: {type: [string, 'null']}
         coordinator: {$ref: '#/components/schemas/Node'}
         simpleConsumerGroup: {type: boolean}
         authorizedOperations:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/AclOperation'}
 
     AdminDescribeConsumerGroupResponse:
@@ -2892,16 +3089,15 @@ components:
         members:
           type: array
           items: {$ref: '#/components/schemas/GroupMemberDescription'}
-        partitionAssignor: {type: string, nullable: true}
-        type: {type: string, nullable: true}
-        groupState: {type: string, nullable: true}
+        partitionAssignor: {type: [string, 'null']}
+        type: {type: [string, 'null']}
+        groupState: {type: [string, 'null']}
         coordinator: {$ref: '#/components/schemas/Node'}
         authorizedOperations:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/AclOperation'}
-        groupEpoch: {type: integer, nullable: true}
-        targetAssignmentEpoch: {type: integer, nullable: true}
+        groupEpoch: {type: [integer, 'null']}
+        targetAssignmentEpoch: {type: [integer, 'null']}
 
     ShareGroupMemberDescription:
       type: object
@@ -2921,13 +3117,12 @@ components:
         members:
           type: array
           items: {$ref: '#/components/schemas/ShareGroupMemberDescription'}
-        groupState: {type: string, nullable: true}
+        groupState: {type: [string, 'null']}
         coordinator: {$ref: '#/components/schemas/Node'}
         groupEpoch: {type: integer}
         targetAssignmentEpoch: {type: integer}
         authorizedOperations:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/AclOperation'}
 
     StreamsGroupTaskIds:
@@ -2969,20 +3164,19 @@ components:
       properties:
         memberId: {type: string}
         memberEpoch: {type: integer}
-        instanceId: {type: string, nullable: true}
-        rackId: {type: string, nullable: true}
+        instanceId: {type: [string, 'null']}
+        rackId: {type: [string, 'null']}
         clientId: {type: string}
         clientHost: {type: string}
         topologyEpoch: {type: integer}
         processId: {type: string}
         userEndpoint:
-          allOf:
+          oneOf:
             - $ref: '#/components/schemas/StreamsGroupEndpoint'
-          nullable: true
+            - type: 'null'
         clientTags:
-          type: object
+          type: [object, 'null']
           additionalProperties: {type: string}
-          nullable: true
         taskOffsets:
           type: array
           items: {$ref: '#/components/schemas/StreamsGroupTaskOffset'}
@@ -3034,11 +3228,10 @@ components:
         members:
           type: array
           items: {$ref: '#/components/schemas/StreamsGroupMemberDescription'}
-        groupState: {type: string, nullable: true}
+        groupState: {type: [string, 'null']}
         coordinator: {$ref: '#/components/schemas/Node'}
         authorizedOperations:
-          type: array
-          nullable: true
+          type: [array, 'null']
           items: {$ref: '#/components/schemas/AclOperation'}
 
     AdminListConsumerGroupOffsetsRequest:
@@ -3060,9 +3253,12 @@ components:
       properties:
         topic: {type: string}
         partition: {type: integer}
-        offset: {type: integer, format: int64}
-        leaderEpoch: {type: integer, nullable: true}
-        metadata: {type: string, nullable: true}
+        offset:
+          type: [integer, 'null']
+          format: int64
+          description: Null when the partition has no committed offset
+        leaderEpoch: {type: [integer, 'null']}
+        metadata: {type: [string, 'null']}
 
     AdminListConsumerGroupOffsetsResponse:
       type: array
@@ -3094,8 +3290,8 @@ components:
                     type: integer
                     format: int64
                     minimum: 0
-                  metadata: {type: string}
-                  timeoutMs: {type: integer, minimum: 1}
+                  metadata: {type: [string, 'null']}
+            timeoutMs: {type: integer, minimum: 1}
 
     AdminDeleteConsumerGroupOffsetsRequest:
       allOf:
@@ -3123,7 +3319,9 @@ components:
               minLength: 1
             members:
               type: array
-              description: Member ids to remove; omit to remove all members
+              description: |
+                `group.instance.id` values of the static members to remove; omit to
+                remove all members
               items: {type: string}
             reason:
               type: string
@@ -3169,7 +3367,7 @@ components:
           type: integer
           format: int64
           description: Epoch millis of the offset, `-1` if unknown
-        leaderEpoch: {type: integer, nullable: true}
+        leaderEpoch: {type: [integer, 'null']}
 
     AdminListOffsetsResponse:
       type: array
@@ -3182,9 +3380,11 @@ components:
       properties:
         producerId:
           type: string
+          minLength: 1
           description: Producer instance id returned by `POST /producer/create`
         token:
           type: string
+          minLength: 1
           description: Ownership token returned by `POST /producer/create`
 
     ConsumerInstanceRef:
@@ -3194,9 +3394,11 @@ components:
       properties:
         consumerId:
           type: string
+          minLength: 1
           description: Consumer instance id returned by `POST /consumer/create`
         token:
           type: string
+          minLength: 1
           description: Ownership token returned by `POST /consumer/create`
 
     ProducerCreateRequest:
@@ -3237,8 +3439,12 @@ components:
         properties:
           id: {type: string}
           name: {type: string}
-          owner: {type: string}
-          username: {type: string, nullable: true}
+          owner:
+            type: [string, 'null']
+            description: Basic auth user that created the instance; null when auth is disabled
+          username:
+            type: [string, 'null']
+            description: SASL username from the `sasl.jaas.config` of the instance
           expiresAt:
             type: integer
             format: int64
@@ -3250,8 +3456,10 @@ components:
       properties:
         producerId:
           type: string
+          minLength: 1
         token:
           type: string
+          minLength: 1
         topic:
           type: string
           minLength: 1
@@ -3266,11 +3474,9 @@ components:
             Kafka allows repeated header keys, but a JSON object cannot express them.
             Use the binary send format when a key has to appear more than once.
         key:
-          type: string
-          nullable: true
+          type: [string, 'null']
         value:
-          type: string
-          nullable: true
+          type: [string, 'null']
 
     ProducerSendResponse:
       type: object
@@ -3308,8 +3514,8 @@ components:
       properties:
         name:
           type: string
-          description: Human-readable instance name
-          minLength: 1
+          description: Human-readable instance name; must not be blank
+          pattern: '\S'
         config:
           type: object
           description: Arbitrary Kafka client properties (`bootstrap.servers`, `group.id`, etc.)
@@ -3340,8 +3546,12 @@ components:
         properties:
           id: {type: string}
           name: {type: string}
-          owner: {type: string}
-          username: {type: string, nullable: true}
+          owner:
+            type: [string, 'null']
+            description: Basic auth user that created the instance; null when auth is disabled
+          username:
+            type: [string, 'null']
+            description: SASL username from the `sasl.jaas.config` of the instance
           expiresAt:
             type: integer
             format: int64
@@ -3388,9 +3598,9 @@ components:
               type: object
               properties:
                 key: {type: string}
-                value: {type: string, nullable: true}
-          key: {type: string, nullable: true}
-          value: {type: string, nullable: true}
+                value: {type: [string, 'null']}
+          key: {type: [string, 'null']}
+          value: {type: [string, 'null']}
 
     ConsumerSeekRequest:
       allOf:
@@ -3453,7 +3663,10 @@ components:
               items: {type: string}
             pattern:
               type: string
-              description: Regex to subscribe to matching topics
+              description: |
+                Broker-side RE2/J regular expression (`SubscriptionPattern`).
+                Requires the consumer group protocol (`group.protocol=consumer`);
+                with the classic protocol the request fails.
 
     ConsumerSubscriptionResponse:
       type: array
@@ -3495,7 +3708,7 @@ components:
           properties:
             pattern:
               type: string
-              description: Regex to filter topic names
+              description: Java regular expression; only topics whose whole name matches are returned
 
     ConsumerTopicsResponse:
       type: array
@@ -3516,7 +3729,7 @@ components:
         groupId: {type: string}
         generationId: {type: integer}
         memberId: {type: string}
-        groupInstanceId: {type: string, nullable: true}
+        groupInstanceId: {type: [string, 'null']}
 
     ConsumerCommittedResponse:
       type: array
@@ -3531,11 +3744,10 @@ components:
               properties:
                 partition: {type: integer}
                 offset:
-                  type: integer
+                  type: [integer, 'null']
                   format: int64
-                  nullable: true
                   description: Null when no committed offset exists
-                metadata: {type: string, nullable: true}
+                metadata: {type: [string, 'null']}
 
     ConsumerOffsetsResponse:
       type: array
@@ -3550,9 +3762,8 @@ components:
               properties:
                 partition: {type: integer}
                 offset:
-                  type: integer
+                  type: [integer, 'null']
                   format: int64
-                  nullable: true
 
 
 
