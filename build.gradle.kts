@@ -6,6 +6,7 @@ plugins {
 }
 
 val nettyVersion = "4.2.19.Final"
+val mockitoVersion = "5.24.0"
 
 group = "pro.savel.kafka"
 version = "5.1.1"
@@ -23,6 +24,8 @@ application {
 repositories {
     mavenCentral()
 }
+
+val mockitoAgent = configurations.create("mockitoAgent")
 
 dependencies {
     implementation(platform("io.netty:netty-bom:$nettyVersion"))
@@ -50,8 +53,11 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+    mockitoAgent("org.mockito:mockito-core:$mockitoVersion") {
+        isTransitive = false
+    }
 }
 
 distributions {
@@ -104,5 +110,5 @@ tasks.installDist {
 
 tasks.test {
     useJUnitPlatform()
-    jvmArgs("-Xshare:off")
+    jvmArgs("-Xshare:off", "-javaagent:${mockitoAgent.asPath}")
 }
