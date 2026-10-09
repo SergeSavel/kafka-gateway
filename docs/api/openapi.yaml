@@ -111,8 +111,8 @@ paths:
               schema:
                 type: string
                 example: '5.1.1'
-        '400': {$ref: '#/components/responses/BadRequest'}
         '404': {$ref: '#/components/responses/NotFound'}
+        '405': {$ref: '#/components/responses/MethodNotAllowed'}
         '500': {$ref: '#/components/responses/InternalServerError'}
 
   /admin:

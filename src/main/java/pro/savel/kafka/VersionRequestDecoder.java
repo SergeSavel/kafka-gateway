@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import pro.savel.kafka.common.HttpUtils;
 import pro.savel.kafka.common.Utils;
 import pro.savel.kafka.common.exceptions.BadRequestException;
+import pro.savel.kafka.common.exceptions.MethodNotAllowedException;
 
 import java.nio.charset.StandardCharsets;
 
@@ -42,6 +43,8 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
                 decode(ctx, httpRequest);
             } catch (BadRequestException e) {
                 HttpUtils.writeBadRequestAndClose(ctx, Utils.combineErrorMessage(e));
+            } catch (MethodNotAllowedException e) {
+                HttpUtils.writeMethodNotAllowedAndClose(ctx, Utils.combineErrorMessage(e));
             } catch (Exception e) {
                 logger.error("An unexpected error occurred while decoding version request.", e);
                 HttpUtils.writeInternalServerErrorAndClose(ctx, Utils.combineErrorMessage(e));
@@ -53,7 +56,7 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException {
+    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException {
         var decoder = new QueryStringDecoder(httpRequest.uri(), StandardCharsets.UTF_8, true);
         var pathMethod = decoder.path().substring(URI_PREFIX.length());
         if (pathMethod.isEmpty()) {
@@ -63,12 +66,12 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void decodeRoot(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException {
+    private void decodeRoot(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException {
         if (httpRequest.method() == HttpMethod.GET) {
             var version = VersionRequestDecoder.class.getPackage().getImplementationVersion();
             HttpUtils.writeOkAndClose(ctx, version != null ? version : "unknown");
         } else {
-            throw new BadRequestException("Unsupported HTTP method.");
+            throw new MethodNotAllowedException("Unsupported HTTP method.");
         }
     }
 }

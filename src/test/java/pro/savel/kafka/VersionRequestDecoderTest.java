@@ -44,4 +44,16 @@ class VersionRequestDecoderTest {
         response.release();
         channel.finishAndReleaseAll();
     }
+
+    @Test
+    void post_returnsMethodNotAllowed() {
+        var channel = new EmbeddedChannel(new VersionRequestDecoder());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/version");
+        assertFalse(channel.writeInbound(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
+        response.release();
+        channel.finishAndReleaseAll();
+    }
 }
