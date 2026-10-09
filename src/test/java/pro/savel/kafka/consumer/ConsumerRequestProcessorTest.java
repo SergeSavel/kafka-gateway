@@ -40,6 +40,7 @@ import pro.savel.kafka.consumer.responses.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
@@ -222,13 +223,13 @@ class ConsumerRequestProcessorTest
         var consumer = wrapper.getConsumer();
         var tp = new TopicPartition("topic", 0);
         var record = new ConsumerRecord<byte[], byte[]>("topic", 0, 0L, "key".getBytes(), "value".getBytes());
-        var records = new ConsumerRecords<byte[], byte[]>(Map.of(tp, List.of(record)));
+        var records = new ConsumerRecords<byte[], byte[]>(Map.of(tp, List.of(record)), Map.of());
         when(consumer.poll(any())).thenReturn(records);
 
         var request = new ConsumerPollRequest();
         request.setConsumerId(wrapper.getId());
         request.setToken(wrapper.getToken());
-        request.setTimeout(1000L);
+        request.setTimeoutMs(1000L);
 
         channel.writeInbound(bearer(request));
 
@@ -622,7 +623,12 @@ class ConsumerRequestProcessorTest
     {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
-        when(consumer.groupMetadata()).thenReturn(new ConsumerGroupMetadata("group-1", 3, "member-1", java.util.Optional.empty()));
+        var metadata = mock(ConsumerGroupMetadata.class);
+        when(metadata.groupId()).thenReturn("group-1");
+        when(metadata.generationId()).thenReturn(3);
+        when(metadata.memberId()).thenReturn("member-1");
+        when(metadata.groupInstanceId()).thenReturn(Optional.of("instance-1"));
+        when(consumer.groupMetadata()).thenReturn(metadata);
 
         var request = new ConsumerGetGroupMetadataRequest();
         request.setConsumerId(wrapper.getId());
@@ -635,6 +641,8 @@ class ConsumerRequestProcessorTest
         var body = (ConsumerGroupMetadataResponse) response.getResponse();
         assertEquals("group-1", body.getGroupId());
         assertEquals(3, body.getGenerationId());
+        assertEquals("member-1", body.getMemberId());
+        assertEquals("instance-1", body.getGroupInstanceId());
     }
 
     @Test

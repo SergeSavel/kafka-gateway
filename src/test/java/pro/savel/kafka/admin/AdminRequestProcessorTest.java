@@ -1144,7 +1144,8 @@ class AdminRequestProcessorTest
         var admin = wrapper.getAdmin();
         var result = mock(DescribeConsumerGroupsResult.class);
         var description = new ConsumerGroupDescription("group-1", false, List.of(), "assignor",
-                org.apache.kafka.common.ConsumerGroupState.STABLE, new Node(1, "host", 9092));
+                GroupType.CONSUMER, GroupState.STABLE, new Node(1, "host", 9092), Set.of(),
+                Optional.empty(), Optional.empty());
         when(result.all()).thenReturn(KafkaFuture.completedFuture(Map.of("group-1", description)));
         when(admin.describeConsumerGroups(anyCollection(), any(DescribeConsumerGroupsOptions.class))).thenReturn(result);
 
