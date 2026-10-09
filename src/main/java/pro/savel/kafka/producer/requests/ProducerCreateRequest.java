@@ -16,6 +16,7 @@ package pro.savel.kafka.producer.requests;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
@@ -23,7 +24,7 @@ import java.util.Properties;
 
 @Data
 public class ProducerCreateRequest implements ProducerRequest {
-    @NotEmpty
+    @NotBlank
     private String name;
     @NotEmpty
     private Properties config;

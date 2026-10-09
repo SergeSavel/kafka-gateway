@@ -3411,8 +3411,8 @@ components:
       properties:
         name:
           type: string
-          description: Human-readable instance name
-          minLength: 1
+          description: Human-readable instance name; must not be blank
+          pattern: '\S'
         config:
           type: object
           description: Arbitrary Kafka client properties (`bootstrap.servers`, SASL, `transactional.id`, etc.)
