@@ -36,7 +36,7 @@ dependencies {
     runtimeOnly("io.netty:netty-transport-native-epoll:$nettyVersion:linux-aarch_64")
     implementation("org.apache.kafka:kafka-clients:4.1.2")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
-    implementation("org.hibernate.validator:hibernate-validator:9.1.3.Final")
+    implementation("org.hibernate.validator:hibernate-validator:9.1.4.Final")
     implementation("org.slf4j:slf4j-api:2.0.18")
     implementation(platform("org.apache.logging.log4j:log4j-bom:2.26.1"))
     runtimeOnly("org.apache.logging.log4j:log4j-core")
