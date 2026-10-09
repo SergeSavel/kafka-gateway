@@ -14,6 +14,9 @@
 
 package pro.savel.kafka.common;
 
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.http.FullHttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -62,6 +65,24 @@ class HttpUtilsTest {
         } finally {
             Locale.setDefault(previousDefault);
         }
+    }
+
+    @Test
+    void writeHttpResponseAndClose_announcesCloseInCanonicalCase() {
+        var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
+
+        HttpUtils.writeBadRequestAndClose(channel.pipeline().firstContext(), "bad");
+
+        FullHttpResponse response = channel.readOutbound();
+        var connectionClose = false;
+        for (var header : response.headers()) {
+            if ("Connection".contentEquals(header.getKey()) && "close".contentEquals(header.getValue()))
+                connectionClose = true;
+        }
+        assertTrue(connectionClose, "Connection: close must be sent, in canonical case for case-sensitive clients");
+        assertFalse(channel.isOpen());
+        response.release();
+        channel.finishAndReleaseAll();
     }
 
     @Test

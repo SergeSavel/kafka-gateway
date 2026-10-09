@@ -21,7 +21,7 @@ info:
     ## Errors
     Error responses carry a `text/plain` body with the error message (empty when
     there is no message), and the gateway **closes the connection** after sending
-    them. Status codes:
+    them, announcing it with `Connection: close`. Status codes:
     - `400` — bad request (invalid JSON, validation failure, invalid token, unknown topic/partition, invalid Kafka request or client config)
     - `401` — not authenticated (gateway Basic auth failure, Kafka `AuthenticationException`)
     - `403` — not authorized (Kafka `AuthorizationException`, broker ACLs)
