@@ -16,7 +16,13 @@ package pro.savel.kafka.common;
 
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -82,6 +88,39 @@ class HttpUtilsTest {
         assertTrue(connectionClose, "Connection: close must be sent, in canonical case for case-sensitive clients");
         assertFalse(channel.isOpen());
         response.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
+    void writeOk_keepAliveRequest_leavesConnectionOpen() {
+        var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+
+        HttpUtils.writeOk(channel.pipeline().firstContext(), request, "ok", HttpUtils.ASCII_TEXT_PLAIN_CHARSET_UTF8);
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertFalse(response.headers().contains(HttpHeaderNames.CONNECTION));
+        assertTrue(channel.isOpen());
+        response.release();
+        request.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
+    void writeOk_connectionCloseRequest_announcesAndClosesConnection() {
+        var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+        request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+
+        HttpUtils.writeOk(channel.pipeline().firstContext(), request, "ok", HttpUtils.ASCII_TEXT_PLAIN_CHARSET_UTF8);
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertEquals("close", response.headers().get(HttpHeaderNames.CONNECTION));
+        assertFalse(channel.isOpen());
+        response.release();
+        request.release();
         channel.finishAndReleaseAll();
     }
 

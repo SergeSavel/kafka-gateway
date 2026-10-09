@@ -18,6 +18,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
@@ -28,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HealthRequestDecoderTest {
 
@@ -41,6 +43,40 @@ class HealthRequestDecoderTest {
         assertEquals(HttpResponseStatus.OK, response.status());
         assertEquals("{\"status\":\"UP\"}", response.content().toString(StandardCharsets.UTF_8));
         assertEquals(HttpUtils.APPLICATION_JSON_CHARSET_UTF8, response.headers().get(HttpHeaderNames.CONTENT_TYPE));
+        response.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
+    void get_keepAliveRequest_leavesConnectionOpen() {
+        var channel = new EmbeddedChannel(new HealthRequestDecoder());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/health");
+        assertFalse(channel.writeInbound(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertFalse(response.headers().contains(HttpHeaderNames.CONNECTION));
+        assertTrue(channel.isOpen());
+        response.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
+    void get_connectionCloseRequest_announcesAndClosesConnection() {
+        var channel = new EmbeddedChannel(new HealthRequestDecoder());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/health");
+        request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+        assertFalse(channel.writeInbound(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.status());
+        var connectionClose = false;
+        for (var header : response.headers()) {
+            if ("Connection".contentEquals(header.getKey()) && "close".contentEquals(header.getValue()))
+                connectionClose = true;
+        }
+        assertTrue(connectionClose, "Connection: close must be sent, in canonical case for case-sensitive clients");
+        assertFalse(channel.isOpen());
         response.release();
         channel.finishAndReleaseAll();
     }

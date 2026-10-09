@@ -18,6 +18,7 @@ import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
@@ -41,6 +42,40 @@ class VersionRequestDecoderTest {
         assertEquals(HttpResponseStatus.OK, response.status());
         assertFalse(response.content().toString(StandardCharsets.UTF_8).isEmpty());
         assertTrue(response.headers().contains(HttpHeaderNames.CONTENT_TYPE));
+        response.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
+    void get_keepAliveRequest_leavesConnectionOpen() {
+        var channel = new EmbeddedChannel(new VersionRequestDecoder());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/version");
+        assertFalse(channel.writeInbound(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.status());
+        assertFalse(response.headers().contains(HttpHeaderNames.CONNECTION));
+        assertTrue(channel.isOpen());
+        response.release();
+        channel.finishAndReleaseAll();
+    }
+
+    @Test
+    void get_connectionCloseRequest_announcesAndClosesConnection() {
+        var channel = new EmbeddedChannel(new VersionRequestDecoder());
+        var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/version");
+        request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
+        assertFalse(channel.writeInbound(request));
+
+        FullHttpResponse response = channel.readOutbound();
+        assertEquals(HttpResponseStatus.OK, response.status());
+        var connectionClose = false;
+        for (var header : response.headers()) {
+            if ("Connection".contentEquals(header.getKey()) && "close".contentEquals(header.getValue()))
+                connectionClose = true;
+        }
+        assertTrue(connectionClose, "Connection: close must be sent, in canonical case for case-sensitive clients");
+        assertFalse(channel.isOpen());
         response.release();
         channel.finishAndReleaseAll();
     }

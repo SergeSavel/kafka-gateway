@@ -69,7 +69,8 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
     private void decodeRoot(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException {
         if (httpRequest.method() == HttpMethod.GET) {
             var version = VersionRequestDecoder.class.getPackage().getImplementationVersion();
-            HttpUtils.writeOkAndClose(ctx, version != null ? version : "unknown");
+            HttpUtils.writeOk(ctx, httpRequest, version != null ? version : "unknown",
+                    HttpUtils.ASCII_TEXT_PLAIN_CHARSET_UTF8);
         } else {
             throw new MethodNotAllowedException("Unsupported HTTP method.");
         }

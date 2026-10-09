@@ -18,8 +18,11 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpUtil;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AsciiString;
 import pro.savel.kafka.common.exceptions.BadRequestException;
@@ -72,6 +75,13 @@ public abstract class HttpUtils {
         var mediaType = (separatorIndex < 0 ? headerValue : headerValue.substring(0, separatorIndex))
                 .trim().toLowerCase(Locale.ROOT);
         return mediaType.isEmpty() ? null : mediaType;
+    }
+
+    public static void writeOk(ChannelHandlerContext ctx, HttpRequest request, String message, AsciiString contentType) {
+        if (HttpUtil.isKeepAlive(request))
+            ctx.writeAndFlush(createHttpResponse(HttpResponseStatus.OK, message, contentType));
+        else
+            writeOkAndClose(ctx, message, contentType);
     }
 
     public static void writeOkAndClose(ChannelHandlerContext ctx, String message) {
@@ -152,16 +162,20 @@ public abstract class HttpUtils {
 
     public static void writeHttpResponseAndClose(ChannelHandlerContext ctx, HttpResponseStatus status, String message,
                                                  AsciiString contentType) {
+        var httpResponse = createHttpResponse(status, message, contentType);
+        httpResponse.headers().set(ASCII_CONNECTION, HttpHeaderValues.CLOSE);
+        var future = ctx.writeAndFlush(httpResponse);
+        future.addListener(ChannelFutureListener.CLOSE);
+    }
+
+    private static FullHttpResponse createHttpResponse(HttpResponseStatus status, String message,
+                                                       AsciiString contentType) {
         var httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
         if (message != null) {
             httpResponse.headers().set(ASCII_CONTENT_TYPE, contentType);
             httpResponse.content().writeCharSequence(message, StandardCharsets.UTF_8);
         }
         httpResponse.headers().setInt(ASCII_CONTENT_LENGTH, httpResponse.content().readableBytes());
-        // Announce the close, or a pooling client returns the connection to its pool and fails its
-        // next request on it.
-        httpResponse.headers().set(ASCII_CONNECTION, HttpHeaderValues.CLOSE);
-        var future = ctx.writeAndFlush(httpResponse);
-        future.addListener(ChannelFutureListener.CLOSE);
+        return httpResponse;
     }
 }
