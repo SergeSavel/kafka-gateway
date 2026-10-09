@@ -42,8 +42,8 @@ import java.util.function.Consumer;
  * directly, so processors don't implement {@code AutoCloseable}.
  */
 @ChannelHandler.Sharable
-public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdapter {
-
+public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdapter
+{
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     private final String kind;
@@ -51,14 +51,16 @@ public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdap
     private final BlockingTaskExecutor blockingTaskExecutor;
 
     protected AbstractRequestProcessor(String kind, Class<? extends Request> requestType,
-                                        BlockingTaskExecutor blockingTaskExecutor) {
+                                        BlockingTaskExecutor blockingTaskExecutor)
+    {
         this.kind = kind;
         this.requestType = requestType;
         this.blockingTaskExecutor = blockingTaskExecutor;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof RequestBearer bearer && requestType.isInstance(bearer.request())) {
             try {
                 processRequest(ctx, bearer);
@@ -77,7 +79,8 @@ public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdap
 
     protected abstract void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer);
 
-    protected <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, Consumer<T> completion) {
+    protected <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, Consumer<T> completion)
+    {
         blockingTaskExecutor.execute(ctx, operation, (result, error) -> ensureResponse(ctx, () -> {
             if (error == null) {
                 completion.accept(result);
@@ -97,7 +100,8 @@ public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdap
      * response completes, and the read timeout deliberately ignores connections whose reads the
      * gateway itself suspended, so nothing would ever reap the connection.
      */
-    protected void ensureResponse(ChannelHandlerContext ctx, ResponseTask task) {
+    protected void ensureResponse(ChannelHandlerContext ctx, ResponseTask task)
+    {
         try {
             task.run();
         } catch (Exception e) {
@@ -111,11 +115,13 @@ public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdap
      * expose values through {@code KafkaFuture.get()}, which throws checked exceptions.
      */
     @FunctionalInterface
-    protected interface ResponseTask {
+    protected interface ResponseTask
+    {
         void run() throws Exception;
     }
 
-    protected boolean handleError(ChannelHandlerContext ctx, Throwable error) {
+    protected boolean handleError(ChannelHandlerContext ctx, Throwable error)
+    {
         if ((error instanceof CompletionException || error instanceof ExecutionException) && error.getCause() != null)
             return handleError(ctx, error.getCause());
         if (error instanceof org.apache.kafka.common.errors.TimeoutException && error.getCause() != null)
@@ -129,7 +135,8 @@ public abstract class AbstractRequestProcessor extends ChannelInboundHandlerAdap
      * Hook for a processor-specific exception type CommonErrors doesn't cover (e.g. consumer's
      * InvalidOffsetException). Return true if this method wrote a response for the error.
      */
-    protected boolean handleSpecificError(ChannelHandlerContext ctx, Throwable error) {
+    protected boolean handleSpecificError(ChannelHandlerContext ctx, Throwable error)
+    {
         return false;
     }
 }

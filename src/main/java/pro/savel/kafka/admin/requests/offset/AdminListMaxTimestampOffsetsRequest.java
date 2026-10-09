@@ -19,5 +19,6 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class AdminListMaxTimestampOffsetsRequest extends AdminListOffsetsRequest {
+public class AdminListMaxTimestampOffsetsRequest extends AdminListOffsetsRequest
+{
 }

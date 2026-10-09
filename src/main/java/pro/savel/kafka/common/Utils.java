@@ -18,9 +18,10 @@ import jakarta.validation.ConstraintViolation;
 
 import java.util.Collection;
 
-public abstract class Utils {
-
-    public static String combineErrorMessage(Throwable throwable) {
+public abstract class Utils
+{
+    public static String combineErrorMessage(Throwable throwable)
+    {
         if (throwable == null)
             return null;
         var builder = new StringBuilder();
@@ -38,7 +39,8 @@ public abstract class Utils {
         return builder.toString();
     }
 
-    public static String rootErrorMessage(Throwable throwable) {
+    public static String rootErrorMessage(Throwable throwable)
+    {
         String result = null;
         while (throwable != null) {
             if (throwable.getMessage() != null)
@@ -48,13 +50,15 @@ public abstract class Utils {
         return result;
     }
 
-    public static <T> String combineConstraintViolationMessage(ConstraintViolation<T> violation) {
+    public static <T> String combineConstraintViolationMessage(ConstraintViolation<T> violation)
+    {
         if (violation == null)
             return null;
         return violation.getPropertyPath() + ": " + violation.getMessage();
     }
 
-    public static <T> String combineConstraintViolationMessage(Collection<ConstraintViolation<T>> violations) {
+    public static <T> String combineConstraintViolationMessage(Collection<ConstraintViolation<T>> violations)
+    {
         if (violations == null)
             return null;
         var builder = new StringBuilder();

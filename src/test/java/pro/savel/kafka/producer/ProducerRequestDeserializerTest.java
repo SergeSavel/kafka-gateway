@@ -25,10 +25,11 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ProducerRequestDeserializerTest {
-
+class ProducerRequestDeserializerTest
+{
     @Test
-    void validPayload_parsesAllFields() {
+    void validPayload_parsesAllFields()
+    {
         var buf = validSendPayload("value");
         try {
             var request = ProducerRequestDeserializer.deserializeBinarySend(buf);
@@ -47,7 +48,8 @@ class ProducerRequestDeserializerTest {
     }
 
     @Test
-    void duplicateHeaderKeys_preservedInOrder() {
+    void duplicateHeaderKeys_preservedInOrder()
+    {
         var buf = Unpooled.buffer();
         buf.writeShort(1); // version
         writeString(buf, "producer-1");
@@ -76,13 +78,15 @@ class ProducerRequestDeserializerTest {
     }
 
     @Test
-    void emptyPayload_throwsBadRequest() {
+    void emptyPayload_throwsBadRequest()
+    {
         var buf = Unpooled.EMPTY_BUFFER;
         assertThrows(BadRequestException.class, () -> ProducerRequestDeserializer.deserializeBinarySend(buf));
     }
 
     @Test
-    void truncatedVersion_throwsBadRequest() {
+    void truncatedVersion_throwsBadRequest()
+    {
         var buf = Unpooled.wrappedBuffer(new byte[]{0});
         try {
             assertThrows(BadRequestException.class, () -> ProducerRequestDeserializer.deserializeBinarySend(buf));
@@ -92,7 +96,8 @@ class ProducerRequestDeserializerTest {
     }
 
     @Test
-    void truncatedString_throwsBadRequest() {
+    void truncatedString_throwsBadRequest()
+    {
         var buf = Unpooled.buffer();
         buf.writeShort(1); // version
         buf.writeInt(10);  // producerId length
@@ -105,7 +110,8 @@ class ProducerRequestDeserializerTest {
     }
 
     @Test
-    void truncatedAtNullableFlag_throwsBadRequest() {
+    void truncatedAtNullableFlag_throwsBadRequest()
+    {
         var buf = Unpooled.buffer();
         buf.writeShort(1); // version
         writeString(buf, "producer-1");
@@ -120,7 +126,8 @@ class ProducerRequestDeserializerTest {
     }
 
     @Test
-    void truncatedValue_returnsShorterValue() {
+    void truncatedValue_returnsShorterValue()
+    {
         var buf = validSendPayload("value");
         var truncated = buf.readSlice(buf.readableBytes() - 2);
         try {
@@ -132,7 +139,8 @@ class ProducerRequestDeserializerTest {
     }
 
     @Test
-    void unsupportedVersion_throwsBadRequest() {
+    void unsupportedVersion_throwsBadRequest()
+    {
         var buf = Unpooled.buffer();
         buf.writeShort(2);
         try {
@@ -144,7 +152,8 @@ class ProducerRequestDeserializerTest {
         }
     }
 
-    private static ByteBuf validSendPayload(String value) {
+    private static ByteBuf validSendPayload(String value)
+    {
         var buf = Unpooled.buffer();
         buf.writeShort(1); // version
         writeString(buf, "producer-1");
@@ -163,13 +172,15 @@ class ProducerRequestDeserializerTest {
         return buf;
     }
 
-    private static void writeString(ByteBuf buf, String value) {
+    private static void writeString(ByteBuf buf, String value)
+    {
         var bytes = value.getBytes(StandardCharsets.UTF_8);
         buf.writeInt(bytes.length);
         buf.writeBytes(bytes);
     }
 
-    private static void writeBytes(ByteBuf buf, String value) {
+    private static void writeBytes(ByteBuf buf, String value)
+    {
         var bytes = value.getBytes(StandardCharsets.UTF_8);
         buf.writeInt(bytes.length);
         buf.writeBytes(bytes);

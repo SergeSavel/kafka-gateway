@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests.scram;
 
 import pro.savel.kafka.admin.requests.AdminRequest;
 
-public interface AdminScramRequest extends AdminRequest {
+public interface AdminScramRequest extends AdminRequest
+{
 }

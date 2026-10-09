@@ -23,12 +23,13 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AdminConfigResponseTest {
-
+class AdminConfigResponseTest
+{
 //region of
 
     @Test
-    void of_configEntryWithNullTypeAndDocumentation_mapsWithoutError() {
+    void of_configEntryWithNullTypeAndDocumentation_mapsWithoutError()
+    {
         var entry = new ConfigEntry("cleanup.policy", "delete",
                 ConfigEntry.ConfigSource.DYNAMIC_TOPIC_CONFIG, false, false,
                 Collections.emptyList(), null, null);
@@ -47,7 +48,8 @@ class AdminConfigResponseTest {
     }
 
     @Test
-    void of_configEntryWithAllFields_mapsEnumNames() {
+    void of_configEntryWithAllFields_mapsEnumNames()
+    {
         var entry = new ConfigEntry("retention.ms", "604800000",
                 ConfigEntry.ConfigSource.DEFAULT_CONFIG, true, true,
                 Collections.emptyList(), ConfigEntry.ConfigType.LONG, "retention docs");
@@ -66,7 +68,8 @@ class AdminConfigResponseTest {
     }
 
     @Test
-    void of_nullConfig_returnsNull() {
+    void of_nullConfig_returnsNull()
+    {
         assertNull(AdminConfigResponse.of(null));
     }
 

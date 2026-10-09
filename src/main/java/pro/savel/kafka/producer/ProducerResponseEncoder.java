@@ -30,18 +30,20 @@ import pro.savel.kafka.producer.responses.ProducerSendResponse;
 import java.io.IOException;
 
 @ChannelHandler.Sharable
-public class ProducerResponseEncoder extends ChannelOutboundHandlerAdapter {
-
+public class ProducerResponseEncoder extends ChannelOutboundHandlerAdapter
+{
     private static final Logger logger = LoggerFactory.getLogger(ProducerResponseEncoder.class);
 
     private final ObjectMapper objectMapper;
 
-    public ProducerResponseEncoder(ObjectMapper objectMapper) {
+    public ProducerResponseEncoder(ObjectMapper objectMapper)
+    {
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
+    {
         if (msg instanceof ProducerResponseBearer bearer) {
             try {
                 if (logger.isDebugEnabled()) {
@@ -72,7 +74,8 @@ public class ProducerResponseEncoder extends ChannelOutboundHandlerAdapter {
     }
 
     private FullHttpResponse createHttpResponse(ChannelHandlerContext ctx, ProducerResponseBearer bearer)
-            throws IOException {
+            throws IOException
+    {
         FullHttpResponse httpResponse;
         if (bearer.getResponse() == null) {
             httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, bearer.getStatus());

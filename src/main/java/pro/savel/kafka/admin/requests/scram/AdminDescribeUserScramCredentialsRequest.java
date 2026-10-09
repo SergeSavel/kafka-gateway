@@ -21,7 +21,8 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class AdminDescribeUserScramCredentialsRequest implements AdminScramRequest {
+public class AdminDescribeUserScramCredentialsRequest implements AdminScramRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

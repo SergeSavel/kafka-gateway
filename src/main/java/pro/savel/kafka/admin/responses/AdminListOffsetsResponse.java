@@ -20,14 +20,16 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class AdminListOffsetsResponse extends ArrayList<AdminListOffsetsResponse.OffsetListing>
-        implements AdminResponse {
-
-    private AdminListOffsetsResponse(int initialCapacity) {
+        implements AdminResponse
+{
+    private AdminListOffsetsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
     public static AdminListOffsetsResponse of(
-            Map<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo> source) {
+            Map<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo> source)
+    {
         if (source == null)
             return null;
         var result = new AdminListOffsetsResponse(source.size());
@@ -36,19 +38,21 @@ public class AdminListOffsetsResponse extends ArrayList<AdminListOffsetsResponse
     }
 
     @Getter
-    public static class OffsetListing {
-
+    public static class OffsetListing
+    {
         private String topic;
         private int partition;
         private long offset;
         private long timestamp;
         private Integer leaderEpoch;
 
-        private OffsetListing() {
+        private OffsetListing()
+        {
         }
 
         private static OffsetListing of(org.apache.kafka.common.TopicPartition topicPartition,
-                org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo info) {
+                org.apache.kafka.clients.admin.ListOffsetsResult.ListOffsetsResultInfo info)
+        {
             if (topicPartition == null || info == null)
                 return null;
             var result = new OffsetListing();

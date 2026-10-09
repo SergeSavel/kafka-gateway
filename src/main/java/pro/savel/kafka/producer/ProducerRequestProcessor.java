@@ -27,17 +27,19 @@ import pro.savel.kafka.producer.responses.ProducerListResponse;
 import pro.savel.kafka.producer.responses.ProducerPartitionsResponse;
 import pro.savel.kafka.producer.responses.ProducerSendResponse;
 
-public class ProducerRequestProcessor extends AbstractRequestProcessor {
-
+public class ProducerRequestProcessor extends AbstractRequestProcessor
+{
     private final ProducerProvider provider;
 
-    public ProducerRequestProcessor(BlockingTaskExecutor blockingTaskExecutor, ProducerProvider provider) {
+    public ProducerRequestProcessor(BlockingTaskExecutor blockingTaskExecutor, ProducerProvider provider)
+    {
         super("producer", ProducerRequest.class, blockingTaskExecutor);
         this.provider = provider;
     }
 
     @Override
-    protected void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    protected void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         switch (requestBearer.request()) {
             case ProducerSendRequest ignored -> processSend(ctx, requestBearer);
             case ProducerGetPartitionsRequest ignored -> processGetPartitions(ctx, requestBearer);
@@ -55,14 +57,16 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
 
 //region Management
 
-    private void processList(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processList(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var wrappers = provider.getItems();
         var response = ProducerListResponse.of(wrappers);
         var responseBearer = new ProducerResponseBearer(requestBearer, HttpResponseStatus.OK, response);
         ctx.writeAndFlush(responseBearer);
     }
 
-    private void processCreate(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreate(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerCreateRequest) requestBearer.request();
         var owner = ctx.channel().attr(NettyAttributes.USERNAME).get();
         execute(ctx,
@@ -73,7 +77,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
                 });
     }
 
-    private void processRemove(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processRemove(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerRemoveRequest) requestBearer.request();
         execute(ctx, () -> {
             provider.removeProducer(request.getProducerId(), request.getToken());
@@ -81,7 +86,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
         }, ignored -> ctx.writeAndFlush(new ProducerResponseBearer(requestBearer, HttpResponseStatus.NO_CONTENT, null)));
     }
 
-    private void processTouch(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processTouch(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerTouchRequest) requestBearer.request();
         var wrapper = provider.getProducer(request.getProducerId(), request.getToken());
         wrapper.touch();
@@ -93,7 +99,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
 
 //region Producer
 
-    private void processSend(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processSend(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerSendRequest) requestBearer.request();
         var producer = getProducer(request.getProducerId(), request.getToken());
         var record = new ProducerRecord<>(request.getTopic(), request.getPartition(), request.getKey(), request.getValue());
@@ -114,7 +121,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
         producer.send(record, callback);
     }
 
-    private void processGetPartitions(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetPartitions(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerGetPartitionsRequest) requestBearer.request();
         var producer = getProducer(request.getProducerId(), request.getToken());
         execute(ctx, () -> producer.partitionsFor(request.getTopic()), partitions -> {
@@ -123,7 +131,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
         });
     }
 
-    private void processBeginTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processBeginTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerBeginTransactionRequest) requestBearer.request();
         var producer = getProducer(request.getProducerId(), request.getToken());
         execute(ctx, () -> {
@@ -132,7 +141,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
         }, ignored -> ctx.writeAndFlush(new ProducerResponseBearer(requestBearer, HttpResponseStatus.NO_CONTENT, null)));
     }
 
-    private void processCommitTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCommitTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerCommitTransactionRequest) requestBearer.request();
         var producer = getProducer(request.getProducerId(), request.getToken());
         execute(ctx, () -> {
@@ -141,7 +151,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
         }, ignored -> ctx.writeAndFlush(new ProducerResponseBearer(requestBearer, HttpResponseStatus.NO_CONTENT, null)));
     }
 
-    private void processAbortTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processAbortTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ProducerAbortTransactionRequest) requestBearer.request();
         var producer = getProducer(request.getProducerId(), request.getToken());
         execute(ctx, () -> {
@@ -152,7 +163,8 @@ public class ProducerRequestProcessor extends AbstractRequestProcessor {
 
 //endregion
 
-    private Producer<byte[], byte[]> getProducer(String id, String token) {
+    private Producer<byte[], byte[]> getProducer(String id, String token)
+    {
         var wrapper = provider.getProducer(id, token);
         wrapper.touch();
         return wrapper.getProducer();

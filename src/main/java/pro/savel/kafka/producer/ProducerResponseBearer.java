@@ -19,9 +19,10 @@ import pro.savel.kafka.common.RequestBearer;
 import pro.savel.kafka.common.ResponseBearer;
 import pro.savel.kafka.producer.responses.ProducerResponse;
 
-public class ProducerResponseBearer extends ResponseBearer<ProducerResponse> {
-
-    public ProducerResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, ProducerResponse response) {
+public class ProducerResponseBearer extends ResponseBearer<ProducerResponse>
+{
+    public ProducerResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, ProducerResponse response)
+    {
         super(requestBearer, status, response);
     }
 }

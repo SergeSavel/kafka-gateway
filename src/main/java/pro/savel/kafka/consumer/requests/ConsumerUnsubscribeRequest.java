@@ -18,7 +18,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class ConsumerUnsubscribeRequest implements ConsumerRequest {
+public class ConsumerUnsubscribeRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

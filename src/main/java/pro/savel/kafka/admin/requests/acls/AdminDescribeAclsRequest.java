@@ -21,7 +21,8 @@ import lombok.Data;
 import pro.savel.kafka.admin.data.AdminAclBindingFilter;
 
 @Data
-public class AdminDescribeAclsRequest implements AdminAclsRequest {
+public class AdminDescribeAclsRequest implements AdminAclsRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

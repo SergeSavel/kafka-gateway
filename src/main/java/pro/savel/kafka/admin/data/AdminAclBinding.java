@@ -20,8 +20,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class AdminAclBinding {
-
+public class AdminAclBinding
+{
     @NotNull
     @Valid
     private ResourcePattern pattern;
@@ -30,7 +30,8 @@ public class AdminAclBinding {
     @Valid
     private AccessControlEntry entry;
 
-    public static AdminAclBinding of(org.apache.kafka.common.acl.AclBinding source) {
+    public static AdminAclBinding of(org.apache.kafka.common.acl.AclBinding source)
+    {
         if (source == null)
             return null;
         var result = new AdminAclBinding();
@@ -40,8 +41,8 @@ public class AdminAclBinding {
     }
 
     @Data
-    public static class ResourcePattern {
-
+    public static class ResourcePattern
+    {
         @NotEmpty
         private String resourceType;
         @NotNull
@@ -49,7 +50,8 @@ public class AdminAclBinding {
         @NotEmpty
         private String patternType;
 
-        private static ResourcePattern of(org.apache.kafka.common.resource.ResourcePattern source) {
+        private static ResourcePattern of(org.apache.kafka.common.resource.ResourcePattern source)
+        {
             if (source == null)
                 return null;
             var result = new ResourcePattern();
@@ -61,8 +63,8 @@ public class AdminAclBinding {
     }
 
     @Data
-    public static class AccessControlEntry {
-
+    public static class AccessControlEntry
+    {
         @NotNull
         private String principal;
         @NotNull
@@ -72,7 +74,8 @@ public class AdminAclBinding {
         @NotEmpty
         private String permissionType;
 
-        private static AccessControlEntry of(org.apache.kafka.common.acl.AccessControlEntry source) {
+        private static AccessControlEntry of(org.apache.kafka.common.acl.AccessControlEntry source)
+        {
             if (source == null)
                 return null;
             var result = new AccessControlEntry();

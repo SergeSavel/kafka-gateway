@@ -47,8 +47,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class ConsumerRequestProcessorTest {
-
+class ConsumerRequestProcessorTest
+{
     @SuppressWarnings("unchecked")
     private final ConsumerProvider provider = new ConsumerProvider(config -> mock(Consumer.class));
     private final ConsumerRequestProcessor processor =
@@ -56,27 +56,32 @@ class ConsumerRequestProcessorTest {
     private final EmbeddedChannel channel = new EmbeddedChannel(processor);
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.finishAndReleaseAll();
         provider.close();
     }
 
-    private static RequestBearer bearer(ConsumerRequest request) {
+    private static RequestBearer bearer(ConsumerRequest request)
+    {
         return new RequestBearer(request, Serde.JSON, true);
     }
 
-    private ConsumerWrapper addWrapper() {
+    private ConsumerWrapper addWrapper()
+    {
         return provider.createConsumer("test-consumer", new Properties(), 60_000, null);
     }
 
-    private static pro.savel.kafka.common.contract.TopicPartition partition(String topic, int partition) {
+    private static pro.savel.kafka.common.contract.TopicPartition partition(String topic, int partition)
+    {
         return pro.savel.kafka.common.contract.TopicPartition.of(new TopicPartition(topic, partition));
     }
 
     //region Management
 
     @Test
-    void processCreate_success_returnsCreatedWithIdAndToken() {
+    void processCreate_success_returnsCreatedWithIdAndToken()
+    {
         var request = new ConsumerCreateRequest();
         request.setName("my-consumer");
         request.setConfig(new Properties());
@@ -94,7 +99,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processCreate_emptyScramPassword_returnsBadRequest() {
+    void processCreate_emptyScramPassword_returnsBadRequest()
+    {
         var request = new ConsumerCreateRequest();
         request.setName("my-consumer");
         var config = new Properties();
@@ -113,7 +119,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processRemove_validToken_removesAndReturnsNoContent() {
+    void processRemove_validToken_removesAndReturnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -130,7 +137,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processRemove_invalidToken_returnsBadRequest() {
+    void processRemove_invalidToken_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new ConsumerReleaseRequest();
@@ -145,7 +153,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processRemove_unknownId_isNoOpAndReturnsNoContent() {
+    void processRemove_unknownId_isNoOpAndReturnsNoContent()
+    {
         var request = new ConsumerReleaseRequest();
         request.setConsumerId("does-not-exist");
         request.setToken("any-token");
@@ -157,7 +166,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processTouch_updatesExpirationAndReturnsNoContent() throws InterruptedException {
+    void processTouch_updatesExpirationAndReturnsNoContent() throws InterruptedException
+    {
         var wrapper = addWrapper();
         var expiresBefore = wrapper.getExpiresAt();
         Thread.sleep(5);
@@ -174,7 +184,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processTouch_unknownId_returnsNotFound() {
+    void processTouch_unknownId_returnsNotFound()
+    {
         var request = new ConsumerTouchRequest();
         request.setConsumerId("does-not-exist");
         request.setToken("token");
@@ -187,7 +198,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processList_returnsAllConsumers() {
+    void processList_returnsAllConsumers()
+    {
         addWrapper();
         addWrapper();
 
@@ -204,7 +216,8 @@ class ConsumerRequestProcessorTest {
     //region Consumer operations
 
     @Test
-    void processPoll_success_returnsMessages() {
+    void processPoll_success_returnsMessages()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var tp = new TopicPartition("topic", 0);
@@ -227,7 +240,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processCommit_success_returnsNoContent() {
+    void processCommit_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -243,7 +257,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processCommit_invalidOffsetException_returnsConflict() {
+    void processCommit_invalidOffsetException_returnsConflict()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         doThrow(new OffsetOutOfRangeException(Map.of())).when(consumer).commitSync();
@@ -260,7 +275,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processCommit_commitFailedAfterRebalance_returnsConflict() {
+    void processCommit_commitFailedAfterRebalance_returnsConflict()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         doThrow(new CommitFailedException()).when(consumer).commitSync();
@@ -277,7 +293,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processCommit_rebalanceInProgress_returnsConflict() {
+    void processCommit_rebalanceInProgress_returnsConflict()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         doThrow(new RebalanceInProgressException("rebalancing")).when(consumer).commitSync();
@@ -294,7 +311,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSeek_success_seeksAndReturnsNoContent() {
+    void processSeek_success_seeksAndReturnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -313,7 +331,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSeekToBeginning_success_returnsNoContent() {
+    void processSeekToBeginning_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -330,7 +349,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSeekToEnd_success_returnsNoContent() {
+    void processSeekToEnd_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -347,7 +367,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processAssign_success_returnsNoContent() {
+    void processAssign_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -364,7 +385,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetAssignment_success_returnsAssignment() {
+    void processGetAssignment_success_returnsAssignment()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         when(consumer.assignment()).thenReturn(Set.of(new TopicPartition("topic", 0)));
@@ -382,7 +404,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSubscribe_withTopics_subscribesAndReturnsNoContent() {
+    void processSubscribe_withTopics_subscribesAndReturnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -399,7 +422,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSubscribe_withPattern_subscribesAndReturnsNoContent() {
+    void processSubscribe_withPattern_subscribesAndReturnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -416,7 +440,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSubscribe_neitherTopicsNorPattern_returnsBadRequest() {
+    void processSubscribe_neitherTopicsNorPattern_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new ConsumerSubscribeRequest();
@@ -431,7 +456,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processSubscribe_patternWithClassicProtocol_returnsBadRequest() {
+    void processSubscribe_patternWithClassicProtocol_returnsBadRequest()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         doThrow(new UnsupportedOperationException("not supported with the CLASSIC protocol"))
@@ -450,7 +476,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processUnsubscribe_success_returnsNoContent() {
+    void processUnsubscribe_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
 
@@ -466,7 +493,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetSubscription_success_returnsSubscription() {
+    void processGetSubscription_success_returnsSubscription()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         when(consumer.subscription()).thenReturn(Set.of("topic-a"));
@@ -484,7 +512,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetPosition_success_returnsOffset() {
+    void processGetPosition_success_returnsOffset()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         when(consumer.position(new TopicPartition("topic", 0))).thenReturn(123L);
@@ -504,7 +533,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetPartitions_success_returnsPartitions() {
+    void processGetPartitions_success_returnsPartitions()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var node = new Node(1, "host", 9092);
@@ -525,7 +555,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processListTopics_noPattern_returnsAllTopics() {
+    void processListTopics_noPattern_returnsAllTopics()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var node = new Node(1, "host", 9092);
@@ -546,7 +577,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processListTopics_withPattern_filtersTopics() {
+    void processListTopics_withPattern_filtersTopics()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var node = new Node(1, "host", 9092);
@@ -569,7 +601,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processListTopics_invalidPattern_returnsBadRequest() {
+    void processListTopics_invalidPattern_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new ConsumerListTopicsRequest();
@@ -585,7 +618,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetGroupMetadata_success_returnsMetadata() {
+    void processGetGroupMetadata_success_returnsMetadata()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         when(consumer.groupMetadata()).thenReturn(new ConsumerGroupMetadata("group-1", 3, "member-1", java.util.Optional.empty()));
@@ -604,7 +638,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetCommitted_success_returnsCommittedOffsets() {
+    void processGetCommitted_success_returnsCommittedOffsets()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var tp = new TopicPartition("topic", 0);
@@ -624,7 +659,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetBeginningOffsets_success_returnsOffsets() {
+    void processGetBeginningOffsets_success_returnsOffsets()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var tp = new TopicPartition("topic", 0);
@@ -644,7 +680,8 @@ class ConsumerRequestProcessorTest {
     }
 
     @Test
-    void processGetEndOffsets_success_returnsOffsets() {
+    void processGetEndOffsets_success_returnsOffsets()
+    {
         var wrapper = addWrapper();
         var consumer = wrapper.getConsumer();
         var tp = new TopicPartition("topic", 0);
@@ -666,7 +703,8 @@ class ConsumerRequestProcessorTest {
     //endregion
 
     @Test
-    void processRequest_unknownRequestType_returnsInternalServerError() {
+    void processRequest_unknownRequestType_returnsInternalServerError()
+    {
         channel.writeInbound(bearer(new UnknownConsumerRequest()));
 
         FullHttpResponse response = channel.readOutbound();
@@ -674,6 +712,7 @@ class ConsumerRequestProcessorTest {
         response.release();
     }
 
-    private record UnknownConsumerRequest() implements ConsumerRequest {
+    private record UnknownConsumerRequest() implements ConsumerRequest
+    {
     }
 }

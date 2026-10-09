@@ -29,10 +29,11 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HttpUtilsTest {
-
+class HttpUtilsTest
+{
     @Test
-    void mediaType_stripsParametersTrimsAndLowercases() {
+    void mediaType_stripsParametersTrimsAndLowercases()
+    {
         assertEquals("application/json", HttpUtils.mediaType("application/json"));
         assertEquals("application/json", HttpUtils.mediaType("application/json; charset=utf-8"));
         assertEquals("application/json", HttpUtils.mediaType("application/json;charset=utf-8"));
@@ -41,7 +42,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void mediaType_nullOrBlank_returnsNull() {
+    void mediaType_nullOrBlank_returnsNull()
+    {
         assertNull(HttpUtils.mediaType(null));
         assertNull(HttpUtils.mediaType(""));
         assertNull(HttpUtils.mediaType("   "));
@@ -49,7 +51,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void isJson_recognizesMediaTypeRegardlessOfParametersAndCase() {
+    void isJson_recognizesMediaTypeRegardlessOfParametersAndCase()
+    {
         assertTrue(HttpUtils.isJson("application/json"));
         assertTrue(HttpUtils.isJson("application/json; charset=utf-8"));
         assertTrue(HttpUtils.isJson("application/json;charset=utf-8"));
@@ -59,7 +62,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void mediaType_isLocaleIndependent() {
+    void mediaType_isLocaleIndependent()
+    {
         // Turkish lowercases 'I' to dotless 'ı', which would break "application" for a default-locale
         // toLowerCase(). Header values are protocol data, so they must fold the same everywhere.
         var previousDefault = Locale.getDefault();
@@ -74,7 +78,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void writeHttpResponseAndClose_announcesCloseInCanonicalCase() {
+    void writeHttpResponseAndClose_announcesCloseInCanonicalCase()
+    {
         var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
 
         HttpUtils.writeBadRequestAndClose(channel.pipeline().firstContext(), "bad");
@@ -92,7 +97,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void writeMethodNotAllowedAndClose_namesAllowedMethodInCanonicalCase() {
+    void writeMethodNotAllowedAndClose_namesAllowedMethodInCanonicalCase()
+    {
         var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
 
         HttpUtils.writeMethodNotAllowedAndClose(channel.pipeline().firstContext(), "bad method", HttpMethod.POST);
@@ -115,7 +121,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void writeOk_keepAliveRequest_leavesConnectionOpen() {
+    void writeOk_keepAliveRequest_leavesConnectionOpen()
+    {
         var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
 
@@ -131,7 +138,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void writeOk_connectionCloseRequest_announcesAndClosesConnection() {
+    void writeOk_connectionCloseRequest_announcesAndClosesConnection()
+    {
         var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
         request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
@@ -148,7 +156,8 @@ class HttpUtilsTest {
     }
 
     @Test
-    void isOctetStream_recognizesMediaTypeRegardlessOfParametersAndCase() {
+    void isOctetStream_recognizesMediaTypeRegardlessOfParametersAndCase()
+    {
         assertTrue(HttpUtils.isOctetStream("application/octet-stream"));
         assertTrue(HttpUtils.isOctetStream("application/octet-stream; boundary=x"));
         assertTrue(HttpUtils.isOctetStream("Application/Octet-Stream"));

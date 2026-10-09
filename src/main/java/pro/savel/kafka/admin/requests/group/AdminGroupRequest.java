@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests.group;
 
 import pro.savel.kafka.admin.requests.AdminRequest;
 
-public interface AdminGroupRequest extends AdminRequest {
+public interface AdminGroupRequest extends AdminRequest
+{
 }

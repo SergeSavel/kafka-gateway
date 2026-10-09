@@ -39,8 +39,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @ChannelHandler.Sharable
-public class ConsumerRequestDecoder extends ChannelInboundHandlerAdapter {
-
+public class ConsumerRequestDecoder extends ChannelInboundHandlerAdapter
+{
     public static final String URI_PREFIX = "/consumer";
     private static final Logger logger = LoggerFactory.getLogger(ConsumerRequestDecoder.class);
 
@@ -79,7 +79,8 @@ public class ConsumerRequestDecoder extends ChannelInboundHandlerAdapter {
      *                              ClientReadTimeoutHandler exempts it from that timeout, and this
      *                              cap is what replaces the bound it would otherwise impose.
      */
-    public ConsumerRequestDecoder(ObjectMapper objectMapper, ValidatorFactory validatorFactory, int maxPollTimeoutSeconds) {
+    public ConsumerRequestDecoder(ObjectMapper objectMapper, ValidatorFactory validatorFactory, int maxPollTimeoutSeconds)
+    {
         if (maxPollTimeoutSeconds <= 0)
             throw new IllegalArgumentException("maxPollTimeoutSeconds must be greater than 0");
         this.objectMapper = objectMapper;
@@ -88,7 +89,8 @@ public class ConsumerRequestDecoder extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest httpRequest && httpRequest.uri().startsWith(URI_PREFIX)) {
             try {
                 decode(ctx, httpRequest);
@@ -107,12 +109,14 @@ public class ConsumerRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private static void passBearer(ChannelHandlerContext ctx, FullHttpRequest httpRequest, ConsumerRequest request) {
+    private static void passBearer(ChannelHandlerContext ctx, FullHttpRequest httpRequest, ConsumerRequest request)
+    {
         var bearer = new RequestBearer(httpRequest, request);
         ctx.fireChannelRead(bearer);
     }
 
-    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException, MethodNotAllowedException {
+    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException, MethodNotAllowedException
+    {
         var decoder = new QueryStringDecoder(httpRequest.uri(), StandardCharsets.UTF_8, true);
         var pathMethod = decoder.path().substring(URI_PREFIX.length());
         if (pathMethod.isEmpty()) {
@@ -129,17 +133,20 @@ public class ConsumerRequestDecoder extends ChannelInboundHandlerAdapter {
         decodeRequest(ctx, httpRequest, requestType);
     }
 
-    private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException {
+    private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException
+    {
         if (httpRequest.method() != method)
             throw new MethodNotAllowedException("Unsupported HTTP method.", method);
     }
 
-    private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {
+    private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest)
+    {
         var request = new ConsumerListRequest();
         passBearer(ctx, httpRequest, request);
     }
 
-    private <T extends ConsumerRequest> void decodeRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest, Class<T> clazz) throws BadRequestException {
+    private <T extends ConsumerRequest> void decodeRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest, Class<T> clazz) throws BadRequestException
+    {
         var contentType = HttpUtils.getContentType(httpRequest);
         T request;
         if (HttpUtils.isJson(contentType))

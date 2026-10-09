@@ -25,21 +25,23 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.ReferenceCountUtil;
 import pro.savel.kafka.common.HttpUtils;
 
-public class JsonRequestSizeLimitHandler extends ChannelInboundHandlerAdapter {
-
+public class JsonRequestSizeLimitHandler extends ChannelInboundHandlerAdapter
+{
     private final int maxContentLength;
     private boolean jsonRequest;
     private boolean discarding;
     private long receivedBytes;
 
-    public JsonRequestSizeLimitHandler(int maxContentLength) {
+    public JsonRequestSizeLimitHandler(int maxContentLength)
+    {
         if (maxContentLength <= 0)
             throw new IllegalArgumentException("maxContentLength must be greater than 0");
         this.maxContentLength = maxContentLength;
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (discarding) {
             ReferenceCountUtil.release(msg);
             return;
@@ -68,24 +70,28 @@ public class JsonRequestSizeLimitHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
+    public void channelInactive(ChannelHandlerContext ctx)
+    {
         reset();
         ctx.fireChannelInactive();
     }
 
-    private void reject(ChannelHandlerContext ctx, Object msg) {
+    private void reject(ChannelHandlerContext ctx, Object msg)
+    {
         discarding = true;
         ReferenceCountUtil.release(msg);
         HttpUtils.writeHttpResponseAndClose(ctx, HttpResponseStatus.REQUEST_ENTITY_TOO_LARGE, null);
     }
 
-    private void reset() {
+    private void reset()
+    {
         jsonRequest = false;
         discarding = false;
         receivedBytes = 0;
     }
 
-    private static long contentLength(HttpRequest request) {
+    private static long contentLength(HttpRequest request)
+    {
         try {
             return HttpUtil.getContentLength(request, -1);
         } catch (NumberFormatException ignored) {

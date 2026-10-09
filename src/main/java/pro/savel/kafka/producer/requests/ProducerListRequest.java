@@ -17,5 +17,6 @@ package pro.savel.kafka.producer.requests;
 import lombok.Data;
 
 @Data
-public class ProducerListRequest implements ProducerRequest {
+public class ProducerListRequest implements ProducerRequest
+{
 }

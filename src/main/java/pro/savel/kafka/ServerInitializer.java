@@ -49,8 +49,8 @@ import pro.savel.kafka.producer.ProducerResponseEncoder;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-class ServerInitializer extends ChannelInitializer<SocketChannel> {
-
+class ServerInitializer extends ChannelInitializer<SocketChannel>
+{
     private static final Logger logger = LoggerFactory.getLogger(ServerInitializer.class);
 
     private static final ObjectMapper objectMapper = new ObjectMapper()
@@ -92,18 +92,21 @@ class ServerInitializer extends ChannelInitializer<SocketChannel> {
             new DefaultChannelGroup("http-channels", GlobalEventExecutor.INSTANCE, true);
     private final ServerConfig config;
 
-    ServerInitializer(ServerConfig config) {
+    ServerInitializer(ServerConfig config)
+    {
         this.config = config;
         consumerResponseEncoder = new ConsumerResponseEncoder(objectMapper, config.responseChunkBytes());
         consumerRequestDecoder = new ConsumerRequestDecoder(objectMapper, validatorFactory, config.readTimeoutSeconds());
     }
 
-    public void initialize() {
+    public void initialize()
+    {
         basicAuthenticationHandler.initialize();
     }
 
     @Override
-    protected void initChannel(SocketChannel channel) {
+    protected void initChannel(SocketChannel channel)
+    {
         channels.add(channel);
 
         ChannelPipeline pipeline = channel.pipeline();
@@ -131,7 +134,8 @@ class ServerInitializer extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(defaultInboundHandler);
     }
 
-    void close(ShutdownDeadline deadline) {
+    void close(ShutdownDeadline deadline)
+    {
         var channelCloseFuture = channels.close();
         if (!channelCloseFuture.awaitUninterruptibly(deadline.remainingNanos(), TimeUnit.NANOSECONDS))
             logger.warn("Timed out waiting for HTTP channels to close.");

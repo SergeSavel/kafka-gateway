@@ -48,10 +48,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * (HttpRequestFlowControlHandler -> ChunkedWriteHandler -> ConsumerResponseEncoder), unlike
  * ConsumerPollChunkedInputTest which exercises ConsumerPollChunkedInput in isolation.
  */
-class ConsumerPollPipelineIntegrationTest {
-
+class ConsumerPollPipelineIntegrationTest
+{
     @Test
-    void binaryPollResponse_throughRealPipeline_isNotTruncated() {
+    void binaryPollResponse_throughRealPipeline_isNotTruncated()
+    {
         var objectMapper = new ObjectMapper();
         var chunkBytes = 16; // small on purpose, to force many chunk boundaries
         var encoder = new ConsumerResponseEncoder(objectMapper, chunkBytes);
@@ -95,7 +96,8 @@ class ConsumerPollPipelineIntegrationTest {
         channel.finishAndReleaseAll();
     }
 
-    private static ConsumerPollResponse manyMessagesResponse(int count) {
+    private static ConsumerPollResponse manyMessagesResponse(int count)
+    {
         var records = new ArrayList<ConsumerRecord<byte[], byte[]>>(count);
         for (int i = 0; i < count; i++) {
             var key = ("key-" + i).getBytes(StandardCharsets.UTF_8);

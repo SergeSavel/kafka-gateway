@@ -21,8 +21,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Getter
-public class GroupMemberDescription {
-
+public class GroupMemberDescription
+{
     private String consumerId;
     private String groupInstanceId;
     private String clientId;
@@ -32,10 +32,12 @@ public class GroupMemberDescription {
     private Integer memberEpoch;
     private Boolean upgraded;
 
-    private GroupMemberDescription() {
+    private GroupMemberDescription()
+    {
     }
 
-    public static Collection<GroupMemberDescription> of(Collection<org.apache.kafka.clients.admin.MemberDescription> source) {
+    public static Collection<GroupMemberDescription> of(Collection<org.apache.kafka.clients.admin.MemberDescription> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<GroupMemberDescription>(source.size());
@@ -43,7 +45,8 @@ public class GroupMemberDescription {
         return result;
     }
 
-    public static GroupMemberDescription of(org.apache.kafka.clients.admin.MemberDescription source) {
+    public static GroupMemberDescription of(org.apache.kafka.clients.admin.MemberDescription source)
+    {
         if (source == null)
             return null;
         var result = new GroupMemberDescription();
@@ -58,7 +61,8 @@ public class GroupMemberDescription {
         return result;
     }
 
-    public static Collection<TopicPartition> mapMemberAssignment(org.apache.kafka.clients.admin.MemberAssignment source) {
+    public static Collection<TopicPartition> mapMemberAssignment(org.apache.kafka.clients.admin.MemberAssignment source)
+    {
         if (source == null)
             return null;
         return TopicPartition.of(source.topicPartitions());

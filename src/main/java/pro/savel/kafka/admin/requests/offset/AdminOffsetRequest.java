@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests.offset;
 
 import pro.savel.kafka.admin.requests.AdminRequest;
 
-public interface AdminOffsetRequest extends AdminRequest {
+public interface AdminOffsetRequest extends AdminRequest
+{
 }

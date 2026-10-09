@@ -21,8 +21,8 @@ import org.apache.kafka.common.acl.AclOperation;
 import pro.savel.kafka.common.contract.Node;
 
 @Getter
-public class AdminDescribeClusterResponse implements AdminResponse {
-
+public class AdminDescribeClusterResponse implements AdminResponse
+{
     private String clusterId;
 
     @Deprecated
@@ -32,14 +32,17 @@ public class AdminDescribeClusterResponse implements AdminResponse {
     private Collection<Node> nodes;
     private Collection<String> authorizedOperations;
 
-    private AdminDescribeClusterResponse() {}
+    private AdminDescribeClusterResponse()
+    {
+    }
 
     public static AdminDescribeClusterResponse of(
         String clusterId,
         org.apache.kafka.common.Node controller,
         Collection<org.apache.kafka.common.Node> nodes,
         Collection<AclOperation> authorizedOperations
-    ) {
+    )
+    {
         var result = new AdminDescribeClusterResponse();
         result.clusterId = clusterId;
         result.controller = Node.of(controller);

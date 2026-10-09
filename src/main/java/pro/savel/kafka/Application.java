@@ -55,8 +55,7 @@ public class Application
         FutureTask<Void> shutdownTask = null;
         Thread shutdownHook = null;
 
-        try
-        {
+        try {
             initializer.initialize();
 
             var bootstrap = new ServerBootstrap();
@@ -80,20 +79,15 @@ public class Application
             shutdownHook = new Thread(task, "kafka-gateway-shutdown");
             Runtime.getRuntime().addShutdownHook(shutdownHook);
             channel.closeFuture().sync();
-        }
-        finally
-        {
+        } finally {
             if (shutdownTask != null)
                 awaitShutdown(shutdownTask);
             else
                 shutdown(null, initializer, bossGroup, workerGroup, shutdownTimeout);
             if (shutdownHook != null)
-                try
-                {
+                try {
                     Runtime.getRuntime().removeShutdownHook(shutdownHook);
-                }
-                catch (IllegalStateException ignored)
-                {
+                } catch (IllegalStateException ignored) {
                     // JVM shutdown is already in progress.
                 }
         }
@@ -110,7 +104,8 @@ public class Application
             channel.close();
     }
 
-    private static void awaitShutdown(FutureTask<Void> shutdownTask) {
+    private static void awaitShutdown(FutureTask<Void> shutdownTask)
+    {
         shutdownTask.run();
         try {
             shutdownTask.get();
@@ -122,7 +117,8 @@ public class Application
     }
 
     private static void shutdown(Channel serverChannel, ServerInitializer initializer,
-                                 EventLoopGroup bossGroup, EventLoopGroup workerGroup, Duration timeout) {
+                                 EventLoopGroup bossGroup, EventLoopGroup workerGroup, Duration timeout)
+    {
         var startedAt = System.nanoTime();
         var deadline = ShutdownDeadline.after(timeout);
         logger.info("Server is shutting down...");
@@ -139,7 +135,8 @@ public class Application
                     TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startedAt));
     }
 
-    private static void runShutdownStep(Runnable step) {
+    private static void runShutdownStep(Runnable step)
+    {
         try {
             step.run();
         } catch (Throwable e) {
@@ -147,12 +144,14 @@ public class Application
         }
     }
 
-    private static void awaitClose(Future<?> future, ShutdownDeadline deadline, String what) {
+    private static void awaitClose(Future<?> future, ShutdownDeadline deadline, String what)
+    {
         if (future != null && !future.awaitUninterruptibly(deadline.remainingNanos(), TimeUnit.NANOSECONDS))
             logger.warn("Timed out waiting for {}.", what);
     }
 
-    private static void shutdownEventLoops(ShutdownDeadline deadline, EventLoopGroup... groups) {
+    private static void shutdownEventLoops(ShutdownDeadline deadline, EventLoopGroup... groups)
+    {
         var terminationFutures = Arrays.stream(groups)
                 .map(group -> group.shutdownGracefully(
                         0, Math.max(1, deadline.remainingNanos()), TimeUnit.NANOSECONDS))
@@ -161,7 +160,8 @@ public class Application
             awaitClose(terminationFuture, deadline, "a Netty event loop group to terminate");
     }
 
-    private static Transport selectTransport(boolean epollEnabled) {
+    private static Transport selectTransport(boolean epollEnabled)
+    {
         if (epollEnabled && isLinux()) {
             if (Epoll.isAvailable())
                 return new Transport(EpollIoHandler.newFactory(), EpollServerSocketChannel.class, "epoll");
@@ -170,7 +170,8 @@ public class Application
         return new Transport(NioIoHandler.newFactory(), NioServerSocketChannel.class, "NIO");
     }
 
-    private static boolean isLinux() {
+    private static boolean isLinux()
+    {
         // Locale.ROOT: os.name is a platform string, and a Turkish default locale would fold
         // "Linux" to "lınux" with dotless i, silently costing the epoll transport.
         return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("linux");
@@ -179,6 +180,7 @@ public class Application
     private record Transport(
             IoHandlerFactory ioHandlerFactory,
             Class<? extends ServerChannel> serverChannelClass,
-            String name) {
+            String name)
+    {
     }
 }

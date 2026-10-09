@@ -31,17 +31,19 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-public class ConsumerRequestProcessor extends AbstractRequestProcessor {
-
+public class ConsumerRequestProcessor extends AbstractRequestProcessor
+{
     private final ConsumerProvider provider;
 
-    public ConsumerRequestProcessor(BlockingTaskExecutor blockingTaskExecutor, ConsumerProvider provider) {
+    public ConsumerRequestProcessor(BlockingTaskExecutor blockingTaskExecutor, ConsumerProvider provider)
+    {
         super("consumer", ConsumerRequest.class, blockingTaskExecutor);
         this.provider = provider;
     }
 
     @Override
-    protected boolean handleSpecificError(ChannelHandlerContext ctx, Throwable error) {
+    protected boolean handleSpecificError(ChannelHandlerContext ctx, Throwable error)
+    {
         if (error instanceof InvalidOffsetException e) {
             HttpUtils.writeConflictAndClose(ctx, Utils.combineErrorMessage(e));
             return true;
@@ -55,7 +57,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    protected void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         switch (requestBearer.request()) {
             case ConsumerPollRequest ignored -> processPoll(ctx, requestBearer);
             case ConsumerCommitRequest ignored -> processCommit(ctx, requestBearer);
@@ -86,14 +89,16 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
 
     // region Management
 
-    private void processList(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processList(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var wrappers = provider.getItems();
         var response = ConsumerListResponse.of(wrappers);
         var responseBearer = new ConsumerResponseBearer(requestBearer, HttpResponseStatus.OK, response);
         ctx.writeAndFlush(responseBearer);
     }
 
-    private void processCreate(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreate(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerCreateRequest) requestBearer.request();
         var owner = ctx.channel().attr(NettyAttributes.USERNAME).get();
         execute(ctx, () -> {
@@ -104,7 +109,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processRemove(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processRemove(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerReleaseRequest) requestBearer.request();
         execute(ctx, () -> {
             provider.removeConsumer(request.getConsumerId(), request.getToken());
@@ -112,7 +118,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processTouch(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processTouch(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerTouchRequest) requestBearer.request();
         var wrapper = provider.getConsumer(request.getConsumerId(), request.getToken());
         wrapper.touch();
@@ -124,7 +131,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
 
     // region Consumer
 
-    private void processPoll(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processPoll(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerPollRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -134,7 +142,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processCommit(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCommit(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerCommitRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -143,7 +152,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processAssign(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processAssign(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerAssignRequest) requestBearer.request();
         var assignment = CommonRequestMapper.mapPartitions(request.getPartitions());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -153,7 +163,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetAssignment(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetAssignment(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetAssignmentRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -163,7 +174,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processSeek(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processSeek(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerSeekRequest) requestBearer.request();
         var topicPartition = new TopicPartition(request.getTopic(), request.getPartition());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -173,7 +185,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processSeekToBeginning(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processSeekToBeginning(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerSeekToBeginningRequest) requestBearer.request();
         var partitions = CommonRequestMapper.mapPartitions(request.getPartitions());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -183,7 +196,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processSeekToEnd(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processSeekToEnd(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerSeekToEndRequest) requestBearer.request();
         var partitions = CommonRequestMapper.mapPartitions(request.getPartitions());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -193,7 +207,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processSubscribe(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processSubscribe(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerSubscribeRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -208,7 +223,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
     }
 
     private static void subscribeToPattern(org.apache.kafka.clients.consumer.Consumer<byte[], byte[]> consumer,
-                                           String pattern) {
+                                           String pattern)
+    {
         try {
             consumer.subscribe(new SubscriptionPattern(pattern));
         } catch (UnsupportedOperationException e) {
@@ -216,7 +232,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }
     }
 
-    private void processUnsubscribe(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processUnsubscribe(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerUnsubscribeRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -225,7 +242,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetSubscription(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetSubscription(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetSubscriptionRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -235,7 +253,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetPosition(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetPosition(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetPositionRequest) requestBearer.request();
         var topicPartition = new TopicPartition(request.getTopic(), request.getPartition());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -246,7 +265,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetPartitions(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetPartitions(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetPartitionsRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -257,7 +277,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
     }
 
     @Deprecated
-    private void processListPartitions(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListPartitions(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerListPartitionsRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         execute(ctx, () -> {
@@ -267,7 +288,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetGroupMetadata(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetGroupMetadata(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetGroupMetadataRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         var metadata = consumer.groupMetadata();
@@ -275,7 +297,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         ctx.writeAndFlush(new ConsumerResponseBearer(requestBearer, HttpResponseStatus.OK, response));
     }
 
-    private void processGetCommitted(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetCommitted(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetCommittedRequest) requestBearer.request();
         var partitions = CommonRequestMapper.mapPartitions(request.getPartitions());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -286,7 +309,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetBeginningOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetBeginningOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetBeginningOffsetsRequest) requestBearer.request();
         var partitions = CommonRequestMapper.mapPartitions(request.getPartitions());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -297,7 +321,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processGetEndOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processGetEndOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerGetEndOffsetsRequest) requestBearer.request();
         var partitions = CommonRequestMapper.mapPartitions(request.getPartitions());
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
@@ -308,7 +333,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
         }, ctx::writeAndFlush);
     }
 
-    private void processListTopics(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListTopics(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (ConsumerListTopicsRequest) requestBearer.request();
         var consumer = getConsumer(request.getConsumerId(), request.getToken());
         final Pattern pattern;
@@ -332,7 +358,8 @@ public class ConsumerRequestProcessor extends AbstractRequestProcessor {
 
     // endregion
 
-    private org.apache.kafka.clients.consumer.Consumer<byte[], byte[]> getConsumer(String id, String token) {
+    private org.apache.kafka.clients.consumer.Consumer<byte[], byte[]> getConsumer(String id, String token)
+    {
         var wrapper = provider.getConsumer(id, token);
         wrapper.touch();
         return wrapper.getConsumer();

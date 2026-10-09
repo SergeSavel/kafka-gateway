@@ -40,24 +40,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ConsumerRequestDecoderTest {
-
+class ConsumerRequestDecoderTest
+{
     private static final int READ_TIMEOUT_SECONDS = 300;
     private static final long LIMIT_MS = READ_TIMEOUT_SECONDS * 1000L;
 
     private EmbeddedChannel channel;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         channel = new EmbeddedChannel(decoder(READ_TIMEOUT_SECONDS));
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.finishAndReleaseAll();
     }
 
-    private static ConsumerRequestDecoder decoder(int maxPollTimeoutSeconds) {
+    private static ConsumerRequestDecoder decoder(int maxPollTimeoutSeconds)
+    {
         var objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
@@ -70,7 +73,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_timeoutAboveLimit_returnsBadRequest() {
+    void decodePoll_timeoutAboveLimit_returnsBadRequest()
+    {
         assertFalse(channel.writeInbound(pollRequest(LIMIT_MS + 1)));
 
         FullHttpResponse response = channel.readOutbound();
@@ -79,7 +83,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_timeoutAtLimit_passesRequest() {
+    void decodePoll_timeoutAtLimit_passesRequest()
+    {
         assertTrue(channel.writeInbound(pollRequest(LIMIT_MS)));
 
         RequestBearer bearer = channel.readInbound();
@@ -88,7 +93,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_limitFollowsConfiguredReadTimeout() {
+    void decodePoll_limitFollowsConfiguredReadTimeout()
+    {
         // A timeout the default limit would have accepted, rejected by a decoder built with a
         // lower read timeout - so the bound really tracks the setting rather than a constant.
         var strictChannel = new EmbeddedChannel(decoder(60));
@@ -105,7 +111,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_timeoutMs_passesRequest() {
+    void decodePoll_timeoutMs_passesRequest()
+    {
         assertTrue(channel.writeInbound(pollRequestWithBody(
                 "{\"consumerId\":\"consumer-1\",\"token\":\"token-1\",\"timeoutMs\":1000}")));
 
@@ -115,7 +122,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_timeoutMsAboveLimit_returnsBadRequest() {
+    void decodePoll_timeoutMsAboveLimit_returnsBadRequest()
+    {
         assertFalse(channel.writeInbound(pollRequestWithBody(
                 "{\"consumerId\":\"consumer-1\",\"token\":\"token-1\",\"timeoutMs\":" + (LIMIT_MS + 1) + "}")));
 
@@ -125,7 +133,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_bothTimeoutFields_timeoutMsWins() {
+    void decodePoll_bothTimeoutFields_timeoutMsWins()
+    {
         assertTrue(channel.writeInbound(pollRequestWithBody(
                 "{\"consumerId\":\"consumer-1\",\"token\":\"token-1\",\"timeout\":5000,\"timeoutMs\":1000}")));
 
@@ -135,7 +144,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_deprecatedTimeoutZero_isSpecifiedNotAbsent() {
+    void decodePoll_deprecatedTimeoutZero_isSpecifiedNotAbsent()
+    {
         // Zero is a legitimate non-blocking poll, and it is what a primitive-typed field would have
         // conflated with "not set" - the deprecated field must still count as present.
         assertTrue(channel.writeInbound(pollRequestWithBody(
@@ -147,7 +157,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_timeoutMsZero_winsOverDeprecatedTimeout() {
+    void decodePoll_timeoutMsZero_winsOverDeprecatedTimeout()
+    {
         // The other branch of the same rule: a zero timeoutMs must take precedence rather than be
         // skipped as if unset, which would silently fall back to the deprecated field.
         assertTrue(channel.writeInbound(pollRequestWithBody(
@@ -159,7 +170,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decodePoll_noTimeout_returnsBadRequest() {
+    void decodePoll_noTimeout_returnsBadRequest()
+    {
         assertFalse(channel.writeInbound(pollRequestWithBody(
                 "{\"consumerId\":\"consumer-1\",\"token\":\"token-1\"}")));
 
@@ -169,7 +181,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost() {
+    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost()
+    {
         assertFalse(channel.writeInbound(
                 new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/consumer/poll")));
 
@@ -180,7 +193,8 @@ class ConsumerRequestDecoderTest {
     }
 
     @Test
-    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet() {
+    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet()
+    {
         assertFalse(channel.writeInbound(
                 new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/consumer")));
 
@@ -190,11 +204,13 @@ class ConsumerRequestDecoderTest {
         response.release();
     }
 
-    private static FullHttpRequest pollRequest(long timeout) {
+    private static FullHttpRequest pollRequest(long timeout)
+    {
         return pollRequestWithBody("{\"consumerId\":\"consumer-1\",\"token\":\"token-1\",\"timeout\":" + timeout + "}");
     }
 
-    private static FullHttpRequest pollRequestWithBody(String bodyJson) {
+    private static FullHttpRequest pollRequestWithBody(String bodyJson)
+    {
         var body = Unpooled.copiedBuffer(bodyJson, StandardCharsets.UTF_8);
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/consumer/poll", body);
         request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");

@@ -20,13 +20,15 @@ import pro.savel.kafka.producer.ProducerWrapper;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ProducerListResponse extends ArrayList<ProducerListResponse.ProducerListing> implements ProducerResponse {
-
-    private ProducerListResponse(int initialCapacity) {
+public class ProducerListResponse extends ArrayList<ProducerListResponse.ProducerListing> implements ProducerResponse
+{
+    private ProducerListResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ProducerListResponse of(Collection<ProducerWrapper> source) {
+    public static ProducerListResponse of(Collection<ProducerWrapper> source)
+    {
         if (source == null)
             return null;
         var result = new ProducerListResponse(source.size());
@@ -35,18 +37,20 @@ public class ProducerListResponse extends ArrayList<ProducerListResponse.Produce
     }
 
     @Getter
-    public static class ProducerListing {
-
+    public static class ProducerListing
+    {
         private String id;
         private String name;
         private String owner;
         private String username;
         private long expiresAt;
 
-        private ProducerListing() {
+        private ProducerListing()
+        {
         }
 
-        private static ProducerListing of(ProducerWrapper source) {
+        private static ProducerListing of(ProducerWrapper source)
+        {
             if (source == null)
                 return null;
             var result = new ProducerListing();

@@ -21,13 +21,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public class ConsumerTopicsResponse extends ArrayList<ConsumerTopicsResponse.TopicInfo> implements ConsumerResponse {
-
-    private ConsumerTopicsResponse(int initialCapacity) {
+public class ConsumerTopicsResponse extends ArrayList<ConsumerTopicsResponse.TopicInfo> implements ConsumerResponse
+{
+    private ConsumerTopicsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ConsumerTopicsResponse of(Map<String, List<org.apache.kafka.common.PartitionInfo>> source) {
+    public static ConsumerTopicsResponse of(Map<String, List<org.apache.kafka.common.PartitionInfo>> source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerTopicsResponse(source.size());
@@ -42,14 +44,16 @@ public class ConsumerTopicsResponse extends ArrayList<ConsumerTopicsResponse.Top
     }
 
     @Getter
-    public static class PartitionInfo {
-
+    public static class PartitionInfo
+    {
         private int partition;
 
-        private PartitionInfo() {
+        private PartitionInfo()
+        {
         }
 
-        private static PartitionInfo of(org.apache.kafka.common.PartitionInfo source) {
+        private static PartitionInfo of(org.apache.kafka.common.PartitionInfo source)
+        {
             if (source == null)
                 return null;
             var result = new PartitionInfo();
@@ -59,12 +63,13 @@ public class ConsumerTopicsResponse extends ArrayList<ConsumerTopicsResponse.Top
     }
 
     @Getter
-    public static class TopicInfo {
-
+    public static class TopicInfo
+    {
         private String topic;
         private Collection<PartitionInfo> partitions;
 
-        private TopicInfo() {
+        private TopicInfo()
+        {
         }
     }
 }

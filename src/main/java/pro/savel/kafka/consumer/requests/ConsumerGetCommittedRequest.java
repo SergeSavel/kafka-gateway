@@ -23,7 +23,8 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.Collection;
 
 @Data
-public class ConsumerGetCommittedRequest implements ConsumerRequest {
+public class ConsumerGetCommittedRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

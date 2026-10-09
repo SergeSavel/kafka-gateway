@@ -23,7 +23,8 @@ import lombok.Data;
 import java.util.Properties;
 
 @Data
-public class ProducerCreateRequest implements ProducerRequest {
+public class ProducerCreateRequest implements ProducerRequest
+{
     @NotBlank
     private String name;
     @NotEmpty

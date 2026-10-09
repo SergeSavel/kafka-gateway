@@ -25,12 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ChannelHandler.Sharable
-public class DefaultInboundHandler extends ChannelInboundHandlerAdapter {
-
+public class DefaultInboundHandler extends ChannelInboundHandlerAdapter
+{
     private static final Logger logger = LoggerFactory.getLogger(DefaultInboundHandler.class);
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         try {
             if (msg instanceof HttpContent) {
                 // Leftover content of a request already handled or rejected upstream.
@@ -46,7 +47,8 @@ public class DefaultInboundHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+    {
         // A response for the current request may already be partially written (e.g. a chunked
         // consumer/poll body). Writing a fresh 408/504 here would land after, or interleaved with,
         // those bytes and corrupt the stream, which the client sees as a truncated response. Just

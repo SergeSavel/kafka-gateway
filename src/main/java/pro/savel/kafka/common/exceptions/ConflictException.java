@@ -16,18 +16,21 @@ package pro.savel.kafka.common.exceptions;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class ConflictException extends HttpStatusException {
-
-    public ConflictException(String message, Throwable cause) {
+public class ConflictException extends HttpStatusException
+{
+    public ConflictException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
-    public ConflictException(String message) {
+    public ConflictException(String message)
+    {
         super(message);
     }
 
     @Override
-    public HttpResponseStatus status() {
+    public HttpResponseStatus status()
+    {
         return HttpResponseStatus.CONFLICT;
     }
 }

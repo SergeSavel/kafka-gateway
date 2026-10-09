@@ -24,7 +24,8 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.Collection;
 
 @Data
-public class AdminDeleteConsumerGroupOffsetsRequest implements AdminGroupRequest {
+public class AdminDeleteConsumerGroupOffsetsRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

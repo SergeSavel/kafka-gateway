@@ -16,5 +16,6 @@ package pro.savel.kafka.consumer.responses;
 
 import pro.savel.kafka.common.contract.Response;
 
-public interface ConsumerResponse extends Response {
+public interface ConsumerResponse extends Response
+{
 }

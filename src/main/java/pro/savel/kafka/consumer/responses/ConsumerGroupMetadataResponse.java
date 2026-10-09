@@ -18,17 +18,19 @@ import lombok.Getter;
 import org.apache.kafka.clients.consumer.ConsumerGroupMetadata;
 
 @Getter
-public class ConsumerGroupMetadataResponse implements ConsumerResponse {
-
+public class ConsumerGroupMetadataResponse implements ConsumerResponse
+{
     private String groupId;
     private int generationId;
     private String memberId;
     private String groupInstanceId;
 
-    private ConsumerGroupMetadataResponse() {
+    private ConsumerGroupMetadataResponse()
+    {
     }
 
-    public static ConsumerGroupMetadataResponse of(ConsumerGroupMetadata source) {
+    public static ConsumerGroupMetadataResponse of(ConsumerGroupMetadata source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerGroupMetadataResponse();

@@ -40,10 +40,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class HttpVersionHandlerTest {
-
+class HttpVersionHandlerTest
+{
     @Test
-    void http11Request_passesThrough() {
+    void http11Request_passesThrough()
+    {
         var channel = new EmbeddedChannel(new HttpVersionHandler());
         var request = request(HttpVersion.HTTP_1_1);
 
@@ -53,7 +54,8 @@ class HttpVersionHandlerTest {
     }
 
     @Test
-    void http10Request_returns505() {
+    void http10Request_returns505()
+    {
         var channel = new EmbeddedChannel(new HttpVersionHandler());
         var request = request(HttpVersion.HTTP_1_0);
 
@@ -63,7 +65,8 @@ class HttpVersionHandlerTest {
     }
 
     @Test
-    void rejectedRequestBody_discardedUntilLastContent() throws Exception {
+    void rejectedRequestBody_discardedUntilLastContent() throws Exception
+    {
         var handler = new HttpVersionHandler();
         var ctx = mock(ChannelHandlerContext.class);
         when(ctx.writeAndFlush(any())).thenReturn(mock(ChannelFuture.class));
@@ -86,7 +89,8 @@ class HttpVersionHandlerTest {
     }
 
     @Test
-    void rejectedBodylessRequest_emptyLastContentDiscarded() throws Exception {
+    void rejectedBodylessRequest_emptyLastContentDiscarded() throws Exception
+    {
         var handler = new HttpVersionHandler();
         var ctx = mock(ChannelHandlerContext.class);
         when(ctx.writeAndFlush(any())).thenReturn(mock(ChannelFuture.class));
@@ -100,11 +104,13 @@ class HttpVersionHandlerTest {
         verify(ctx).fireChannelRead(nextRequest);
     }
 
-    private static HttpRequest request(HttpVersion version) {
+    private static HttpRequest request(HttpVersion version)
+    {
         return new DefaultHttpRequest(version, HttpMethod.POST, "/");
     }
 
-    private static void assertResponseStatus(EmbeddedChannel channel, HttpResponseStatus expectedStatus) {
+    private static void assertResponseStatus(EmbeddedChannel channel, HttpResponseStatus expectedStatus)
+    {
         var response = channel.<FullHttpResponse>readOutbound();
         assertEquals(expectedStatus, response.status());
         ReferenceCountUtil.release(response);

@@ -16,25 +16,29 @@ package pro.savel.kafka.common;
 
 import java.time.Duration;
 
-public final class ShutdownDeadline {
-
+public final class ShutdownDeadline
+{
     private final long deadlineNanos;
 
-    private ShutdownDeadline(Duration timeout) {
+    private ShutdownDeadline(Duration timeout)
+    {
         if (timeout == null || timeout.isNegative() || timeout.isZero())
             throw new IllegalArgumentException("timeout must be greater than 0");
         deadlineNanos = System.nanoTime() + timeout.toNanos();
     }
 
-    public static ShutdownDeadline after(Duration timeout) {
+    public static ShutdownDeadline after(Duration timeout)
+    {
         return new ShutdownDeadline(timeout);
     }
 
-    public long remainingNanos() {
+    public long remainingNanos()
+    {
         return Math.max(0, deadlineNanos - System.nanoTime());
     }
 
-    public boolean isExpired() {
+    public boolean isExpired()
+    {
         return remainingNanos() == 0;
     }
 }

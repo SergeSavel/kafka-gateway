@@ -30,16 +30,18 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  * DefaultInboundHandler's ReadTimeoutException/WriteTimeoutException handling further down the pipeline.
  * A swallowed exception would leave the channel open.
  */
-class PipelineExceptionPropagationTest {
-
-    private EmbeddedChannel newChannel() {
+class PipelineExceptionPropagationTest
+{
+    private EmbeddedChannel newChannel()
+    {
         var processor = new AdminRequestProcessor(new SynchronousBlockingTaskExecutor(),
                 new AdminProvider(config -> null));
         return new EmbeddedChannel(processor, new DefaultInboundHandler());
     }
 
     @Test
-    void readTimeout_propagatesPastProcessor_toDefaultInboundHandler() {
+    void readTimeout_propagatesPastProcessor_toDefaultInboundHandler()
+    {
         var channel = newChannel();
 
         channel.pipeline().fireExceptionCaught(ReadTimeoutException.INSTANCE);
@@ -50,7 +52,8 @@ class PipelineExceptionPropagationTest {
     }
 
     @Test
-    void writeTimeout_propagatesPastProcessor_toDefaultInboundHandler() {
+    void writeTimeout_propagatesPastProcessor_toDefaultInboundHandler()
+    {
         var channel = newChannel();
 
         channel.pipeline().fireExceptionCaught(WriteTimeoutException.INSTANCE);

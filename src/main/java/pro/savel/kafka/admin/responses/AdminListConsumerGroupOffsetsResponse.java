@@ -20,14 +20,16 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class AdminListConsumerGroupOffsetsResponse
-        extends ArrayList<AdminListConsumerGroupOffsetsResponse.TopicPartitionOffsetMetadata> implements AdminResponse {
-
-    private AdminListConsumerGroupOffsetsResponse(int initialCapacity) {
+        extends ArrayList<AdminListConsumerGroupOffsetsResponse.TopicPartitionOffsetMetadata> implements AdminResponse
+{
+    private AdminListConsumerGroupOffsetsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
     public static AdminListConsumerGroupOffsetsResponse of(
-            Map<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.consumer.OffsetAndMetadata> source) {
+            Map<org.apache.kafka.common.TopicPartition, org.apache.kafka.clients.consumer.OffsetAndMetadata> source)
+    {
         if (source == null)
             return null;
         var result = new AdminListConsumerGroupOffsetsResponse(source.size());
@@ -37,19 +39,21 @@ public class AdminListConsumerGroupOffsetsResponse
     }
 
     @Getter
-    public static class TopicPartitionOffsetMetadata {
-
+    public static class TopicPartitionOffsetMetadata
+    {
         private String topic;
         private Integer partition;
         private Long offset;
         private Integer leaderEpoch;
         private String metadata;
 
-        private TopicPartitionOffsetMetadata() {
+        private TopicPartitionOffsetMetadata()
+        {
         }
 
         private static TopicPartitionOffsetMetadata of(org.apache.kafka.common.TopicPartition topicPartition,
-                org.apache.kafka.clients.consumer.OffsetAndMetadata offsetMetadata) {
+                org.apache.kafka.clients.consumer.OffsetAndMetadata offsetMetadata)
+        {
             if (topicPartition == null && offsetMetadata == null)
                 return null;
             var result = new TopicPartitionOffsetMetadata();

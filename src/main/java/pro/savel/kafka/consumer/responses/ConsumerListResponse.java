@@ -20,13 +20,15 @@ import pro.savel.kafka.consumer.ConsumerWrapper;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ConsumerListResponse extends ArrayList<ConsumerListResponse.ConsumerListing> implements ConsumerResponse {
-
-    private ConsumerListResponse(int initialCapacity) {
+public class ConsumerListResponse extends ArrayList<ConsumerListResponse.ConsumerListing> implements ConsumerResponse
+{
+    private ConsumerListResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ConsumerListResponse of(Collection<ConsumerWrapper> source) {
+    public static ConsumerListResponse of(Collection<ConsumerWrapper> source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerListResponse(source.size());
@@ -35,18 +37,20 @@ public class ConsumerListResponse extends ArrayList<ConsumerListResponse.Consume
     }
 
     @Getter
-    public static class ConsumerListing {
-
+    public static class ConsumerListing
+    {
         private String id;
         private String name;
         private String owner;
         private String username;
         private long expiresAt;
 
-        private ConsumerListing() {
+        private ConsumerListing()
+        {
         }
 
-        private static ConsumerListing of(ConsumerWrapper source) {
+        private static ConsumerListing of(ConsumerWrapper source)
+        {
             if (source == null)
                 return null;
             var result = new ConsumerListing();

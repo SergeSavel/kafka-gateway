@@ -22,13 +22,15 @@ import java.util.Collection;
 import java.util.Map;
 
 public class AdminDescribeUserScramCredentialsResponse extends
-        ArrayList<AdminDescribeUserScramCredentialsResponse.ScramCredentialDescription> implements AdminResponse {
-
-    private AdminDescribeUserScramCredentialsResponse(int initialCapacity) {
+        ArrayList<AdminDescribeUserScramCredentialsResponse.ScramCredentialDescription> implements AdminResponse
+{
+    private AdminDescribeUserScramCredentialsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminDescribeUserScramCredentialsResponse of(Map<String, UserScramCredentialsDescription> source) {
+    public static AdminDescribeUserScramCredentialsResponse of(Map<String, UserScramCredentialsDescription> source)
+    {
         if (source == null)
             return null;
         var sourceDescriptions = source.values();
@@ -38,15 +40,17 @@ public class AdminDescribeUserScramCredentialsResponse extends
     }
 
     @Getter
-    public static class ScramCredentialDescription {
-
+    public static class ScramCredentialDescription
+    {
         private String name;
         private Collection<ScramCredentialInfo> credentialInfos;
 
-        private ScramCredentialDescription() {
+        private ScramCredentialDescription()
+        {
         }
 
-        public static ScramCredentialDescription of(UserScramCredentialsDescription source) {
+        public static ScramCredentialDescription of(UserScramCredentialsDescription source)
+        {
             if (source == null)
                 return null;
             var result = new ScramCredentialDescription();
@@ -57,15 +61,17 @@ public class AdminDescribeUserScramCredentialsResponse extends
     }
 
     @Getter
-    public static class ScramCredentialInfo {
-
+    public static class ScramCredentialInfo
+    {
         private String scramMechanism;
         private int iterations;
 
-        private ScramCredentialInfo() {
+        private ScramCredentialInfo()
+        {
         }
 
-        public static ScramCredentialInfo of(org.apache.kafka.clients.admin.ScramCredentialInfo source) {
+        public static ScramCredentialInfo of(org.apache.kafka.clients.admin.ScramCredentialInfo source)
+        {
             if (source == null)
                 return null;
             var result = new ScramCredentialInfo();
@@ -75,7 +81,8 @@ public class AdminDescribeUserScramCredentialsResponse extends
         }
 
         private static ArrayList<ScramCredentialInfo> of(
-                Collection<org.apache.kafka.clients.admin.ScramCredentialInfo> source) {
+                Collection<org.apache.kafka.clients.admin.ScramCredentialInfo> source)
+        {
             if (source == null)
                 return null;
             var result = new ArrayList<ScramCredentialInfo>(source.size());

@@ -22,7 +22,8 @@ import lombok.Data;
 import pro.savel.kafka.common.contract.TopicPartition;
 
 @Data
-public class AdminAbortTransactionRequest implements AdminProducerRequest {
+public class AdminAbortTransactionRequest implements AdminProducerRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

@@ -20,48 +20,55 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HttpStatusExceptionTest {
-
+class HttpStatusExceptionTest
+{
     @Test
-    void badRequest_returns400() {
+    void badRequest_returns400()
+    {
         var ex = new BadRequestException("bad");
         assertEquals(HttpResponseStatus.BAD_REQUEST, ex.status());
         assertEquals("bad", ex.getMessage());
     }
 
     @Test
-    void notFound_returns404() {
+    void notFound_returns404()
+    {
         var ex = new NotFoundException("not found");
         assertEquals(HttpResponseStatus.NOT_FOUND, ex.status());
     }
 
     @Test
-    void methodNotAllowed_returns405() {
+    void methodNotAllowed_returns405()
+    {
         var ex = new MethodNotAllowedException("method", HttpMethod.POST);
         assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, ex.status());
         assertEquals(HttpMethod.POST, ex.allowedMethod());
     }
 
     @Test
-    void unauthenticated_returns401() {
+    void unauthenticated_returns401()
+    {
         var ex = new UnauthenticatedException("unauth");
         assertEquals(HttpResponseStatus.UNAUTHORIZED, ex.status());
     }
 
     @Test
-    void unauthorized_returns403() {
+    void unauthorized_returns403()
+    {
         var ex = new UnauthorizedException("forbidden");
         assertEquals(HttpResponseStatus.FORBIDDEN, ex.status());
     }
 
     @Test
-    void conflict_returns409() {
+    void conflict_returns409()
+    {
         var ex = new ConflictException("conflict");
         assertEquals(HttpResponseStatus.CONFLICT, ex.status());
     }
 
     @Test
-    void exceptionWithCause_preservesCause() {
+    void exceptionWithCause_preservesCause()
+    {
         var cause = new RuntimeException("root");
         var ex = new BadRequestException("bad", cause);
         assertEquals(cause, ex.getCause());

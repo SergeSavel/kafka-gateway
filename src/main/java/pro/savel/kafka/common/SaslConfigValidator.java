@@ -23,14 +23,15 @@ import pro.savel.kafka.common.exceptions.BadRequestException;
 import java.util.Map;
 import java.util.Properties;
 
-public abstract class SaslConfigValidator {
-
+public abstract class SaslConfigValidator
+{
     private static final String SCRAM_SHA_256 = "SCRAM-SHA-256";
     private static final String SCRAM_SHA_512 = "SCRAM-SHA-512";
     private static final String USERNAME_OPTION = "username";
     private static final String PASSWORD_OPTION = "password";
 
-    public static void rejectEmptyScramCredentials(Properties config) {
+    public static void rejectEmptyScramCredentials(Properties config)
+    {
         var mechanism = config.getProperty(SaslConfigs.SASL_MECHANISM);
         if (!SCRAM_SHA_256.equalsIgnoreCase(mechanism) && !SCRAM_SHA_512.equalsIgnoreCase(mechanism))
             return;
@@ -56,7 +57,8 @@ public abstract class SaslConfigValidator {
     /**
      * The username configured in sasl.jaas.config, or null when absent or unparseable.
      */
-    public static String usernameFromJaasConfig(Properties config) {
+    public static String usernameFromJaasConfig(Properties config)
+    {
         var jaasConfig = config.getProperty(SaslConfigs.SASL_JAAS_CONFIG);
         if (jaasConfig == null)
             return null;

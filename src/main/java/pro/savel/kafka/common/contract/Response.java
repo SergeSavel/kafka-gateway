@@ -14,5 +14,6 @@
 
 package pro.savel.kafka.common.contract;
 
-public interface Response {
+public interface Response
+{
 }

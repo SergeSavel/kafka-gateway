@@ -19,10 +19,11 @@ import pro.savel.kafka.consumer.responses.*;
 import java.util.*;
 
 @Deprecated
-public class ConsumerResponseMapper {
-
+public class ConsumerResponseMapper
+{
     @Deprecated
-    public static ConsumerListPartitionsResponse mapPartitionsResponse(Collection<org.apache.kafka.common.PartitionInfo> source) {
+    public static ConsumerListPartitionsResponse mapPartitionsResponse(Collection<org.apache.kafka.common.PartitionInfo> source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerListPartitionsResponse();

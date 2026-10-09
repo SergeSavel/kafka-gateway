@@ -24,14 +24,16 @@ import pro.savel.kafka.producer.responses.ProducerSendResponse;
 
 import java.io.IOException;
 
-public class ProducerResponseSerializer {
-
+public class ProducerResponseSerializer
+{
     public static ByteBuf serializeJson(ObjectMapper objectMapper, ByteBufAllocator allocator,
-                                        ProducerResponse response) throws IOException {
+                                        ProducerResponse response) throws IOException
+    {
         return JsonUtils.serializeJson(objectMapper, allocator, response);
     }
 
-    public static ByteBuf serializeBinary(ByteBufAllocator allocator, ProducerResponse response) {
+    public static ByteBuf serializeBinary(ByteBufAllocator allocator, ProducerResponse response)
+    {
         if (response == null)
             return null;
         var responseClass = response.getClass();
@@ -41,7 +43,8 @@ public class ProducerResponseSerializer {
             throw new IllegalArgumentException("Response class " + responseClass + " not supported");
     }
 
-    private static ByteBuf serializeSend(ByteBufAllocator allocator, ProducerSendResponse response) {
+    private static ByteBuf serializeSend(ByteBufAllocator allocator, ProducerSendResponse response)
+    {
         var topicLength = ByteBufUtil.utf8Bytes(response.getTopic());
         var capacity = Short.BYTES + Integer.BYTES + topicLength + Integer.BYTES
                 + Long.BYTES + Long.BYTES + Integer.BYTES + Integer.BYTES;
@@ -61,7 +64,8 @@ public class ProducerResponseSerializer {
         }
     }
 
-    private static void writeString(ByteBuf buf, String value) {
+    private static void writeString(ByteBuf buf, String value)
+    {
         var length = ByteBufUtil.utf8Bytes(value);
         buf.writeInt(length);
         ByteBufUtil.writeUtf8(buf, value);

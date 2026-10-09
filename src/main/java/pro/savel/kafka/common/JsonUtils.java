@@ -25,10 +25,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public abstract class JsonUtils {
-
+public abstract class JsonUtils
+{
     public static ByteBuf serializeJson(ObjectMapper objectMapper, ByteBufAllocator allocator, Object value)
-            throws IOException {
+            throws IOException
+    {
         if (value == null)
             return null;
         var buffer = allocator.buffer();
@@ -44,7 +45,8 @@ public abstract class JsonUtils {
         }
     }
 
-    public static <T> T parseJson(ObjectMapper objectMapper, ByteBuf byteBuf, Class<T> clazz) throws BadRequestException {
+    public static <T> T parseJson(ObjectMapper objectMapper, ByteBuf byteBuf, Class<T> clazz) throws BadRequestException
+    {
         T result;
         try (var inputStream = new ByteBufInputStream(byteBuf)) {
             result = objectMapper.readValue((InputStream) inputStream, clazz);

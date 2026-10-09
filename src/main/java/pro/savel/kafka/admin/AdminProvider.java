@@ -23,19 +23,22 @@ import pro.savel.kafka.common.exceptions.NotFoundException;
 import java.util.Properties;
 import java.util.function.Function;
 
-public class AdminProvider extends ClientProvider<AdminWrapper> {
-
+public class AdminProvider extends ClientProvider<AdminWrapper>
+{
     private final Function<Properties, Admin> clientFactory;
 
-    public AdminProvider() {
+    public AdminProvider()
+    {
         this(Admin::create);
     }
 
-    public AdminProvider(Function<Properties, Admin> clientFactory) {
+    public AdminProvider(Function<Properties, Admin> clientFactory)
+    {
         this.clientFactory = clientFactory;
     }
 
-    public AdminWrapper createAdmin(String name, Properties config, int expirationTimeout, String owner) {
+    public AdminWrapper createAdmin(String name, Properties config, int expirationTimeout, String owner)
+    {
         SaslConfigValidator.rejectEmptyScramCredentials(config);
         var admin = clientFactory.apply(config);
         var wrapper = new AdminWrapper(name, config, admin, expirationTimeout, owner);
@@ -43,14 +46,16 @@ public class AdminProvider extends ClientProvider<AdminWrapper> {
         return wrapper;
     }
 
-    protected AdminWrapper getAdmin(String id, String token) throws NotFoundException, BadRequestException {
+    protected AdminWrapper getAdmin(String id, String token) throws NotFoundException, BadRequestException
+    {
         var wrapper = getItem(id);
         if (!wrapper.getToken().equals(token))
             throw new BadRequestException("Invalid token.", null);
         return wrapper;
     }
 
-    public void removeAdmin(String id, String token) throws BadRequestException {
+    public void removeAdmin(String id, String token) throws BadRequestException
+    {
         var wrapper = wrappers.get(id);
         if (wrapper == null)
             return;

@@ -24,10 +24,11 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class BlockingTaskExecutorTest {
-
+class BlockingTaskExecutorTest
+{
     @Test
-    void close_interruptsActiveTasks() throws InterruptedException {
+    void close_interruptsActiveTasks() throws InterruptedException
+    {
         var executor = new BlockingTaskExecutor();
         var channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
         var taskStarted = new CountDownLatch(1);

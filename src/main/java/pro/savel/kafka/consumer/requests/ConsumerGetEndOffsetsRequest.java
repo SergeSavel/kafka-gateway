@@ -23,7 +23,8 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.Collection;
 
 @Data
-public class ConsumerGetEndOffsetsRequest implements ConsumerRequest {
+public class ConsumerGetEndOffsetsRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

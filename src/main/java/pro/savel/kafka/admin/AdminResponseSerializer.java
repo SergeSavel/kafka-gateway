@@ -22,10 +22,11 @@ import pro.savel.kafka.common.JsonUtils;
 
 import java.io.IOException;
 
-public abstract class AdminResponseSerializer {
-
+public abstract class AdminResponseSerializer
+{
     public static ByteBuf serializeJson(ObjectMapper objectMapper, ByteBufAllocator allocator, AdminResponse response)
-            throws IOException {
+            throws IOException
+    {
         return JsonUtils.serializeJson(objectMapper, allocator, response);
     }
 }

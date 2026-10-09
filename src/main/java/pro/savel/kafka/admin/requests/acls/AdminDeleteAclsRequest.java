@@ -24,7 +24,8 @@ import pro.savel.kafka.admin.data.AdminAclBindingFilter;
 import java.util.Collection;
 
 @Data
-public class AdminDeleteAclsRequest implements AdminAclsRequest {
+public class AdminDeleteAclsRequest implements AdminAclsRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

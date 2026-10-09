@@ -35,15 +35,17 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class JsonRequestSizeLimitHandlerTest {
-
+class JsonRequestSizeLimitHandlerTest
+{
     @Test
-    void invalidLimit_isRejected() {
+    void invalidLimit_isRejected()
+    {
         assertThrows(IllegalArgumentException.class, () -> new JsonRequestSizeLimitHandler(0));
     }
 
     @Test
-    void jsonContentLengthAboveLimit_returns413() {
+    void jsonContentLengthAboveLimit_returns413()
+    {
         var channel = new EmbeddedChannel(new JsonRequestSizeLimitHandler(4));
         var request = request(HttpUtils.APPLICATION_JSON, 5);
 
@@ -53,7 +55,8 @@ class JsonRequestSizeLimitHandlerTest {
     }
 
     @Test
-    void jsonContentTypeWithoutSpaceInParameter_isStillLimited() {
+    void jsonContentTypeWithoutSpaceInParameter_isStillLimited()
+    {
         var channel = new EmbeddedChannel(new JsonRequestSizeLimitHandler(4));
         var request = request("application/json;charset=utf-8", 5);
 
@@ -63,7 +66,8 @@ class JsonRequestSizeLimitHandlerTest {
     }
 
     @Test
-    void chunkedJsonAboveLimit_returns413() {
+    void chunkedJsonAboveLimit_returns413()
+    {
         var channel = new EmbeddedChannel(new JsonRequestSizeLimitHandler(4));
         var request = request(HttpUtils.APPLICATION_JSON, null);
         request.headers().set(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
@@ -85,7 +89,8 @@ class JsonRequestSizeLimitHandlerTest {
     }
 
     @Test
-    void binaryRequestAboveJsonLimit_passesThrough() {
+    void binaryRequestAboveJsonLimit_passesThrough()
+    {
         var channel = new EmbeddedChannel(new JsonRequestSizeLimitHandler(4));
         var request = request(HttpUtils.APPLICATION_OCTET_STREAM, 5);
         var content = new DefaultLastHttpContent(Unpooled.wrappedBuffer(new byte[5]));
@@ -99,7 +104,8 @@ class JsonRequestSizeLimitHandlerTest {
         channel.finishAndReleaseAll();
     }
 
-    private static DefaultHttpRequest request(String contentType, Integer contentLength) {
+    private static DefaultHttpRequest request(String contentType, Integer contentLength)
+    {
         var request = new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/");
         request.headers().set(HttpHeaderNames.CONTENT_TYPE, contentType);
         if (contentLength != null)
@@ -107,7 +113,8 @@ class JsonRequestSizeLimitHandlerTest {
         return request;
     }
 
-    private static void assertResponseStatus(EmbeddedChannel channel, HttpResponseStatus expectedStatus) {
+    private static void assertResponseStatus(EmbeddedChannel channel, HttpResponseStatus expectedStatus)
+    {
         var response = channel.<FullHttpResponse>readOutbound();
         assertEquals(expectedStatus, response.status());
         ReferenceCountUtil.release(response);

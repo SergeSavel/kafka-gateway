@@ -40,15 +40,16 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ConsumerPollChunkedInputTest {
-
+class ConsumerPollChunkedInputTest
+{
     private static final int CHUNK_SIZE = 11;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
 
     @Test
-    void jsonChunks_matchExistingWireFormatAndRespectLimit() throws Exception {
+    void jsonChunks_matchExistingWireFormatAndRespectLimit() throws Exception
+    {
         var response = response();
         var expected = ConsumerResponseSerializer.serializeJson(objectMapper, allocator, response);
         var input = new ConsumerPollChunkedInput(objectMapper, response, Serde.JSON, CHUNK_SIZE);
@@ -61,7 +62,8 @@ class ConsumerPollChunkedInputTest {
     }
 
     @Test
-    void binaryChunks_matchExistingWireFormatAndRespectLimit() throws Exception {
+    void binaryChunks_matchExistingWireFormatAndRespectLimit() throws Exception
+    {
         var response = response();
         var expected = ConsumerResponseSerializer.serializeBinary(allocator, response);
         var input = new ConsumerPollChunkedInput(objectMapper, response, Serde.BINARY, CHUNK_SIZE);
@@ -74,7 +76,8 @@ class ConsumerPollChunkedInputTest {
     }
 
     @Test
-    void emptyResponses_preserveWireFormat() throws Exception {
+    void emptyResponses_preserveWireFormat() throws Exception
+    {
         var response = ConsumerPollResponse.of(new ConsumerRecords<>(Collections.emptyMap(), Collections.emptyMap()));
 
         var json = readAll(new ConsumerPollChunkedInput(objectMapper, response, Serde.JSON, 1), 1);
@@ -88,7 +91,8 @@ class ConsumerPollChunkedInputTest {
     }
 
     @Test
-    void invalidArguments_areRejected() {
+    void invalidArguments_areRejected()
+    {
         var response = response();
         assertThrows(IllegalArgumentException.class,
                 () -> new ConsumerPollChunkedInput(objectMapper, response, Serde.JSON, 0));
@@ -96,7 +100,8 @@ class ConsumerPollChunkedInputTest {
                 () -> new ConsumerPollChunkedInput(objectMapper, response, null, CHUNK_SIZE));
     }
 
-    private ByteBuf readAll(ConsumerPollChunkedInput input, int chunkSize) throws Exception {
+    private ByteBuf readAll(ConsumerPollChunkedInput input, int chunkSize) throws Exception
+    {
         var result = allocator.buffer();
         var chunks = 0;
         try {
@@ -119,7 +124,8 @@ class ConsumerPollChunkedInputTest {
         }
     }
 
-    private static ConsumerPollResponse response() {
+    private static ConsumerPollResponse response()
+    {
         var first = record("topic-1", 0, 1, "key", "value-1");
         var second = record("topic-1", 0, 2, "ключ\"", "строка\n");
         var records = new ConsumerRecords<byte[], byte[]>(
@@ -128,7 +134,8 @@ class ConsumerPollChunkedInputTest {
     }
 
     private static ConsumerRecord<byte[], byte[]> record(
-            String topic, int partition, long offset, String key, String value) {
+            String topic, int partition, long offset, String key, String value)
+    {
         var headers = new RecordHeaders(List.of(
                 new RecordHeader("header", "значение\n".getBytes(StandardCharsets.UTF_8))));
         var keyBytes = key.getBytes(StandardCharsets.UTF_8);

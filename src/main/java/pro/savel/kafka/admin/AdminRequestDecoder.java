@@ -64,8 +64,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @ChannelHandler.Sharable
-public class AdminRequestDecoder extends ChannelInboundHandlerAdapter {
-
+public class AdminRequestDecoder extends ChannelInboundHandlerAdapter
+{
     public static final String URI_PREFIX = "/admin";
     private static final Logger logger = LoggerFactory.getLogger(AdminRequestDecoder.class);
 
@@ -127,18 +127,21 @@ public class AdminRequestDecoder extends ChannelInboundHandlerAdapter {
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-    public AdminRequestDecoder(ObjectMapper objectMapper, ValidatorFactory validatorFactory) {
+    public AdminRequestDecoder(ObjectMapper objectMapper, ValidatorFactory validatorFactory)
+    {
         this.objectMapper = objectMapper;
         this.validator = validatorFactory == null ? null : validatorFactory.getValidator();
     }
 
-    private static void passBearer(ChannelHandlerContext ctx, FullHttpRequest httpRequest, AdminRequest request) {
+    private static void passBearer(ChannelHandlerContext ctx, FullHttpRequest httpRequest, AdminRequest request)
+    {
         var bearer = new RequestBearer(httpRequest, request);
         ctx.fireChannelRead(bearer);
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest httpRequest && httpRequest.uri().startsWith(URI_PREFIX)) {
             try {
                 decode(ctx, httpRequest);
@@ -157,7 +160,8 @@ public class AdminRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException, MethodNotAllowedException {
+    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException, MethodNotAllowedException
+    {
         var decoder = new QueryStringDecoder(httpRequest.uri(), StandardCharsets.UTF_8, true);
         var pathMethod = decoder.path().substring(URI_PREFIX.length());
         if (pathMethod.isEmpty()) {
@@ -174,18 +178,21 @@ public class AdminRequestDecoder extends ChannelInboundHandlerAdapter {
         decodeRequest(ctx, httpRequest, requestType);
     }
 
-    private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException {
+    private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException
+    {
         if (httpRequest.method() != method)
             throw new MethodNotAllowedException("Unsupported HTTP method.", method);
     }
 
-    private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {
+    private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest)
+    {
         var request = new AdminListRequest();
         var bearer = new RequestBearer(httpRequest, request);
         ctx.fireChannelRead(bearer);
     }
 
-    private <T extends AdminRequest> void decodeRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest, Class<T> clazz) throws BadRequestException {
+    private <T extends AdminRequest> void decodeRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest, Class<T> clazz) throws BadRequestException
+    {
         var contentType = HttpUtils.getContentType(httpRequest);
         T request;
         if (HttpUtils.isJson(contentType))

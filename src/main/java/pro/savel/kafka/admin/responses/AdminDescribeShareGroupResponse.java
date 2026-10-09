@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Getter
-public class AdminDescribeShareGroupResponse implements AdminResponse {
-
+public class AdminDescribeShareGroupResponse implements AdminResponse
+{
     private String groupId;
     private Collection<ShareMemberDescription> members;
     private String groupState;
@@ -33,10 +33,12 @@ public class AdminDescribeShareGroupResponse implements AdminResponse {
     private int targetAssignmentEpoch;
     private Collection<String> authorizedOperations;
 
-    private AdminDescribeShareGroupResponse() {
+    private AdminDescribeShareGroupResponse()
+    {
     }
 
-    public static AdminDescribeShareGroupResponse of(org.apache.kafka.clients.admin.ShareGroupDescription source) {
+    public static AdminDescribeShareGroupResponse of(org.apache.kafka.clients.admin.ShareGroupDescription source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeShareGroupResponse();
@@ -51,19 +53,21 @@ public class AdminDescribeShareGroupResponse implements AdminResponse {
     }
 
     @Getter
-    public static class ShareMemberDescription {
-
+    public static class ShareMemberDescription
+    {
         private String consumerId;
         private String clientId;
         private String host;
         private Collection<TopicPartition> assignment;
         private int memberEpoch;
 
-        private ShareMemberDescription() {
+        private ShareMemberDescription()
+        {
         }
 
         private static Collection<ShareMemberDescription> of(
-                Collection<org.apache.kafka.clients.admin.ShareMemberDescription> source) {
+                Collection<org.apache.kafka.clients.admin.ShareMemberDescription> source)
+        {
             if (source == null)
                 return null;
             var result = new ArrayList<ShareMemberDescription>(source.size());
@@ -71,7 +75,8 @@ public class AdminDescribeShareGroupResponse implements AdminResponse {
             return result;
         }
 
-        private static ShareMemberDescription of(org.apache.kafka.clients.admin.ShareMemberDescription source) {
+        private static ShareMemberDescription of(org.apache.kafka.clients.admin.ShareMemberDescription source)
+        {
             if (source == null)
                 return null;
             var result = new ShareMemberDescription();
@@ -84,7 +89,8 @@ public class AdminDescribeShareGroupResponse implements AdminResponse {
         }
 
         private static Collection<TopicPartition> mapMemberAssignment(
-                org.apache.kafka.clients.admin.ShareMemberAssignment source) {
+                org.apache.kafka.clients.admin.ShareMemberAssignment source)
+        {
             if (source == null)
                 return null;
             return TopicPartition.of(source.topicPartitions());

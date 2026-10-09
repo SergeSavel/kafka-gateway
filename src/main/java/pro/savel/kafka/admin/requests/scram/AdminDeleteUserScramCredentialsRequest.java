@@ -19,7 +19,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class AdminDeleteUserScramCredentialsRequest implements AdminScramRequest {
+public class AdminDeleteUserScramCredentialsRequest implements AdminScramRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

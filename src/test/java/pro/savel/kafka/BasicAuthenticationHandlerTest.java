@@ -30,22 +30,25 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class BasicAuthenticationHandlerTest {
-
+class BasicAuthenticationHandlerTest
+{
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static String basicAuth(String user, String password) {
+    private static String basicAuth(String user, String password)
+    {
         return "Basic " + Base64.getEncoder().encodeToString((user + ":" + password).getBytes(StandardCharsets.UTF_8));
     }
 
-    private static FullHttpRequest getRequest() {
+    private static FullHttpRequest getRequest()
+    {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test");
     }
 
 //region initialize
 
     @Test
-    void initialize_missingFile_disablesAuth() {
+    void initialize_missingFile_disablesAuth()
+    {
         var handler = new BasicAuthenticationHandler(objectMapper);
         handler.initialize("/nonexistent/users.json");
 
@@ -57,7 +60,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void initialize_validFile_loadsUsers(@TempDir Path tempDir) throws IOException {
+    void initialize_validFile_loadsUsers(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -76,7 +80,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void initialize_malformedFile_throwsException(@TempDir Path tempDir) throws IOException {
+    void initialize_malformedFile_throwsException(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, "not json");
 
@@ -89,7 +94,8 @@ class BasicAuthenticationHandlerTest {
 //region authenticate
 
     @Test
-    void authenticate_missingAuthHeader_returns401(@TempDir Path tempDir) throws IOException {
+    void authenticate_missingAuthHeader_returns401(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -105,7 +111,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_invalidPrefix_returns401(@TempDir Path tempDir) throws IOException {
+    void authenticate_invalidPrefix_returns401(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -122,7 +129,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_malformedBase64_returns401(@TempDir Path tempDir) throws IOException {
+    void authenticate_malformedBase64_returns401(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -139,7 +147,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_wrongPassword_returns401(@TempDir Path tempDir) throws IOException {
+    void authenticate_wrongPassword_returns401(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -156,7 +165,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_wrongUsername_returns401(@TempDir Path tempDir) throws IOException {
+    void authenticate_wrongUsername_returns401(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -173,7 +183,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_validCredentials_passesThrough(@TempDir Path tempDir) throws IOException {
+    void authenticate_validCredentials_passesThrough(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -190,7 +201,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_caseInsensitiveUsername_passesThrough(@TempDir Path tempDir) throws IOException {
+    void authenticate_caseInsensitiveUsername_passesThrough(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"Admin","password":"secret"}]
@@ -207,7 +219,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_caseInsensitiveUsername_isLocaleIndependent(@TempDir Path tempDir) throws IOException {
+    void authenticate_caseInsensitiveUsername_isLocaleIndependent(@TempDir Path tempDir) throws IOException
+    {
         // Turkish uppercases 'i' to dotted 'İ', so "Admin" and "ADMIN" would fold to different keys
         // and a valid credential would be rejected on a host with that default locale.
         var previousDefault = Locale.getDefault();
@@ -232,7 +245,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_lowercaseScheme_passesThrough(@TempDir Path tempDir) throws IOException {
+    void authenticate_lowercaseScheme_passesThrough(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]
@@ -250,7 +264,8 @@ class BasicAuthenticationHandlerTest {
     }
 
     @Test
-    void authenticate_noColonInCredentials_returns401(@TempDir Path tempDir) throws IOException {
+    void authenticate_noColonInCredentials_returns401(@TempDir Path tempDir) throws IOException
+    {
         var usersFile = tempDir.resolve("users.json");
         Files.writeString(usersFile, """
                 [{"username":"admin","password":"secret"}]

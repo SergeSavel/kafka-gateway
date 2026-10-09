@@ -16,5 +16,6 @@ package pro.savel.kafka.producer.responses;
 
 import pro.savel.kafka.common.contract.Response;
 
-public interface ProducerResponse extends Response {
+public interface ProducerResponse extends Response
+{
 }

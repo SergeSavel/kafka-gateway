@@ -18,10 +18,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-class ApplicationTest {
-
+class ApplicationTest
+{
     @Test
-    void stop_beforeStart_doesNotThrow() {
+    void stop_beforeStart_doesNotThrow()
+    {
         assertDoesNotThrow(() -> Application.stop(null));
     }
 }

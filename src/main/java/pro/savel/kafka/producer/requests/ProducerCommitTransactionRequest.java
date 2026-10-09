@@ -18,7 +18,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class ProducerCommitTransactionRequest implements ProducerRequest {
+public class ProducerCommitTransactionRequest implements ProducerRequest
+{
     @NotEmpty
     private String producerId;
     @NotEmpty

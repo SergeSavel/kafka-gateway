@@ -22,12 +22,13 @@ import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.util.ReferenceCountUtil;
 import pro.savel.kafka.common.HttpUtils;
 
-public class HttpVersionHandler extends ChannelInboundHandlerAdapter {
-
+public class HttpVersionHandler extends ChannelInboundHandlerAdapter
+{
     private boolean discarding;
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (discarding) {
             if (msg instanceof LastHttpContent)
                 discarding = false;

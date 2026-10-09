@@ -24,7 +24,8 @@ import pro.savel.kafka.admin.data.AdminAclBinding;
 import java.util.Collection;
 
 @Data
-public class AdminCreateAclsRequest implements AdminAclsRequest {
+public class AdminCreateAclsRequest implements AdminAclsRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

@@ -14,5 +14,6 @@
 
 package pro.savel.kafka.consumer.requests;
 
-public class ConsumerSeekToBeginningRequest extends ConsumerSeekToRequest {
+public class ConsumerSeekToBeginningRequest extends ConsumerSeekToRequest
+{
 }

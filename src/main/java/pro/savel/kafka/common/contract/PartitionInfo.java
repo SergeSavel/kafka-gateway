@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Getter
-public class PartitionInfo {
-
+public class PartitionInfo
+{
     private int partition;
     private Node leader;
     private Collection<Node> replicas;
@@ -29,10 +29,12 @@ public class PartitionInfo {
     private Collection<Integer> elr;
     private Collection<Integer> lastKnownElr;
 
-    private PartitionInfo() {
+    private PartitionInfo()
+    {
     }
 
-    public static Collection<PartitionInfo> of(Collection<org.apache.kafka.common.TopicPartitionInfo> source) {
+    public static Collection<PartitionInfo> of(Collection<org.apache.kafka.common.TopicPartitionInfo> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<PartitionInfo>(source.size());
@@ -40,7 +42,8 @@ public class PartitionInfo {
         return result;
     }
 
-    public static PartitionInfo of(org.apache.kafka.common.TopicPartitionInfo source) {
+    public static PartitionInfo of(org.apache.kafka.common.TopicPartitionInfo source)
+    {
         if (source == null)
             return null;
         var result = new PartitionInfo();
@@ -53,7 +56,8 @@ public class PartitionInfo {
         return result;
     }
 
-    private static Collection<Integer> mapReplicaIds(Collection<org.apache.kafka.common.Node> source) {
+    private static Collection<Integer> mapReplicaIds(Collection<org.apache.kafka.common.Node> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<Integer>(source.size());

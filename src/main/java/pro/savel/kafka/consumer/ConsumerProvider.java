@@ -25,22 +25,25 @@ import pro.savel.kafka.common.exceptions.NotFoundException;
 import java.util.Properties;
 import java.util.function.Function;
 
-public class ConsumerProvider extends ClientProvider<ConsumerWrapper> {
-
+public class ConsumerProvider extends ClientProvider<ConsumerWrapper>
+{
     private final Function<Properties, Consumer<byte[], byte[]>> clientFactory;
 
-    public ConsumerProvider() {
+    public ConsumerProvider()
+    {
         this(config -> {
             var deserializer = new ByteArrayDeserializer();
             return new KafkaConsumer<>(config, deserializer, deserializer);
         });
     }
 
-    public ConsumerProvider(Function<Properties, Consumer<byte[], byte[]>> clientFactory) {
+    public ConsumerProvider(Function<Properties, Consumer<byte[], byte[]>> clientFactory)
+    {
         this.clientFactory = clientFactory;
     }
 
-    public ConsumerWrapper createConsumer(String name, Properties config, int expirationTimeout, String owner) {
+    public ConsumerWrapper createConsumer(String name, Properties config, int expirationTimeout, String owner)
+    {
         SaslConfigValidator.rejectEmptyScramCredentials(config);
         var consumer = clientFactory.apply(config);
         var wrapper = new ConsumerWrapper(name, config, consumer, expirationTimeout, owner);
@@ -48,14 +51,16 @@ public class ConsumerProvider extends ClientProvider<ConsumerWrapper> {
         return wrapper;
     }
 
-    protected ConsumerWrapper getConsumer(String id, String token) throws NotFoundException, BadRequestException {
+    protected ConsumerWrapper getConsumer(String id, String token) throws NotFoundException, BadRequestException
+    {
         var wrapper = getItem(id);
         if (!wrapper.getToken().equals(token))
             throw new BadRequestException("Invalid token.", null);
         return wrapper;
     }
 
-    public void removeConsumer(String id, String token) throws BadRequestException {
+    public void removeConsumer(String id, String token) throws BadRequestException
+    {
         var wrapper = wrappers.get(id);
         if (wrapper == null)
             return;

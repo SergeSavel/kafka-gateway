@@ -16,18 +16,21 @@ package pro.savel.kafka.common.exceptions;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class UnauthenticatedException extends HttpStatusException {
-
-    public UnauthenticatedException(String message, Throwable cause) {
+public class UnauthenticatedException extends HttpStatusException
+{
+    public UnauthenticatedException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
-    public UnauthenticatedException(String message) {
+    public UnauthenticatedException(String message)
+    {
         super(message);
     }
 
     @Override
-    public HttpResponseStatus status() {
+    public HttpResponseStatus status()
+    {
         return HttpResponseStatus.UNAUTHORIZED;
     }
 }

@@ -22,11 +22,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProducerRequestDeserializer {
-
+public class ProducerRequestDeserializer
+{
     private static final int MAX_HEADERS_COUNT = 900;
 
-    public static ProducerSendRequest deserializeBinarySend(ByteBuf buf) throws BadRequestException {
+    public static ProducerSendRequest deserializeBinarySend(ByteBuf buf) throws BadRequestException
+    {
         if (buf == null)
             return null;
         var version = readPositiveShort(buf);
@@ -36,7 +37,8 @@ public class ProducerRequestDeserializer {
             throw new BadRequestException("Unsupported version: " + version);
     }
 
-    private static ProducerSendRequest deserializeBinarySendV1(ByteBuf buf) throws BadRequestException {
+    private static ProducerSendRequest deserializeBinarySendV1(ByteBuf buf) throws BadRequestException
+    {
         var request = new ProducerSendRequest();
         request.setProducerId(readString(buf));
         request.setToken(readString(buf));
@@ -48,7 +50,8 @@ public class ProducerRequestDeserializer {
         return request;
     }
 
-    private static List<ProducerSendRequest.Header> readHeaders(ByteBuf buf) throws BadRequestException {
+    private static List<ProducerSendRequest.Header> readHeaders(ByteBuf buf) throws BadRequestException
+    {
         var headersCount = readPositiveInt(buf);
         if (headersCount > MAX_HEADERS_COUNT)
             throw new BadRequestException("Too many headers: " + headersCount);
@@ -61,7 +64,8 @@ public class ProducerRequestDeserializer {
         return headers;
     }
 
-    private static byte[] readBytes(ByteBuf buf, int length) throws BadRequestException {
+    private static byte[] readBytes(ByteBuf buf, int length) throws BadRequestException
+    {
         if (length > buf.readableBytes())
             throw new BadRequestException("Binary content length exceeds available data");
         var bytes = new byte[length];
@@ -69,24 +73,28 @@ public class ProducerRequestDeserializer {
         return bytes;
     }
 
-    private static String readString(ByteBuf buf, int length) throws BadRequestException {
+    private static String readString(ByteBuf buf, int length) throws BadRequestException
+    {
         var bytes = readBytes(buf, length);
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
-    private static String readString(ByteBuf buf) throws BadRequestException {
+    private static String readString(ByteBuf buf) throws BadRequestException
+    {
         var length = readPositiveInt(buf);
         return readString(buf, length);
     }
 
-    private static Integer readNullableInt(ByteBuf buf) throws BadRequestException {
+    private static Integer readNullableInt(ByteBuf buf) throws BadRequestException
+    {
         var isNull = readBoolean(buf);
         if (isNull)
             return null;
         return readPositiveInt(buf);
     }
 
-    private static byte[] readNullableBytes(ByteBuf buf) throws BadRequestException {
+    private static byte[] readNullableBytes(ByteBuf buf) throws BadRequestException
+    {
         var isNull = readBoolean(buf);
         if (isNull)
             return null;
@@ -94,14 +102,16 @@ public class ProducerRequestDeserializer {
         return readBytes(buf, length);
     }
 
-    private static byte[] readNullableBytesToTheEnd(ByteBuf buf) throws BadRequestException {
+    private static byte[] readNullableBytesToTheEnd(ByteBuf buf) throws BadRequestException
+    {
         var isNull = readBoolean(buf);
         if (isNull)
             return null;
         return readBytes(buf, buf.readableBytes());
     }
 
-    private static short readPositiveShort(ByteBuf buf) throws BadRequestException {
+    private static short readPositiveShort(ByteBuf buf) throws BadRequestException
+    {
         requireReadable(buf, Short.BYTES);
         var value = buf.readShort();
         if (value < 0)
@@ -109,7 +119,8 @@ public class ProducerRequestDeserializer {
         return value;
     }
 
-    private static int readPositiveInt(ByteBuf buf) throws BadRequestException {
+    private static int readPositiveInt(ByteBuf buf) throws BadRequestException
+    {
         requireReadable(buf, Integer.BYTES);
         var value = buf.readInt();
         if (value < 0)
@@ -117,7 +128,8 @@ public class ProducerRequestDeserializer {
         return value;
     }
 
-    private static boolean readBoolean(ByteBuf buf) throws BadRequestException {
+    private static boolean readBoolean(ByteBuf buf) throws BadRequestException
+    {
         requireReadable(buf, Byte.BYTES);
         var value = buf.readByte();
         if (value == 0)
@@ -127,7 +139,8 @@ public class ProducerRequestDeserializer {
         throw new BadRequestException("Illegal value in binary content");
     }
 
-    private static void requireReadable(ByteBuf buf, int bytes) throws BadRequestException {
+    private static void requireReadable(ByteBuf buf, int bytes) throws BadRequestException
+    {
         if (buf.readableBytes() < bytes)
             throw new BadRequestException("Binary content length exceeds available data");
     }

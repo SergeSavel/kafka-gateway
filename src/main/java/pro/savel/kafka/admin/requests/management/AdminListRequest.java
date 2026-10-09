@@ -17,5 +17,6 @@ package pro.savel.kafka.admin.requests.management;
 import lombok.Data;
 
 @Data
-public class AdminListRequest implements AdminManageRequest {
+public class AdminListRequest implements AdminManageRequest
+{
 }

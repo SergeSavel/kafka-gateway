@@ -22,13 +22,15 @@ import java.util.Collection;
 import static pro.savel.kafka.admin.AdminResponseMapper.mapGroupState;
 import static pro.savel.kafka.admin.AdminResponseMapper.mapGroupType;
 
-public class AdminListGroupsResponse extends ArrayList<AdminListGroupsResponse.GroupListing> implements AdminResponse {
-
-    private AdminListGroupsResponse(int initialCapacity) {
+public class AdminListGroupsResponse extends ArrayList<AdminListGroupsResponse.GroupListing> implements AdminResponse
+{
+    private AdminListGroupsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminListGroupsResponse of(Collection<org.apache.kafka.clients.admin.GroupListing> source) {
+    public static AdminListGroupsResponse of(Collection<org.apache.kafka.clients.admin.GroupListing> source)
+    {
         if (source == null)
             return null;
         var result = new AdminListGroupsResponse(source.size());
@@ -37,18 +39,20 @@ public class AdminListGroupsResponse extends ArrayList<AdminListGroupsResponse.G
     }
 
     @Getter
-    public static class GroupListing {
-
+    public static class GroupListing
+    {
         private String groupId;
         private String type;
         private String protocol;
         private String groupState;
         private boolean isSimpleConsumerGroup;
 
-        private GroupListing() {
+        private GroupListing()
+        {
         }
 
-        private static GroupListing of(org.apache.kafka.clients.admin.GroupListing source) {
+        private static GroupListing of(org.apache.kafka.clients.admin.GroupListing source)
+        {
             if (source == null)
                 return null;
             var result = new GroupListing();

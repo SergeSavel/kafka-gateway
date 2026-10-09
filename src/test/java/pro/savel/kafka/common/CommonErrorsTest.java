@@ -30,36 +30,41 @@ import pro.savel.kafka.common.exceptions.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CommonErrorsTest {
-
+class CommonErrorsTest
+{
     private EmbeddedChannel channel;
     private ChannelHandlerContext ctx;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
         ctx = channel.pipeline().firstContext();
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.close();
     }
 
 //region HttpStatusException subclasses
 
     @Test
-    void handle_badRequest_returns400() {
+    void handle_badRequest_returns400()
+    {
         assertTrue(CommonErrors.handle(ctx, new BadRequestException("bad")));
     }
 
     @Test
-    void handle_notFound_returns404() {
+    void handle_notFound_returns404()
+    {
         assertTrue(CommonErrors.handle(ctx, new NotFoundException("nf")));
     }
 
     @Test
-    void handle_methodNotAllowed_returns405WithAllow() {
+    void handle_methodNotAllowed_returns405WithAllow()
+    {
         assertTrue(CommonErrors.handle(ctx, new MethodNotAllowedException("mna", HttpMethod.POST)));
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.METHOD_NOT_ALLOWED, response.status());
@@ -67,17 +72,20 @@ class CommonErrorsTest {
     }
 
     @Test
-    void handle_unauthenticated_returns401() {
+    void handle_unauthenticated_returns401()
+    {
         assertTrue(CommonErrors.handle(ctx, new UnauthenticatedException("ua")));
     }
 
     @Test
-    void handle_unauthorized_returns403() {
+    void handle_unauthorized_returns403()
+    {
         assertTrue(CommonErrors.handle(ctx, new UnauthorizedException("unauth")));
     }
 
     @Test
-    void handle_conflict_returns409() {
+    void handle_conflict_returns409()
+    {
         assertTrue(CommonErrors.handle(ctx, new ConflictException("c")));
     }
 
@@ -86,72 +94,84 @@ class CommonErrorsTest {
 //region Kafka exceptions
 
     @Test
-    void handle_illegalArgumentException_returnsTrue() {
+    void handle_illegalArgumentException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new IllegalArgumentException("arg")));
     }
 
     @Test
-    void handle_illegalStateException_returnsTrue() {
+    void handle_illegalStateException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new IllegalStateException("state")));
     }
 
     @Test
-    void handle_authorizationException_returnsTrue() {
+    void handle_authorizationException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new AuthorizationException("auth") {}));
     }
 
     @Test
-    void handle_authenticationException_returnsTrue() {
+    void handle_authenticationException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new AuthenticationException("auth") {}));
     }
 
     @Test
-    void handle_invalidRequestException_returnsTrue() {
+    void handle_invalidRequestException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new InvalidRequestException("inv") {}));
     }
 
     @Test
-    void handle_timeoutException_returnsGatewayTimeout() {
+    void handle_timeoutException_returnsGatewayTimeout()
+    {
         assertTrue(CommonErrors.handle(ctx, new TimeoutException("to") {}));
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.GATEWAY_TIMEOUT, response.status());
     }
 
     @Test
-    void handle_wakeupException_returnsServiceUnavailable() {
+    void handle_wakeupException_returnsServiceUnavailable()
+    {
         assertTrue(CommonErrors.handle(ctx, new WakeupException()));
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.SERVICE_UNAVAILABLE, response.status());
     }
 
     @Test
-    void handle_topicExistsException_returnsTrue() {
+    void handle_topicExistsException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new TopicExistsException("te") {}));
     }
 
     @Test
-    void handle_rebalanceInProgressException_returnsConflict() {
+    void handle_rebalanceInProgressException_returnsConflict()
+    {
         assertTrue(CommonErrors.handle(ctx, new RebalanceInProgressException("rebalancing")));
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.CONFLICT, response.status());
     }
 
     @Test
-    void handle_unknownTopicIdException_returnsBadRequest() {
+    void handle_unknownTopicIdException_returnsBadRequest()
+    {
         assertTrue(CommonErrors.handle(ctx, new UnknownTopicIdException("uti")));
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
     }
 
     @Test
-    void handle_configException_returnsBadRequest() {
+    void handle_configException_returnsBadRequest()
+    {
         assertTrue(CommonErrors.handle(ctx, new ConfigException("port", "not-a-number")));
         FullHttpResponse response = channel.readOutbound();
         assertEquals(HttpResponseStatus.BAD_REQUEST, response.status());
     }
 
     @Test
-    void handle_featureUpdateFailedException_returnsTrue() {
+    void handle_featureUpdateFailedException_returnsTrue()
+    {
         assertTrue(CommonErrors.handle(ctx, new FeatureUpdateFailedException("fu")));
     }
 
@@ -160,14 +180,16 @@ class CommonErrorsTest {
 //region CompletionException / TimeoutException unwrapping
 
     @Test
-    void handle_completionException_notHandledDirectly() {
+    void handle_completionException_notHandledDirectly()
+    {
         // CompletionException is unwrapped by processor handleError(), not by CommonErrors.handle()
         var wrapped = new java.util.concurrent.CompletionException(new IllegalArgumentException("inner"));
         assertFalse(CommonErrors.handle(ctx, wrapped));
     }
 
     @Test
-    void handle_kafkaTimeoutException_unwrapsCause() {
+    void handle_kafkaTimeoutException_unwrapsCause()
+    {
         var cause = new AuthorizationException("auth") {};
         var wrapped = new org.apache.kafka.common.errors.TimeoutException("to", cause);
         assertTrue(CommonErrors.handle(ctx, wrapped));
@@ -178,7 +200,8 @@ class CommonErrorsTest {
 //region InterruptedException
 
     @Test
-    void handle_interruptedException_returnsInternalServerErrorWithoutInterruptingCallingThread() {
+    void handle_interruptedException_returnsInternalServerErrorWithoutInterruptingCallingThread()
+    {
         Thread.interrupted(); // clear
 
         assertTrue(CommonErrors.handle(ctx, new InterruptedException("interrupted")));
@@ -189,7 +212,8 @@ class CommonErrorsTest {
     }
 
     @Test
-    void handle_kafkaInterruptException_returnsInternalServerErrorWithoutInterruptingCallingThread() {
+    void handle_kafkaInterruptException_returnsInternalServerErrorWithoutInterruptingCallingThread()
+    {
         // InterruptException interrupts the constructing thread, so clear the flag after building
         // it: what this test is about is whether handle() sets the flag, not the constructor.
         var error = new InterruptException("interrupted");
@@ -210,12 +234,14 @@ class CommonErrorsTest {
 //region Unhandled
 
     @Test
-    void handle_null_returnsFalse() {
+    void handle_null_returnsFalse()
+    {
         assertFalse(CommonErrors.handle(ctx, null));
     }
 
     @Test
-    void handle_unknownException_returnsFalse() {
+    void handle_unknownException_returnsFalse()
+    {
         assertFalse(CommonErrors.handle(ctx, new RuntimeException("unknown")));
     }
 

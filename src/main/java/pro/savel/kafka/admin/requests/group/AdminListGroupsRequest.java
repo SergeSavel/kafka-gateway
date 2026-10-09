@@ -21,7 +21,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class AdminListGroupsRequest implements AdminGroupRequest {
+public class AdminListGroupsRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

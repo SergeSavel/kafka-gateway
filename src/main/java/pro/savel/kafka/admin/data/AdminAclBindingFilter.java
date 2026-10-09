@@ -19,15 +19,16 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class AdminAclBindingFilter {
-
+public class AdminAclBindingFilter
+{
     @Valid
     private ResourcePatternFilter patternFilter;
     @Valid
     private AccessControlEntryFilter entryFilter;
 
     @Data
-    public static class ResourcePatternFilter {
+    public static class ResourcePatternFilter
+    {
         @NotEmpty
         private String resourceType;
         private String name;
@@ -36,7 +37,8 @@ public class AdminAclBindingFilter {
     }
 
     @Data
-    public static class AccessControlEntryFilter {
+    public static class AccessControlEntryFilter
+    {
         private String principal;
         private String host;
         @NotEmpty

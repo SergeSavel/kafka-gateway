@@ -25,12 +25,13 @@ record ServerConfig(
         int maxJsonRequestBytes,
         int responseChunkBytes,
         int shutdownTimeoutSeconds,
-        boolean epollEnabled) {
-
+        boolean epollEnabled)
+{
     private static final int DEFAULT_MAX_REQUEST_BYTES = 32 * 1024 * 1024;
     private static final int DEFAULT_MAX_JSON_REQUEST_BYTES = 4 * 1024 * 1024;
 
-    ServerConfig {
+    ServerConfig
+    {
         if (host == null || host.isBlank())
             throw new IllegalArgumentException("host must not be blank");
         if (port < 1 || port > 65_535)
@@ -48,7 +49,8 @@ record ServerConfig(
             throw new IllegalArgumentException("netty.maxJsonRequestBytes must not exceed netty.maxRequestBytes");
     }
 
-    static ServerConfig fromSystemProperties() {
+    static ServerConfig fromSystemProperties()
+    {
         return new ServerConfig(
                 System.getProperty("host", "0.0.0.0"),
                 Integer.getInteger("port", 8086),
@@ -63,7 +65,8 @@ record ServerConfig(
                 Boolean.parseBoolean(System.getProperty("netty.epoll", "true")));
     }
 
-    private static void requirePositive(String name, int value) {
+    private static void requirePositive(String name, int value)
+    {
         if (value <= 0)
             throw new IllegalArgumentException(name + " must be greater than 0");
     }

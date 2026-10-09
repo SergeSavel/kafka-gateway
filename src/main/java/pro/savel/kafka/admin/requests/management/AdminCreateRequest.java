@@ -23,7 +23,8 @@ import lombok.Data;
 import java.util.Properties;
 
 @Data
-public class AdminCreateRequest implements AdminManageRequest {
+public class AdminCreateRequest implements AdminManageRequest
+{
     @NotBlank
     private String name;
     @NotEmpty

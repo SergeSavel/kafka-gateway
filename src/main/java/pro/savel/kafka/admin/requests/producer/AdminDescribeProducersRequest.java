@@ -24,7 +24,8 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.Collection;
 
 @Data
-public class AdminDescribeProducersRequest implements AdminProducerRequest {
+public class AdminDescribeProducersRequest implements AdminProducerRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

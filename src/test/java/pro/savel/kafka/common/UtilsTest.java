@@ -25,23 +25,26 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
-class UtilsTest {
-
+class UtilsTest
+{
 //region combineErrorMessage
 
     @Test
-    void combineErrorMessage_nullThrowable_returnsNull() {
+    void combineErrorMessage_nullThrowable_returnsNull()
+    {
         assertNull(Utils.combineErrorMessage(null));
     }
 
     @Test
-    void combineErrorMessage_singleMessage_returnsMessage() {
+    void combineErrorMessage_singleMessage_returnsMessage()
+    {
         var ex = new RuntimeException("error");
         assertEquals("error", Utils.combineErrorMessage(ex));
     }
 
     @Test
-    void combineErrorMessage_chainedCauses_returnsAllMessages() {
+    void combineErrorMessage_chainedCauses_returnsAllMessages()
+    {
         var root = new RuntimeException("root cause");
         var mid = new RuntimeException("mid", root);
         var top = new RuntimeException("top", mid);
@@ -49,7 +52,8 @@ class UtilsTest {
     }
 
     @Test
-    void combineErrorMessage_nullMessageInChain_skipsNull() {
+    void combineErrorMessage_nullMessageInChain_skipsNull()
+    {
         var root = new RuntimeException("root");
         var mid = new RuntimeException((String) null, root);
         var top = new RuntimeException("top", mid);
@@ -57,13 +61,15 @@ class UtilsTest {
     }
 
     @Test
-    void combineErrorMessage_allNullMessages_returnsNull() {
+    void combineErrorMessage_allNullMessages_returnsNull()
+    {
         var ex = new RuntimeException((String) null, new RuntimeException((String) null));
         assertNull(Utils.combineErrorMessage(ex));
     }
 
     @Test
-    void combineErrorMessage_exceptionWithNoMessage_returnsNull() {
+    void combineErrorMessage_exceptionWithNoMessage_returnsNull()
+    {
         var ex = new NullPointerException();
         assertNull(Utils.combineErrorMessage(ex));
     }
@@ -73,31 +79,36 @@ class UtilsTest {
 //region rootErrorMessage
 
     @Test
-    void rootErrorMessage_nullThrowable_returnsNull() {
+    void rootErrorMessage_nullThrowable_returnsNull()
+    {
         assertNull(Utils.rootErrorMessage(null));
     }
 
     @Test
-    void rootErrorMessage_singleMessage_returnsMessage() {
+    void rootErrorMessage_singleMessage_returnsMessage()
+    {
         assertEquals("error", Utils.rootErrorMessage(new RuntimeException("error")));
     }
 
     @Test
-    void rootErrorMessage_chainedCauses_returnsDeepestMessage() {
+    void rootErrorMessage_chainedCauses_returnsDeepestMessage()
+    {
         var root = new RuntimeException("root cause");
         var top = new RuntimeException("top", root);
         assertEquals("root cause", Utils.rootErrorMessage(top));
     }
 
     @Test
-    void rootErrorMessage_deepestMessageNull_returnsLastNonNull() {
+    void rootErrorMessage_deepestMessageNull_returnsLastNonNull()
+    {
         var root = new NullPointerException();
         var top = new RuntimeException("top", root);
         assertEquals("top", Utils.rootErrorMessage(top));
     }
 
     @Test
-    void rootErrorMessage_allNullMessages_returnsNull() {
+    void rootErrorMessage_allNullMessages_returnsNull()
+    {
         var ex = new RuntimeException((String) null, new NullPointerException());
         assertNull(Utils.rootErrorMessage(ex));
     }
@@ -107,12 +118,14 @@ class UtilsTest {
 //region combineConstraintViolationMessage (single)
 
     @Test
-    void combineConstraintViolationMessage_singleNull_returnsNull() {
+    void combineConstraintViolationMessage_singleNull_returnsNull()
+    {
         assertNull(Utils.combineConstraintViolationMessage((ConstraintViolation<Object>) null));
     }
 
     @Test
-    void combineConstraintViolationMessage_single_returnsFormatted() {
+    void combineConstraintViolationMessage_single_returnsFormatted()
+    {
         ConstraintViolation<Object> violation = mock(ConstraintViolation.class);
         when(violation.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
         when(violation.getPropertyPath().toString()).thenReturn("name");
@@ -125,17 +138,20 @@ class UtilsTest {
 //region combineConstraintViolationMessage (collection)
 
     @Test
-    void combineConstraintViolationMessage_collectionNull_returnsNull() {
+    void combineConstraintViolationMessage_collectionNull_returnsNull()
+    {
         assertNull(Utils.combineConstraintViolationMessage((Set<ConstraintViolation<Object>>) null));
     }
 
     @Test
-    void combineConstraintViolationMessage_collectionEmpty_returnsEmpty() {
+    void combineConstraintViolationMessage_collectionEmpty_returnsEmpty()
+    {
         assertEquals("", Utils.combineConstraintViolationMessage(List.<ConstraintViolation<Object>>of()));
     }
 
     @Test
-    void combineConstraintViolationMessage_collectionMultiple_returnsJoined() {
+    void combineConstraintViolationMessage_collectionMultiple_returnsJoined()
+    {
         ConstraintViolation<Object> v1 = mock(ConstraintViolation.class);
         when(v1.getPropertyPath()).thenReturn(mock(jakarta.validation.Path.class));
         when(v1.getPropertyPath().toString()).thenReturn("name");

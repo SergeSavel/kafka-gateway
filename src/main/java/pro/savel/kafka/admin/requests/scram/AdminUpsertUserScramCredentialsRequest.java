@@ -20,7 +20,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class AdminUpsertUserScramCredentialsRequest implements AdminScramRequest {
+public class AdminUpsertUserScramCredentialsRequest implements AdminScramRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

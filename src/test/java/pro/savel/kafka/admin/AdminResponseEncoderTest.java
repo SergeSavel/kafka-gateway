@@ -31,10 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AdminResponseEncoderTest {
-
+class AdminResponseEncoderTest
+{
     @Test
-    void binarySerde_returnsNotAcceptable() {
+    void binarySerde_returnsNotAcceptable()
+    {
         var channel = new EmbeddedChannel(new AdminResponseEncoder(new ObjectMapper()));
         var bearer = new AdminResponseBearer(
                 new RequestBearer(new AdminTouchRequest(), Serde.BINARY, true),
@@ -51,7 +52,8 @@ class AdminResponseEncoderTest {
     }
 
     @Test
-    void nullResponse_withBinarySerde_isWrittenWithoutBody() {
+    void nullResponse_withBinarySerde_isWrittenWithoutBody()
+    {
         var channel = new EmbeddedChannel(new AdminResponseEncoder(new ObjectMapper()));
         var bearer = new AdminResponseBearer(
                 new RequestBearer(new AdminTouchRequest(), Serde.BINARY, true),

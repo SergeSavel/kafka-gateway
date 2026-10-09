@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests.cluster;
 
 import pro.savel.kafka.admin.requests.AdminRequest;
 
-public interface AdminClusterRequest extends AdminRequest {
+public interface AdminClusterRequest extends AdminRequest
+{
 }

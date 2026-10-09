@@ -22,15 +22,17 @@ import org.apache.kafka.common.acl.AclOperation;
 
 import java.util.*;
 
-public class AdminResponseMapper {
-
-    public static String mapUuid(Uuid source) {
+public class AdminResponseMapper
+{
+    public static String mapUuid(Uuid source)
+    {
         if (source == null)
             return null;
         return source.toString();
     }
 
-    public static Set<String> mapAclOperations(Set<AclOperation> source) {
+    public static Set<String> mapAclOperations(Set<AclOperation> source)
+    {
         if (source == null)
             return null;
         var result = new HashSet<String>(source.size());
@@ -38,25 +40,29 @@ public class AdminResponseMapper {
         return result;
     }
 
-    public static String mapAclOperation(AclOperation source) {
+    public static String mapAclOperation(AclOperation source)
+    {
         if (source == null)
             return null;
         return source.name();
     }
 
-    public static String mapGroupType(GroupType source) {
+    public static String mapGroupType(GroupType source)
+    {
         if (source == null)
             return null;
         return source.name();
     }
 
-    public static String mapGroupState(GroupState source) {
+    public static String mapGroupState(GroupState source)
+    {
         if (source == null)
             return null;
         return source.name();
     }
 
-    public static String mapGroupState(ClassicGroupState source) {
+    public static String mapGroupState(ClassicGroupState source)
+    {
         if (source == null)
             return null;
         return source.name();

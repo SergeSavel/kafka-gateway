@@ -22,16 +22,18 @@ import org.apache.kafka.clients.admin.SupportedVersionRange;
 import java.util.ArrayList;
 
 @Getter
-public class AdminDescribeFeaturesResponse implements AdminResponse {
-
+public class AdminDescribeFeaturesResponse implements AdminResponse
+{
     private ArrayList<SupportedFeature> supportedFeatures;
     private ArrayList<FinalizedFeature> finalizedFeatures;
     private Long finalizedFeaturesEpoch;
 
-    private AdminDescribeFeaturesResponse() {
+    private AdminDescribeFeaturesResponse()
+    {
     }
 
-    public static AdminDescribeFeaturesResponse of(FeatureMetadata source) {
+    public static AdminDescribeFeaturesResponse of(FeatureMetadata source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeFeaturesResponse();
@@ -44,13 +46,14 @@ public class AdminDescribeFeaturesResponse implements AdminResponse {
     }
 
     @Getter
-    public static class SupportedFeature {
-
+    public static class SupportedFeature
+    {
         private String name;
         private short minVersion;
         private short maxVersion;
 
-        private static SupportedFeature of(String name, SupportedVersionRange source) {
+        private static SupportedFeature of(String name, SupportedVersionRange source)
+        {
             var result = new SupportedFeature();
             result.name = name;
             if (source != null) {
@@ -62,13 +65,14 @@ public class AdminDescribeFeaturesResponse implements AdminResponse {
     }
 
     @Getter
-    public static class FinalizedFeature {
-
+    public static class FinalizedFeature
+    {
         private String name;
         private short minVersionLevel;
         private short maxVersionLevel;
 
-        private static FinalizedFeature of(String name, FinalizedVersionRange source) {
+        private static FinalizedFeature of(String name, FinalizedVersionRange source)
+        {
             var result = new FinalizedFeature();
             result.name = name;
             if (source != null) {

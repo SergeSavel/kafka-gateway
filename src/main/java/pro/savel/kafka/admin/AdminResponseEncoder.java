@@ -29,18 +29,20 @@ import pro.savel.kafka.common.contract.Serde;
 import java.io.IOException;
 
 @ChannelHandler.Sharable
-public class AdminResponseEncoder extends ChannelOutboundHandlerAdapter {
-
+public class AdminResponseEncoder extends ChannelOutboundHandlerAdapter
+{
     private static final Logger logger = LoggerFactory.getLogger(AdminResponseEncoder.class);
 
     private final ObjectMapper objectMapper;
 
-    public AdminResponseEncoder(ObjectMapper objectMapper) {
+    public AdminResponseEncoder(ObjectMapper objectMapper)
+    {
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
+    {
         if (msg instanceof AdminResponseBearer bearer) {
             try {
                 if (logger.isDebugEnabled()) {
@@ -69,7 +71,8 @@ public class AdminResponseEncoder extends ChannelOutboundHandlerAdapter {
         }
     }
 
-    private FullHttpResponse createHttpResponse(ChannelHandlerContext ctx, AdminResponseBearer bearer) throws IOException {
+    private FullHttpResponse createHttpResponse(ChannelHandlerContext ctx, AdminResponseBearer bearer) throws IOException
+    {
         FullHttpResponse httpResponse;
         if (bearer.getResponse() == null) {
             httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, bearer.getStatus());

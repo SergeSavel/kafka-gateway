@@ -16,5 +16,6 @@ package pro.savel.kafka.producer.requests;
 
 import pro.savel.kafka.common.contract.Request;
 
-public interface ProducerRequest extends Request {
+public interface ProducerRequest extends Request
+{
 }

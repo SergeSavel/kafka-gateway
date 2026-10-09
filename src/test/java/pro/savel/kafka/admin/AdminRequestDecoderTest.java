@@ -33,12 +33,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-class AdminRequestDecoderTest {
-
+class AdminRequestDecoderTest
+{
     private EmbeddedChannel channel;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         var objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
@@ -51,12 +52,14 @@ class AdminRequestDecoderTest {
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.finishAndReleaseAll();
     }
 
     @Test
-    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost() {
+    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost()
+    {
         assertFalse(channel.writeInbound(
                 new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/admin/list-topics")));
 
@@ -67,7 +70,8 @@ class AdminRequestDecoderTest {
     }
 
     @Test
-    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet() {
+    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet()
+    {
         assertFalse(channel.writeInbound(
                 new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/admin")));
 

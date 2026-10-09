@@ -20,7 +20,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class ConsumerSubscribeRequest implements ConsumerRequest {
+public class ConsumerSubscribeRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

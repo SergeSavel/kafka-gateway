@@ -19,13 +19,15 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ConsumerAssignmentResponse extends ArrayList<TopicPartition> implements ConsumerResponse {
-
-    private ConsumerAssignmentResponse(int initialCapacity) {
+public class ConsumerAssignmentResponse extends ArrayList<TopicPartition> implements ConsumerResponse
+{
+    private ConsumerAssignmentResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ConsumerAssignmentResponse of(Collection<org.apache.kafka.common.TopicPartition> source) {
+    public static ConsumerAssignmentResponse of(Collection<org.apache.kafka.common.TopicPartition> source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerAssignmentResponse(source.size());

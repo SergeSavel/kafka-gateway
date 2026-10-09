@@ -23,10 +23,11 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProducerRequestMapperTest {
-
+class ProducerRequestMapperTest
+{
     @Test
-    void mapProduceRequest_basicFields_mapped() {
+    void mapProduceRequest_basicFields_mapped()
+    {
         var source = new ProducerSendStringRequest();
         source.setProducerId("prod-1");
         source.setToken("token-1");
@@ -42,7 +43,8 @@ class ProducerRequestMapperTest {
     }
 
     @Test
-    void mapProduceRequest_keyAndValue_convertedToBytes() {
+    void mapProduceRequest_keyAndValue_convertedToBytes()
+    {
         var source = new ProducerSendStringRequest();
         source.setProducerId("p");
         source.setToken("t");
@@ -57,7 +59,8 @@ class ProducerRequestMapperTest {
     }
 
     @Test
-    void mapProduceRequest_nullKeyAndValue_remainNull() {
+    void mapProduceRequest_nullKeyAndValue_remainNull()
+    {
         var source = new ProducerSendStringRequest();
         source.setProducerId("p");
         source.setToken("t");
@@ -70,7 +73,8 @@ class ProducerRequestMapperTest {
     }
 
     @Test
-    void mapProduceRequest_headers_convertedToBytesPreservingOrder() {
+    void mapProduceRequest_headers_convertedToBytesPreservingOrder()
+    {
         var source = new ProducerSendStringRequest();
         source.setProducerId("p");
         source.setToken("t");
@@ -91,7 +95,8 @@ class ProducerRequestMapperTest {
     }
 
     @Test
-    void mapProduceRequest_nullHeaders_remainNull() {
+    void mapProduceRequest_nullHeaders_remainNull()
+    {
         var source = new ProducerSendStringRequest();
         source.setProducerId("p");
         source.setToken("t");
@@ -103,7 +108,8 @@ class ProducerRequestMapperTest {
     }
 
     @Test
-    void mapProduceRequest_nullHeaderValue_mappedAsNull() {
+    void mapProduceRequest_nullHeaderValue_mappedAsNull()
+    {
         var source = new ProducerSendStringRequest();
         source.setProducerId("p");
         source.setToken("t");

@@ -26,8 +26,8 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ProducerResponseSerializerTest {
-
+class ProducerResponseSerializerTest
+{
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UnpooledByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
 
@@ -42,12 +42,14 @@ class ProducerResponseSerializerTest {
 //region JSON
 
     @Test
-    void serializeJson_null_returnsNull() throws Exception {
+    void serializeJson_null_returnsNull() throws Exception
+    {
         assertNull(ProducerResponseSerializer.serializeJson(objectMapper, allocator, null));
     }
 
     @Test
-    void serializeJson_sendResponse_returnsValidJson() throws Exception {
+    void serializeJson_sendResponse_returnsValidJson() throws Exception
+    {
         var response = createSendResponse("test-topic", 2, 100L, 1234567890L, 10, 200);
 
         var buf = ProducerResponseSerializer.serializeJson(objectMapper, allocator, response);
@@ -65,12 +67,14 @@ class ProducerResponseSerializerTest {
 //region Binary
 
     @Test
-    void serializeBinary_null_returnsNull() {
+    void serializeBinary_null_returnsNull()
+    {
         assertNull(ProducerResponseSerializer.serializeBinary(allocator, null));
     }
 
     @Test
-    void serializeBinary_sendResponse_returnsValidBinary() {
+    void serializeBinary_sendResponse_returnsValidBinary()
+    {
         var response = createSendResponse("моя-тема", 5, 42L, 9999L, 8, 64);
 
         var buf = ProducerResponseSerializer.serializeBinary(allocator, response);
@@ -92,7 +96,8 @@ class ProducerResponseSerializerTest {
     }
 
     @Test
-    void serializeBinary_unsupportedType_throwsException() {
+    void serializeBinary_unsupportedType_throwsException()
+    {
         ProducerResponse unsupported = new ProducerResponse() {};
         assertThrows(IllegalArgumentException.class,
                 () -> ProducerResponseSerializer.serializeBinary(allocator, unsupported));

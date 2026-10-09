@@ -17,13 +17,15 @@ package pro.savel.kafka.consumer.responses;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ConsumerSubscriptionResponse extends ArrayList<String> implements ConsumerResponse {
-
-    private ConsumerSubscriptionResponse(int initialCapacity) {
+public class ConsumerSubscriptionResponse extends ArrayList<String> implements ConsumerResponse
+{
+    private ConsumerSubscriptionResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ConsumerSubscriptionResponse of(Collection<String> source) {
+    public static ConsumerSubscriptionResponse of(Collection<String> source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerSubscriptionResponse(source.size());

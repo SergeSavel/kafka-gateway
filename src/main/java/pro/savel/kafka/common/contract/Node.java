@@ -20,18 +20,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Getter
-public class Node {
-
+public class Node
+{
     private int id;
     private String host;
     private int port;
     private String rack;
     private boolean isFenced;
 
-    private Node() {
+    private Node()
+    {
     }
 
-    public static Collection<Node> of(Collection<org.apache.kafka.common.Node> source) {
+    public static Collection<Node> of(Collection<org.apache.kafka.common.Node> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<Node>(source.size());
@@ -39,7 +41,8 @@ public class Node {
         return result;
     }
 
-    public static Node of(org.apache.kafka.common.Node source) {
+    public static Node of(org.apache.kafka.common.Node source)
+    {
         if (source == null || source.isEmpty())
             return null;
         var result = new Node();

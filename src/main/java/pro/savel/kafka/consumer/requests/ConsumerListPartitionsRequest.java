@@ -19,7 +19,8 @@ import lombok.Data;
 
 @Deprecated
 @Data
-public class ConsumerListPartitionsRequest implements ConsumerRequest {
+public class ConsumerListPartitionsRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

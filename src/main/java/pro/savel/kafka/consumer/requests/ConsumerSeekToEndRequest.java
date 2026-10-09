@@ -14,5 +14,6 @@
 
 package pro.savel.kafka.consumer.requests;
 
-public class ConsumerSeekToEndRequest extends ConsumerSeekToRequest {
+public class ConsumerSeekToEndRequest extends ConsumerSeekToRequest
+{
 }

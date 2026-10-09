@@ -24,18 +24,20 @@ import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode(callSuper = false)
-public class ProducerWrapper extends ClientWrapper {
-
+public class ProducerWrapper extends ClientWrapper
+{
     private final Producer<byte[], byte[]> producer;
     private final String token = UUID.randomUUID().toString();
 
-    ProducerWrapper(String name, Properties config, Producer<byte[], byte[]> producer, int expirationTimeout, String owner) {
+    ProducerWrapper(String name, Properties config, Producer<byte[], byte[]> producer, int expirationTimeout, String owner)
+    {
         super(UUID.randomUUID().toString(), name, config, expirationTimeout, owner);
         this.producer = producer;
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         producer.close(CLOSE_TIMEOUT);
     }
 }

@@ -22,15 +22,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 @Getter
-public class TopicPartition {
-
+public class TopicPartition
+{
     private @NotEmpty String topic;
     private @PositiveOrZero int partition;
 
-    private TopicPartition() {
+    private TopicPartition()
+    {
     }
 
-    public static Collection<TopicPartition> of(Collection<org.apache.kafka.common.TopicPartition> source) {
+    public static Collection<TopicPartition> of(Collection<org.apache.kafka.common.TopicPartition> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<TopicPartition>(source.size());
@@ -38,7 +40,8 @@ public class TopicPartition {
         return result;
     }
 
-    public static TopicPartition of(org.apache.kafka.common.TopicPartition source) {
+    public static TopicPartition of(org.apache.kafka.common.TopicPartition source)
+    {
         if (source == null)
             return null;
         var result = new TopicPartition();

@@ -24,13 +24,14 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
-public class BlockingTaskExecutor implements AutoCloseable {
-
+public class BlockingTaskExecutor implements AutoCloseable
+{
     private static final Logger logger = LoggerFactory.getLogger(BlockingTaskExecutor.class);
 
     private final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
-    public <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, BiConsumer<T, Throwable> completion) {
+    public <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, BiConsumer<T, Throwable> completion)
+    {
         var taskReference = new AtomicReference<Future<?>>();
         var closeFuture = ctx.channel().closeFuture();
         ChannelFutureListener closeListener = ignored -> {
@@ -70,11 +71,13 @@ public class BlockingTaskExecutor implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         close(ShutdownDeadline.after(Duration.ofSeconds(40)));
     }
 
-    public void close(ShutdownDeadline deadline) {
+    public void close(ShutdownDeadline deadline)
+    {
         executor.shutdownNow();
         try {
             if (!executor.awaitTermination(deadline.remainingNanos(), TimeUnit.NANOSECONDS))

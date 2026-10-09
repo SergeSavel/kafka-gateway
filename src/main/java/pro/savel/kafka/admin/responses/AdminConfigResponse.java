@@ -20,13 +20,15 @@ import org.apache.kafka.clients.admin.ConfigEntry;
 
 import java.util.ArrayList;
 
-public class AdminConfigResponse extends ArrayList<AdminConfigResponse.Entry> implements AdminResponse {
-
-    private AdminConfigResponse(int initialCapacity) {
+public class AdminConfigResponse extends ArrayList<AdminConfigResponse.Entry> implements AdminResponse
+{
+    private AdminConfigResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminConfigResponse of(Config source) {
+    public static AdminConfigResponse of(Config source)
+    {
         if (source == null)
             return null;
         var result = new AdminConfigResponse(source.entries().size());
@@ -35,8 +37,8 @@ public class AdminConfigResponse extends ArrayList<AdminConfigResponse.Entry> im
     }
 
     @Getter
-    public static class Entry {
-
+    public static class Entry
+    {
         private String name;
         private String value;
         private String source;
@@ -46,10 +48,12 @@ public class AdminConfigResponse extends ArrayList<AdminConfigResponse.Entry> im
         private String type;
         private String documentation;
 
-        private Entry() {
+        private Entry()
+        {
         }
 
-        private static Entry of(ConfigEntry source) {
+        private static Entry of(ConfigEntry source)
+        {
             if (source == null)
                 return null;
             var result = new Entry();
@@ -64,13 +68,15 @@ public class AdminConfigResponse extends ArrayList<AdminConfigResponse.Entry> im
             return result;
         }
 
-        private static String mapConfigEntrySource(ConfigEntry.ConfigSource source) {
+        private static String mapConfigEntrySource(ConfigEntry.ConfigSource source)
+        {
             if (source == null)
                 return null;
             return source.name();
         }
 
-        private static String mapConfigEntryType(ConfigEntry.ConfigType source) {
+        private static String mapConfigEntryType(ConfigEntry.ConfigType source)
+        {
             if (source == null)
                 return null;
             return source.name();

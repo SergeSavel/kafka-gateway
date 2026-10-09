@@ -41,8 +41,8 @@ import java.util.Locale;
 import java.util.Map;
 
 @ChannelHandler.Sharable
-public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter {
-
+public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter
+{
     private static final Logger logger = LoggerFactory.getLogger(BasicAuthenticationHandler.class);
 
     private static final String DEFAULT_FILE_NAME = "users.json";
@@ -51,16 +51,18 @@ public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter {
 
     private volatile Map<String, UserWithHash> users;
 
-    public BasicAuthenticationHandler(ObjectMapper objectMapper) {
+    public BasicAuthenticationHandler(ObjectMapper objectMapper)
+    {
         this.objectMapper = objectMapper;
     }
 
-    public void initialize() {
+    public void initialize()
+    {
         initialize(DEFAULT_FILE_NAME);
     }
 
-    public void initialize(String usersFileName) {
-
+    public void initialize(String usersFileName)
+    {
         var file = new File(usersFileName);
 
         if (!file.exists()) {
@@ -90,7 +92,8 @@ public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest httpRequest) {
             try {
                 authenticate(ctx, httpRequest);
@@ -107,8 +110,8 @@ public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void authenticate(ChannelHandlerContext ctx, FullHttpRequest request) {
-
+    private void authenticate(ChannelHandlerContext ctx, FullHttpRequest request)
+    {
         var users_ = users;
 
         if (users_ != null) {
@@ -155,11 +158,13 @@ public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter {
      * or Azeri default locale {@code "Admin"} would fold to {@code "ADMİN"} while {@code "ADMIN"}
      * stays {@code "ADMIN"}, and the two would stop matching.
      */
-    private static String caseInsensitiveKey(String username) {
+    private static String caseInsensitiveKey(String username)
+    {
         return username.toUpperCase(Locale.ROOT);
     }
 
-    private static byte[] hash(String value) {
+    private static byte[] hash(String value)
+    {
         try {
             return MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {
@@ -167,9 +172,11 @@ public class BasicAuthenticationHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private record UserWithPassword(String username, String password) {
+    private record UserWithPassword(String username, String password)
+    {
     }
 
-    private record UserWithHash(String username, byte[] passwordHash) {
+    private record UserWithHash(String username, byte[] passwordHash)
+    {
     }
 }

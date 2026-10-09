@@ -16,18 +16,21 @@ package pro.savel.kafka.common.exceptions;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class BadRequestException extends HttpStatusException {
-
-    public BadRequestException(String message, Throwable cause) {
+public class BadRequestException extends HttpStatusException
+{
+    public BadRequestException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
-    public BadRequestException(String message) {
+    public BadRequestException(String message)
+    {
         super(message);
     }
 
     @Override
-    public HttpResponseStatus status() {
+    public HttpResponseStatus status()
+    {
         return HttpResponseStatus.BAD_REQUEST;
     }
 }

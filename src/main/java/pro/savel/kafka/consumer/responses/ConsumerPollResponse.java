@@ -22,13 +22,15 @@ import org.apache.kafka.common.header.Headers;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ConsumerPollResponse extends ArrayList<ConsumerPollResponse.Message> implements ConsumerResponse {
-
-    private ConsumerPollResponse(int initialCapacity) {
+public class ConsumerPollResponse extends ArrayList<ConsumerPollResponse.Message> implements ConsumerResponse
+{
+    private ConsumerPollResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ConsumerPollResponse of(ConsumerRecords<byte[], byte[]> source) {
+    public static ConsumerPollResponse of(ConsumerRecords<byte[], byte[]> source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerPollResponse(source.count());
@@ -37,8 +39,8 @@ public class ConsumerPollResponse extends ArrayList<ConsumerPollResponse.Message
     }
 
     @Getter
-    public static class Message {
-
+    public static class Message
+    {
         private long timestamp;
         private String topic;
         private int partition;
@@ -47,10 +49,12 @@ public class ConsumerPollResponse extends ArrayList<ConsumerPollResponse.Message
         private byte[] key;
         private byte[] value;
 
-        private Message() {
+        private Message()
+        {
         }
 
-        private static Message of(ConsumerRecord<byte[], byte[]> source) {
+        private static Message of(ConsumerRecord<byte[], byte[]> source)
+        {
             if (source == null)
                 return null;
             var result = new Message();
@@ -65,15 +69,17 @@ public class ConsumerPollResponse extends ArrayList<ConsumerPollResponse.Message
         }
 
         @Getter
-        public static class Header {
-
+        public static class Header
+        {
             private String key;
             private byte[] value;
 
-            private Header() {
+            private Header()
+            {
             }
 
-            private static Header of(org.apache.kafka.common.header.Header source) {
+            private static Header of(org.apache.kafka.common.header.Header source)
+            {
                 if (source == null)
                     return null;
                 var result = new Header();
@@ -82,7 +88,8 @@ public class ConsumerPollResponse extends ArrayList<ConsumerPollResponse.Message
                 return result;
             }
 
-            private static Collection<Header> of(Headers source) {
+            private static Collection<Header> of(Headers source)
+            {
                 if (source == null)
                     return null;
                 var result = new ArrayList<Header>();

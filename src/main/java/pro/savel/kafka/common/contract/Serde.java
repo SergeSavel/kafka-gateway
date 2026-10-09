@@ -14,7 +14,8 @@
 
 package pro.savel.kafka.common.contract;
 
-public enum Serde {
+public enum Serde
+{
     JSON,
     BINARY,
 }

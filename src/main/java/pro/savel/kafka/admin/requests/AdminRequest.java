@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests;
 
 import pro.savel.kafka.common.contract.Request;
 
-public interface AdminRequest extends Request {
+public interface AdminRequest extends Request
+{
 }

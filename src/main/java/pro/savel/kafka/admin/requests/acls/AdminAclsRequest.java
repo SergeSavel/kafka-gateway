@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests.acls;
 
 import pro.savel.kafka.admin.requests.AdminRequest;
 
-public interface AdminAclsRequest extends AdminRequest {
+public interface AdminAclsRequest extends AdminRequest
+{
 }

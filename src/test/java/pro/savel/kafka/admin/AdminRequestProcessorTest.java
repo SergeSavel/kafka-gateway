@@ -74,39 +74,45 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class AdminRequestProcessorTest {
-
+class AdminRequestProcessorTest
+{
     private final AdminProvider provider = new AdminProvider(config -> mock(Admin.class));
     private final AdminRequestProcessor processor =
             new AdminRequestProcessor(new SynchronousBlockingTaskExecutor(), provider);
     private final EmbeddedChannel channel = new EmbeddedChannel(processor);
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.finishAndReleaseAll();
         provider.close();
     }
 
-    private static RequestBearer bearer(AdminRequest request) {
+    private static RequestBearer bearer(AdminRequest request)
+    {
         return new RequestBearer(request, Serde.JSON, true);
     }
 
-    private AdminWrapper addWrapper() {
+    private AdminWrapper addWrapper()
+    {
         return provider.createAdmin("test-admin", new Properties(), 60_000, null);
     }
 
-    private static TopicPartition partition(String topic, int partition) {
+    private static TopicPartition partition(String topic, int partition)
+    {
         return TopicPartition.of(new org.apache.kafka.common.TopicPartition(topic, partition));
     }
 
-    private static <T> KafkaFuture<T> failed(Throwable error) {
+    private static <T> KafkaFuture<T> failed(Throwable error)
+    {
         var future = new org.apache.kafka.common.internals.KafkaFutureImpl<T>();
         future.completeExceptionally(error);
         return future;
     }
 
     // AdminDescribeLogDirsRequest only exposes @Getter (populated via Jackson field access in production).
-    private static void setField(Object target, String fieldName, Object value) {
+    private static void setField(Object target, String fieldName, Object value)
+    {
         try {
             var field = target.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
@@ -119,7 +125,8 @@ class AdminRequestProcessorTest {
     //region Management
 
     @Test
-    void processCreate_success_returnsCreatedWithIdAndToken() {
+    void processCreate_success_returnsCreatedWithIdAndToken()
+    {
         var request = new AdminCreateRequest();
         request.setName("my-admin");
         request.setConfig(new Properties());
@@ -137,7 +144,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processCreate_emptyScramPassword_returnsBadRequest() {
+    void processCreate_emptyScramPassword_returnsBadRequest()
+    {
         var request = new AdminCreateRequest();
         request.setName("my-admin");
         var config = new Properties();
@@ -156,7 +164,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processRemove_validToken_removesAndReturnsNoContent() {
+    void processRemove_validToken_removesAndReturnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
 
@@ -173,7 +182,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processRemove_invalidToken_returnsBadRequest() {
+    void processRemove_invalidToken_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminRemoveRequest();
@@ -188,7 +198,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processTouch_unknownId_returnsNotFound() {
+    void processTouch_unknownId_returnsNotFound()
+    {
         var request = new AdminTouchRequest();
         request.setAdminId("does-not-exist");
         request.setToken("token");
@@ -201,7 +212,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processTouch_validId_returnsNoContent() {
+    void processTouch_validId_returnsNoContent()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminTouchRequest();
@@ -215,7 +227,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processList_returnsAllAdmins() {
+    void processList_returnsAllAdmins()
+    {
         addWrapper();
         addWrapper();
 
@@ -232,7 +245,8 @@ class AdminRequestProcessorTest {
     //region Cluster
 
     @Test
-    void processDescribeCluster_success_returnsClusterInfo() {
+    void processDescribeCluster_success_returnsClusterInfo()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeClusterResult.class);
@@ -256,7 +270,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeFeatures_success_returnsMetadata() {
+    void processDescribeFeatures_success_returnsMetadata()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeFeaturesResult.class);
@@ -285,7 +300,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeLogDirs_success_returnsDescriptions() {
+    void processDescribeLogDirs_success_returnsDescriptions()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeLogDirsResult.class);
@@ -305,7 +321,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processUpdateFeature_success_returnsOk() {
+    void processUpdateFeature_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(UpdateFeaturesResult.class);
@@ -334,7 +351,8 @@ class AdminRequestProcessorTest {
     //region Topics
 
     @Test
-    void processListTopics_success_returnsListings() {
+    void processListTopics_success_returnsListings()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(ListTopicsResult.class);
@@ -355,7 +373,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListTopics_invalidPattern_returnsBadRequest() {
+    void processListTopics_invalidPattern_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminListTopicsRequest();
@@ -371,7 +390,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeTopic_success_returnsDescription() {
+    void processDescribeTopic_success_returnsDescription()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeTopicsResult.class);
@@ -393,7 +413,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeTopic_multipleResultEntries_writesOnlyOneResponse() {
+    void processDescribeTopic_multipleResultEntries_writesOnlyOneResponse()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeTopicsResult.class);
@@ -416,7 +437,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeTopic_notFound_returnsNotFound() {
+    void processDescribeTopic_notFound_returnsNotFound()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeTopicsResult.class);
@@ -436,7 +458,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeTopic_byId_success_returnsDescription() {
+    void processDescribeTopic_byId_success_returnsDescription()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeTopicsResult.class);
@@ -459,7 +482,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeTopic_byId_notFound_returnsNotFound() {
+    void processDescribeTopic_byId_notFound_returnsNotFound()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeTopicsResult.class);
@@ -479,7 +503,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processCreateTopic_success_returnsTopicInfo() {
+    void processCreateTopic_success_returnsTopicInfo()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(CreateTopicsResult.class);
@@ -505,7 +530,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processCreateTopic_emptyResultValues_stillWritesResponse() {
+    void processCreateTopic_emptyResultValues_stillWritesResponse()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(CreateTopicsResult.class);
@@ -529,7 +555,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processCreateTopic_topicExists_returnsConflict() {
+    void processCreateTopic_topicExists_returnsConflict()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(CreateTopicsResult.class);
@@ -549,7 +576,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteTopic_success_returnsNoContent() {
+    void processDeleteTopic_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteTopicsResult.class);
@@ -568,7 +596,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteTopics_success_returnsResults() {
+    void processDeleteTopics_success_returnsResults()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteTopicsResult.class);
@@ -591,7 +620,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteTopics_callbackThrows_returnsInternalServerErrorInsteadOfHanging() {
+    void processDeleteTopics_callbackThrows_returnsInternalServerErrorInsteadOfHanging()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteTopicsResult.class);
@@ -613,7 +643,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteRecords_success_returnsLowWatermark() {
+    void processDeleteRecords_success_returnsLowWatermark()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteRecordsResult.class);
@@ -640,7 +671,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processCreatePartitions_success_returnsNoContent() {
+    void processCreatePartitions_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(CreatePartitionsResult.class);
@@ -664,7 +696,8 @@ class AdminRequestProcessorTest {
     //region Configs
 
     @Test
-    void processDescribeTopicConfigs_success_returnsEntries() {
+    void processDescribeTopicConfigs_success_returnsEntries()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeConfigsResult.class);
@@ -689,7 +722,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeGroupConfigs_success_returnsEntries() {
+    void processDescribeGroupConfigs_success_returnsEntries()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeConfigsResult.class);
@@ -714,7 +748,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processAlterTopicConfig_success_returnsOk() {
+    void processAlterTopicConfig_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterConfigsResult.class);
@@ -735,7 +770,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processAlterGroupConfig_success_returnsOk() {
+    void processAlterGroupConfig_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterConfigsResult.class);
@@ -756,7 +792,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteTopicConfig_success_returnsOk() {
+    void processDeleteTopicConfig_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterConfigsResult.class);
@@ -776,7 +813,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteGroupConfig_success_returnsOk() {
+    void processDeleteGroupConfig_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterConfigsResult.class);
@@ -800,7 +838,8 @@ class AdminRequestProcessorTest {
     //region SCRAM
 
     @Test
-    void processDescribeUserScramCredentials_success_returnsDescriptions() {
+    void processDescribeUserScramCredentials_success_returnsDescriptions()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeUserScramCredentialsResult.class);
@@ -822,7 +861,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processUpsertUserScramCredentials_success_returnsOk() {
+    void processUpsertUserScramCredentials_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterUserScramCredentialsResult.class);
@@ -843,7 +883,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteUserScramCredentials_success_returnsOk() {
+    void processDeleteUserScramCredentials_success_returnsOk()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterUserScramCredentialsResult.class);
@@ -867,7 +908,8 @@ class AdminRequestProcessorTest {
     //region ACLs
 
     @Test
-    void processDescribeAcls_success_returnsBindings() {
+    void processDescribeAcls_success_returnsBindings()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeAclsResult.class);
@@ -890,7 +932,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processCreateAcls_success_returnsNoContent() {
+    void processCreateAcls_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(CreateAclsResult.class);
@@ -921,7 +964,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteAcls_success_returnsNoContent() {
+    void processDeleteAcls_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteAclsResult.class);
@@ -949,7 +993,8 @@ class AdminRequestProcessorTest {
     //region Producers
 
     @Test
-    void processDescribeProducers_success_returnsStates() {
+    void processDescribeProducers_success_returnsStates()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeProducersResult.class);
@@ -968,7 +1013,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processAbortTransaction_success_returnsNoContent() {
+    void processAbortTransaction_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AbortTransactionResult.class);
@@ -994,7 +1040,8 @@ class AdminRequestProcessorTest {
     //region Groups
 
     @Test
-    void processListGroups_success_returnsListings() {
+    void processListGroups_success_returnsListings()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(ListGroupsResult.class);
@@ -1016,7 +1063,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListGroups_invalidGroupType_returnsBadRequest() {
+    void processListGroups_invalidGroupType_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminListGroupsRequest();
@@ -1032,7 +1080,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListGroups_invalidGroupState_returnsBadRequest() {
+    void processListGroups_invalidGroupState_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminListGroupsRequest();
@@ -1048,7 +1097,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListGroups_groupStatesInBothNamings_areAccepted() {
+    void processListGroups_groupStatesInBothNamings_areAccepted()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(ListGroupsResult.class);
@@ -1071,7 +1121,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListGroups_nullGroupState_returnsBadRequest() {
+    void processListGroups_nullGroupState_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminListGroupsRequest();
@@ -1087,7 +1138,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeConsumerGroup_success_returnsDescription() {
+    void processDescribeConsumerGroup_success_returnsDescription()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeConsumerGroupsResult.class);
@@ -1110,7 +1162,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDescribeConsumerGroup_notFound_returnsNotFound() {
+    void processDescribeConsumerGroup_notFound_returnsNotFound()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DescribeConsumerGroupsResult.class);
@@ -1130,7 +1183,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteConsumerGroup_success_returnsNoContent() {
+    void processDeleteConsumerGroup_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteConsumerGroupsResult.class);
@@ -1149,7 +1203,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListConsumerGroupOffsets_success_returnsOffsets() {
+    void processListConsumerGroupOffsets_success_returnsOffsets()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(ListConsumerGroupOffsetsResult.class);
@@ -1172,7 +1227,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processAlterConsumerGroupOffsets_success_returnsNoContent() {
+    void processAlterConsumerGroupOffsets_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(AlterConsumerGroupOffsetsResult.class);
@@ -1196,7 +1252,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processDeleteConsumerGroupOffsets_success_returnsNoContent() {
+    void processDeleteConsumerGroupOffsets_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(DeleteConsumerGroupOffsetsResult.class);
@@ -1216,7 +1273,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processRemoveMembersFromConsumerGroup_success_returnsNoContent() {
+    void processRemoveMembersFromConsumerGroup_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(RemoveMembersFromConsumerGroupResult.class);
@@ -1241,7 +1299,8 @@ class AdminRequestProcessorTest {
     //region Offsets
 
     @Test
-    void processListEarliestOffsets_success_returnsOffsets() {
+    void processListEarliestOffsets_success_returnsOffsets()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(ListOffsetsResult.class);
@@ -1264,7 +1323,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListOffsets_duplicatePartitions_areDeduplicated() {
+    void processListOffsets_duplicatePartitions_areDeduplicated()
+    {
         var wrapper = addWrapper();
         var admin = wrapper.getAdmin();
         var result = mock(ListOffsetsResult.class);
@@ -1287,7 +1347,8 @@ class AdminRequestProcessorTest {
     }
 
     @Test
-    void processListTimestampOffsets_invalidIsolationLevel_returnsBadRequest() {
+    void processListTimestampOffsets_invalidIsolationLevel_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new AdminListTimestampOffsetsRequest();
@@ -1307,7 +1368,8 @@ class AdminRequestProcessorTest {
     //endregion
 
     @Test
-    void processRequest_unknownRequestType_returnsInternalServerError() {
+    void processRequest_unknownRequestType_returnsInternalServerError()
+    {
         channel.writeInbound(bearer(new UnknownAdminRequest()));
 
         FullHttpResponse response = channel.readOutbound();
@@ -1315,6 +1377,7 @@ class AdminRequestProcessorTest {
         response.release();
     }
 
-    private record UnknownAdminRequest() implements AdminRequest {
+    private record UnknownAdminRequest() implements AdminRequest
+    {
     }
 }

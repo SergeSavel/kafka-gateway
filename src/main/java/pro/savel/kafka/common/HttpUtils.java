@@ -31,8 +31,8 @@ import pro.savel.kafka.common.exceptions.BadRequestException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-public abstract class HttpUtils {
-
+public abstract class HttpUtils
+{
     public static final String APPLICATION_JSON = "application/json";
     public static final String APPLICATION_JSON_CHARSET_UTF8 = "application/json; charset=utf-8";
     public static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -47,18 +47,21 @@ public abstract class HttpUtils {
     public static final AsciiString ASCII_APPLICATION_OCTET_STREAM = AsciiString.cached(APPLICATION_OCTET_STREAM);
     public static final AsciiString ASCII_TEXT_PLAIN_CHARSET_UTF8 = AsciiString.cached(TEXT_PLAIN_CHARSET_UTF8);
 
-    public static String getContentType(FullHttpRequest httpRequest) throws BadRequestException {
+    public static String getContentType(FullHttpRequest httpRequest) throws BadRequestException
+    {
         var contentType = httpRequest.headers().get(ASCII_CONTENT_TYPE);
         if (contentType == null)
             throw new BadRequestException("Missing Content-Type header in request.");
         return contentType;
     }
 
-    public static boolean isJson(String contentType) {
+    public static boolean isJson(String contentType)
+    {
         return APPLICATION_JSON.equals(mediaType(contentType));
     }
 
-    public static boolean isOctetStream(String contentType) {
+    public static boolean isOctetStream(String contentType)
+    {
         return APPLICATION_OCTET_STREAM.equals(mediaType(contentType));
     }
 
@@ -70,7 +73,8 @@ public abstract class HttpUtils {
      * the server's locale: under a Turkish or Azeri default locale {@code "APPLICATION/JSON"} would
      * otherwise fold to {@code "applıcatıon/json"} with dotless i and never match.
      */
-    public static String mediaType(String headerValue) {
+    public static String mediaType(String headerValue)
+    {
         if (headerValue == null)
             return null;
         var separatorIndex = headerValue.indexOf(';');
@@ -79,106 +83,129 @@ public abstract class HttpUtils {
         return mediaType.isEmpty() ? null : mediaType;
     }
 
-    public static void writeOk(ChannelHandlerContext ctx, HttpRequest request, String message, AsciiString contentType) {
+    public static void writeOk(ChannelHandlerContext ctx, HttpRequest request, String message, AsciiString contentType)
+    {
         if (HttpUtil.isKeepAlive(request))
             ctx.writeAndFlush(createHttpResponse(HttpResponseStatus.OK, message, contentType));
         else
             writeOkAndClose(ctx, message, contentType);
     }
 
-    public static void writeOkAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeOkAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.OK, message);
     }
 
-    public static void writeOkAndClose(ChannelHandlerContext ctx, String message, AsciiString contentType) {
+    public static void writeOkAndClose(ChannelHandlerContext ctx, String message, AsciiString contentType)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.OK, message, contentType);
     }
 
-    public static void writeBadRequestAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeBadRequestAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.BAD_REQUEST, message);
     }
 
-    public static void writeNotFoundAndClose(ChannelHandlerContext ctx) {
+    public static void writeNotFoundAndClose(ChannelHandlerContext ctx)
+    {
         writeNotFoundAndClose(ctx, null);
     }
 
-    public static void writeNotFoundAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeNotFoundAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.NOT_FOUND, message);
     }
 
-    public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx, HttpMethod allowedMethod) {
+    public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx, HttpMethod allowedMethod)
+    {
         writeMethodNotAllowedAndClose(ctx, null, allowedMethod);
     }
 
     public static void writeMethodNotAllowedAndClose(ChannelHandlerContext ctx, String message,
-                                                     HttpMethod allowedMethod) {
+                                                     HttpMethod allowedMethod)
+    {
         var httpResponse = createHttpResponse(HttpResponseStatus.METHOD_NOT_ALLOWED, message,
                 ASCII_TEXT_PLAIN_CHARSET_UTF8);
         httpResponse.headers().set(ASCII_ALLOW, allowedMethod.asciiName());
         writeAndClose(ctx, httpResponse);
     }
 
-    public static void writeNotAcceptableAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeNotAcceptableAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.NOT_ACCEPTABLE, message);
     }
 
-    public static void writeUnauthorizedAndClose(ChannelHandlerContext ctx) {
+    public static void writeUnauthorizedAndClose(ChannelHandlerContext ctx)
+    {
         writeUnauthorizedAndClose(ctx, null);
     }
 
-    public static void writeUnauthorizedAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeUnauthorizedAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.UNAUTHORIZED, message);
     }
 
-    public static void writeForbiddenAndClose(ChannelHandlerContext ctx) {
+    public static void writeForbiddenAndClose(ChannelHandlerContext ctx)
+    {
         writeForbiddenAndClose(ctx, null);
     }
 
-    public static void writeForbiddenAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeForbiddenAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.FORBIDDEN, message);
     }
 
-    public static void writeConflictAndClose(ChannelHandlerContext ctx) {
+    public static void writeConflictAndClose(ChannelHandlerContext ctx)
+    {
         writeConflictAndClose(ctx, null);
     }
 
-    public static void writeConflictAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeConflictAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.CONFLICT, message);
     }
 
-    public static void writeInternalServerErrorAndClose(ChannelHandlerContext ctx) {
+    public static void writeInternalServerErrorAndClose(ChannelHandlerContext ctx)
+    {
         writeInternalServerErrorAndClose(ctx, null);
     }
 
-    public static void writeInternalServerErrorAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeInternalServerErrorAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR, message);
     }
 
-    public static void writeServiceUnavailableAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeServiceUnavailableAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.SERVICE_UNAVAILABLE, message);
     }
 
-    public static void writeGatewayTimeoutAndClose(ChannelHandlerContext ctx, String message) {
+    public static void writeGatewayTimeoutAndClose(ChannelHandlerContext ctx, String message)
+    {
         writeHttpResponseAndClose(ctx, HttpResponseStatus.GATEWAY_TIMEOUT, message);
     }
 
-    public static void writeHttpResponseAndClose(ChannelHandlerContext ctx, HttpResponseStatus status, String message) {
+    public static void writeHttpResponseAndClose(ChannelHandlerContext ctx, HttpResponseStatus status, String message)
+    {
         writeHttpResponseAndClose(ctx, status, message, ASCII_TEXT_PLAIN_CHARSET_UTF8);
     }
 
     public static void writeHttpResponseAndClose(ChannelHandlerContext ctx, HttpResponseStatus status, String message,
-                                                 AsciiString contentType) {
+                                                 AsciiString contentType)
+    {
         writeAndClose(ctx, createHttpResponse(status, message, contentType));
     }
 
-    private static void writeAndClose(ChannelHandlerContext ctx, FullHttpResponse httpResponse) {
+    private static void writeAndClose(ChannelHandlerContext ctx, FullHttpResponse httpResponse)
+    {
         httpResponse.headers().set(ASCII_CONNECTION, HttpHeaderValues.CLOSE);
         var future = ctx.writeAndFlush(httpResponse);
         future.addListener(ChannelFutureListener.CLOSE);
     }
 
     private static FullHttpResponse createHttpResponse(HttpResponseStatus status, String message,
-                                                       AsciiString contentType) {
+                                                       AsciiString contentType)
+    {
         var httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status);
         if (message != null) {
             httpResponse.headers().set(ASCII_CONTENT_TYPE, contentType);

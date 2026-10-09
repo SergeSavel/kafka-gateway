@@ -23,14 +23,16 @@ import java.util.Collection;
 import java.util.Map;
 
 public class AdminDescribeProducersResponse extends ArrayList<AdminDescribeProducersResponse.PartitionProducerState>
-        implements AdminResponse {
-
-    private AdminDescribeProducersResponse(int initialCapacity) {
+        implements AdminResponse
+{
+    private AdminDescribeProducersResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
     public static AdminDescribeProducersResponse of(
-            Map<TopicPartition, DescribeProducersResult.PartitionProducerState> source) {
+            Map<TopicPartition, DescribeProducersResult.PartitionProducerState> source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeProducersResponse(source.size());
@@ -40,18 +42,20 @@ public class AdminDescribeProducersResponse extends ArrayList<AdminDescribeProdu
     }
 
     @Getter
-    public static class PartitionProducerState {
-
+    public static class PartitionProducerState
+    {
         private String topic;
         private int partition;
         private Collection<ProducerState> activeProducers;
 
-        private PartitionProducerState() {
+        private PartitionProducerState()
+        {
         }
 
         private static PartitionProducerState of(
                 TopicPartition topicPartition,
-                DescribeProducersResult.PartitionProducerState source) {
+                DescribeProducersResult.PartitionProducerState source)
+        {
             if (topicPartition == null || source == null)
                 return null;
             var result = new PartitionProducerState();
@@ -63,8 +67,8 @@ public class AdminDescribeProducersResponse extends ArrayList<AdminDescribeProdu
     }
 
     @Getter
-    public static class ProducerState {
-
+    public static class ProducerState
+    {
         private long producerId;
         private int producerEpoch;
         private int lastSequence;
@@ -72,10 +76,12 @@ public class AdminDescribeProducersResponse extends ArrayList<AdminDescribeProdu
         private Long currentTransactionStartOffset;
         private Integer coordinatorEpoch;
 
-        private ProducerState() {
+        private ProducerState()
+        {
         }
 
-        private static ProducerState of(org.apache.kafka.clients.admin.ProducerState source) {
+        private static ProducerState of(org.apache.kafka.clients.admin.ProducerState source)
+        {
             if (source == null)
                 return null;
             var result = new ProducerState();
@@ -91,7 +97,8 @@ public class AdminDescribeProducersResponse extends ArrayList<AdminDescribeProdu
         }
 
         private static ArrayList<ProducerState> of(
-                Collection<org.apache.kafka.clients.admin.ProducerState> source) {
+                Collection<org.apache.kafka.clients.admin.ProducerState> source)
+        {
             if (source == null)
                 return null;
             var result = new ArrayList<ProducerState>(source.size());

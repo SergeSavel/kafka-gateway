@@ -20,13 +20,15 @@ import pro.savel.kafka.admin.AdminWrapper;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AdminListResponse extends ArrayList<AdminListResponse.AdminListing> implements AdminResponse {
-
-    private AdminListResponse(int initialCapacity) {
+public class AdminListResponse extends ArrayList<AdminListResponse.AdminListing> implements AdminResponse
+{
+    private AdminListResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminListResponse of(Collection<AdminWrapper> source) {
+    public static AdminListResponse of(Collection<AdminWrapper> source)
+    {
         if (source == null)
             return null;
         var result = new AdminListResponse(source.size());
@@ -35,18 +37,20 @@ public class AdminListResponse extends ArrayList<AdminListResponse.AdminListing>
     }
 
     @Getter
-    public static class AdminListing {
-
+    public static class AdminListing
+    {
         private String id;
         private String name;
         private String owner;
         private String username;
         private long expiresAt;
 
-        private AdminListing() {
+        private AdminListing()
+        {
         }
 
-        private static AdminListing of(AdminWrapper source) {
+        private static AdminListing of(AdminWrapper source)
+        {
             if (source == null)
                 return null;
             var result = new AdminListing();

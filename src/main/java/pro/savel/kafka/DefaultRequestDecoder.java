@@ -22,10 +22,11 @@ import io.netty.util.ReferenceCountUtil;
 import pro.savel.kafka.common.HttpUtils;
 
 @ChannelHandler.Sharable
-public class DefaultRequestDecoder extends ChannelInboundHandlerAdapter {
-
+public class DefaultRequestDecoder extends ChannelInboundHandlerAdapter
+{
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest) {
             try {
                 HttpUtils.writeNotFoundAndClose(ctx);

@@ -19,9 +19,10 @@ import pro.savel.kafka.admin.responses.AdminResponse;
 import pro.savel.kafka.common.RequestBearer;
 import pro.savel.kafka.common.ResponseBearer;
 
-public class AdminResponseBearer extends ResponseBearer<AdminResponse> {
-
-    public AdminResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, AdminResponse response) {
+public class AdminResponseBearer extends ResponseBearer<AdminResponse>
+{
+    public AdminResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, AdminResponse response)
+    {
         super(requestBearer, status, response);
     }
 }

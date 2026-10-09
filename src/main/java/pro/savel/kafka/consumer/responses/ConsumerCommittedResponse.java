@@ -21,13 +21,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConsumerCommittedResponse extends ArrayList<ConsumerCommittedResponse.TopicOffsets> implements ConsumerResponse {
-
-    private ConsumerCommittedResponse(int size) {
+public class ConsumerCommittedResponse extends ArrayList<ConsumerCommittedResponse.TopicOffsets> implements ConsumerResponse
+{
+    private ConsumerCommittedResponse(int size)
+    {
         super(size);
     }
 
-    public static ConsumerCommittedResponse of(Map<org.apache.kafka.common.TopicPartition, OffsetAndMetadata> source) {
+    public static ConsumerCommittedResponse of(Map<org.apache.kafka.common.TopicPartition, OffsetAndMetadata> source)
+    {
         if (source == null)
             return null;
         var map = new HashMap<String, TopicOffsets>();
@@ -41,28 +43,31 @@ public class ConsumerCommittedResponse extends ArrayList<ConsumerCommittedRespon
     }
 
     @Getter
-    public static class TopicOffsets {
-
+    public static class TopicOffsets
+    {
         private final String topic;
         private final ArrayList<PartitionOffset> offsets;
 
-        private TopicOffsets(String topic) {
+        private TopicOffsets(String topic)
+        {
             this.topic = topic;
             this.offsets = new ArrayList<>();
         }
     }
 
     @Getter
-    public static class PartitionOffset {
-
+    public static class PartitionOffset
+    {
         private int partition;
         private Long offset;
         private String metadata;
 
-        private PartitionOffset() {
+        private PartitionOffset()
+        {
         }
 
-        private static PartitionOffset of(int partition, OffsetAndMetadata source) {
+        private static PartitionOffset of(int partition, OffsetAndMetadata source)
+        {
             var result = new PartitionOffset();
             result.partition = partition;
             if (source != null) {

@@ -53,10 +53,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ConsumerResponseEncoderTest {
-
+class ConsumerResponseEncoderTest
+{
     @Test
-    void pollResponse_isStreamedAndCompletesRequestFlow() {
+    void pollResponse_isStreamedAndCompletesRequestFlow()
+    {
         var channel = new EmbeddedChannel(
                 new HttpRequestFlowControlHandler(),
                 new ChunkedWriteHandler(),
@@ -104,7 +105,8 @@ class ConsumerResponseEncoderTest {
     }
 
     @Test
-    void nonPollResponse_withBinarySerde_returnsNotAcceptable() {
+    void nonPollResponse_withBinarySerde_returnsNotAcceptable()
+    {
         var channel = new EmbeddedChannel(new ConsumerResponseEncoder(new ObjectMapper(), 64 * 1024));
         var bearer = new ConsumerResponseBearer(
                 new RequestBearer(new ConsumerTouchRequest(), Serde.BINARY, true),
@@ -120,7 +122,8 @@ class ConsumerResponseEncoderTest {
         channel.finishAndReleaseAll();
     }
 
-    private static ConsumerRecords<byte[], byte[]> records() {
+    private static ConsumerRecords<byte[], byte[]> records()
+    {
         var record = new ConsumerRecord<>("topic", 0, 1, 100L, TimestampType.CREATE_TIME,
                 3, 7, "key".getBytes(StandardCharsets.UTF_8), "payload".getBytes(StandardCharsets.UTF_8),
                 new RecordHeaders(), Optional.empty());

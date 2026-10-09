@@ -31,13 +31,14 @@ import pro.savel.kafka.common.exceptions.MethodNotAllowedException;
 import java.nio.charset.StandardCharsets;
 
 @ChannelHandler.Sharable
-public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
-
+public class VersionRequestDecoder extends ChannelInboundHandlerAdapter
+{
     public static final String URI_PREFIX = "/version";
     private static final Logger logger = LoggerFactory.getLogger(VersionRequestDecoder.class);
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest httpRequest && httpRequest.uri().startsWith(URI_PREFIX)) {
             try {
                 decode(ctx, httpRequest);
@@ -56,7 +57,8 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException {
+    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException
+    {
         var decoder = new QueryStringDecoder(httpRequest.uri(), StandardCharsets.UTF_8, true);
         var pathMethod = decoder.path().substring(URI_PREFIX.length());
         if (pathMethod.isEmpty()) {
@@ -66,7 +68,8 @@ public class VersionRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private void decodeRoot(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException {
+    private void decodeRoot(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws MethodNotAllowedException
+    {
         if (httpRequest.method() == HttpMethod.GET) {
             var version = VersionRequestDecoder.class.getPackage().getImplementationVersion();
             HttpUtils.writeOk(ctx, httpRequest, version != null ? version : "unknown",

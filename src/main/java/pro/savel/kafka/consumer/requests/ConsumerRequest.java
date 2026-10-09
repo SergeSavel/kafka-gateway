@@ -16,5 +16,6 @@ package pro.savel.kafka.consumer.requests;
 
 import pro.savel.kafka.common.contract.Request;
 
-public interface ConsumerRequest extends Request {
+public interface ConsumerRequest extends Request
+{
 }

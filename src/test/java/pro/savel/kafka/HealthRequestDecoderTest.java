@@ -31,10 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class HealthRequestDecoderTest {
-
+class HealthRequestDecoderTest
+{
     @Test
-    void get_returnsOkWithJsonContentType() {
+    void get_returnsOkWithJsonContentType()
+    {
         var channel = new EmbeddedChannel(new HealthRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/health");
         assertFalse(channel.writeInbound(request));
@@ -48,7 +49,8 @@ class HealthRequestDecoderTest {
     }
 
     @Test
-    void get_keepAliveRequest_leavesConnectionOpen() {
+    void get_keepAliveRequest_leavesConnectionOpen()
+    {
         var channel = new EmbeddedChannel(new HealthRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/health");
         assertFalse(channel.writeInbound(request));
@@ -62,7 +64,8 @@ class HealthRequestDecoderTest {
     }
 
     @Test
-    void get_connectionCloseRequest_announcesAndClosesConnection() {
+    void get_connectionCloseRequest_announcesAndClosesConnection()
+    {
         var channel = new EmbeddedChannel(new HealthRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/health");
         request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
@@ -82,7 +85,8 @@ class HealthRequestDecoderTest {
     }
 
     @Test
-    void post_returnsMethodNotAllowed() {
+    void post_returnsMethodNotAllowed()
+    {
         var channel = new EmbeddedChannel(new HealthRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/health");
         assertFalse(channel.writeInbound(request));

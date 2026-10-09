@@ -35,8 +35,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ConsumerResponseSerializerTest {
-
+class ConsumerResponseSerializerTest
+{
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UnpooledByteBufAllocator allocator = UnpooledByteBufAllocator.DEFAULT;
 
@@ -49,24 +49,28 @@ class ConsumerResponseSerializerTest {
                 key, value, headers, Optional.empty());
     }
 
-    private static ConsumerRecords<byte[], byte[]> createRecords(List<ConsumerRecord<byte[], byte[]>> records) {
+    private static ConsumerRecords<byte[], byte[]> createRecords(List<ConsumerRecord<byte[], byte[]>> records)
+    {
         var tp = new TopicPartition(records.get(0).topic(), records.get(0).partition());
         return new ConsumerRecords<>(Map.of(tp, records), Map.of());
     }
 
-    private static ConsumerRecords<byte[], byte[]> emptyRecords() {
+    private static ConsumerRecords<byte[], byte[]> emptyRecords()
+    {
         return new ConsumerRecords<>(Collections.emptyMap(), Collections.emptyMap());
     }
 
 //region JSON
 
     @Test
-    void serializeJson_null_returnsNull() throws Exception {
+    void serializeJson_null_returnsNull() throws Exception
+    {
         assertNull(ConsumerResponseSerializer.serializeJson(objectMapper, allocator, null));
     }
 
     @Test
-    void serializeJson_emptyPollResponse_returnsEmptyArray() throws Exception {
+    void serializeJson_emptyPollResponse_returnsEmptyArray() throws Exception
+    {
         var response = ConsumerPollResponse.of(emptyRecords());
         var buf = ConsumerResponseSerializer.serializeJson(objectMapper, allocator, response);
         assertNotNull(buf);
@@ -75,7 +79,8 @@ class ConsumerResponseSerializerTest {
     }
 
     @Test
-    void serializeJson_pollResponse_convertsBytesToString() throws Exception {
+    void serializeJson_pollResponse_convertsBytesToString() throws Exception
+    {
         var record = createRecord("test", 0, 1L, 100L,
                 "key".getBytes(StandardCharsets.UTF_8), "value".getBytes(StandardCharsets.UTF_8),
                 new RecordHeaders());
@@ -91,7 +96,8 @@ class ConsumerResponseSerializerTest {
     }
 
     @Test
-    void serializeJson_pollResponse_preservesUtf8AndEscaping() throws Exception {
+    void serializeJson_pollResponse_preservesUtf8AndEscaping() throws Exception
+    {
         var headers = new RecordHeaders(List.of(
                 new RecordHeader("header", "значение\n".getBytes(StandardCharsets.UTF_8))
         ));
@@ -113,12 +119,14 @@ class ConsumerResponseSerializerTest {
 //region Binary
 
     @Test
-    void serializeBinary_null_returnsNull() {
+    void serializeBinary_null_returnsNull()
+    {
         assertNull(ConsumerResponseSerializer.serializeBinary(allocator, null));
     }
 
     @Test
-    void serializeBinary_emptyPollResponse_returnsValidBinary() {
+    void serializeBinary_emptyPollResponse_returnsValidBinary()
+    {
         var response = ConsumerPollResponse.of(emptyRecords());
         var buf = ConsumerResponseSerializer.serializeBinary(allocator, response);
         assertNotNull(buf);
@@ -129,7 +137,8 @@ class ConsumerResponseSerializerTest {
     }
 
     @Test
-    void serializeBinary_pollResponseWithMessage_returnsValidBinary() {
+    void serializeBinary_pollResponseWithMessage_returnsValidBinary()
+    {
         var headers = new RecordHeaders(List.of(
                 new RecordHeader("ключ", "hv1".getBytes(StandardCharsets.UTF_8))
         ));
@@ -186,7 +195,8 @@ class ConsumerResponseSerializerTest {
     }
 
     @Test
-    void serializeBinary_nullKeyAndValue_writesNullMarkers() {
+    void serializeBinary_nullKeyAndValue_writesNullMarkers()
+    {
         var record = createRecord("t", 0, 0L, 0L, null, null, new RecordHeaders());
 
         var response = ConsumerPollResponse.of(createRecords(List.of(record)));
@@ -210,7 +220,8 @@ class ConsumerResponseSerializerTest {
     }
 
     @Test
-    void serializeBinary_nullHeaders_writesZeroHeaderCountInsteadOfThrowing() throws Exception {
+    void serializeBinary_nullHeaders_writesZeroHeaderCountInsteadOfThrowing() throws Exception
+    {
         var record = createRecord("t", 0, 0L, 0L, null, null, new RecordHeaders());
         var response = ConsumerPollResponse.of(createRecords(List.of(record)));
         var message = response.get(0);
@@ -234,7 +245,8 @@ class ConsumerResponseSerializerTest {
     }
 
     @Test
-    void serializeBinary_unsupportedType_throwsException() {
+    void serializeBinary_unsupportedType_throwsException()
+    {
         ConsumerResponse unsupported = new ConsumerResponse() {};
         assertThrows(IllegalArgumentException.class,
                 () -> ConsumerResponseSerializer.serializeBinary(allocator, unsupported));

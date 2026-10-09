@@ -21,7 +21,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class AdminDeleteShareGroupsRequest implements AdminGroupRequest {
+public class AdminDeleteShareGroupsRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

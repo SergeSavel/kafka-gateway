@@ -23,18 +23,20 @@ import pro.savel.kafka.common.contract.PartitionInfo;
 import java.util.Collection;
 
 @Getter
-public class AdminDescribeTopicResponse implements AdminResponse {
-
+public class AdminDescribeTopicResponse implements AdminResponse
+{
     private String id;
     private String name;
     private boolean isInternal;
     private Collection<String> authorizedOperations;
     private Collection<PartitionInfo> partitions;
 
-    private AdminDescribeTopicResponse() {
+    private AdminDescribeTopicResponse()
+    {
     }
 
-    public static AdminDescribeTopicResponse of(TopicDescription source) {
+    public static AdminDescribeTopicResponse of(TopicDescription source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeTopicResponse();

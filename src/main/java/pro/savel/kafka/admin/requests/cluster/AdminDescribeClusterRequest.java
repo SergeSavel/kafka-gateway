@@ -19,7 +19,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class AdminDescribeClusterRequest implements AdminClusterRequest {
+public class AdminDescribeClusterRequest implements AdminClusterRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

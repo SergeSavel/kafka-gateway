@@ -30,10 +30,11 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ProducerResponseEncoderTest {
-
+class ProducerResponseEncoderTest
+{
     @Test
-    void nonSendResponse_withBinarySerde_returnsNotAcceptable() {
+    void nonSendResponse_withBinarySerde_returnsNotAcceptable()
+    {
         var channel = new EmbeddedChannel(new ProducerResponseEncoder(new ObjectMapper()));
         var bearer = new ProducerResponseBearer(
                 new RequestBearer(new ProducerTouchRequest(), Serde.BINARY, true),

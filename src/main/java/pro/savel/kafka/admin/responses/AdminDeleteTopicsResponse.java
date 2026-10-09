@@ -24,13 +24,15 @@ import java.util.ArrayList;
 import java.util.Map;
 
 @Getter
-public class AdminDeleteTopicsResponse extends ArrayList<AdminDeleteTopicsResponse.TopicDeletionResult> implements AdminResponse {
-
-    private AdminDeleteTopicsResponse(int initialCapacity) {
+public class AdminDeleteTopicsResponse extends ArrayList<AdminDeleteTopicsResponse.TopicDeletionResult> implements AdminResponse
+{
+    private AdminDeleteTopicsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminDeleteTopicsResponse ofUuids(Map<Uuid, KafkaFuture<Void>> source) {
+    public static AdminDeleteTopicsResponse ofUuids(Map<Uuid, KafkaFuture<Void>> source)
+    {
         if (source == null)
             return null;
         var result = new AdminDeleteTopicsResponse(source.size());
@@ -38,7 +40,8 @@ public class AdminDeleteTopicsResponse extends ArrayList<AdminDeleteTopicsRespon
         return result;
     }
 
-    public static AdminDeleteTopicsResponse ofNames(Map<String, KafkaFuture<Void>> source) {
+    public static AdminDeleteTopicsResponse ofNames(Map<String, KafkaFuture<Void>> source)
+    {
         if (source == null)
             return null;
         var result = new AdminDeleteTopicsResponse(source.size());
@@ -47,14 +50,15 @@ public class AdminDeleteTopicsResponse extends ArrayList<AdminDeleteTopicsRespon
     }
 
     @Getter
-    public static class TopicDeletionResult {
-
+    public static class TopicDeletionResult
+    {
         private String topicId = null;
         private String topicName = null;
         private boolean success = true;
         private String errorMessage;
 
-        private static TopicDeletionResult ofUuid(Uuid topicId, KafkaFuture<Void> topicDeletionResult) {
+        private static TopicDeletionResult ofUuid(Uuid topicId, KafkaFuture<Void> topicDeletionResult)
+        {
             if (topicDeletionResult == null)
                 return null;
             var result = new TopicDeletionResult();
@@ -68,7 +72,8 @@ public class AdminDeleteTopicsResponse extends ArrayList<AdminDeleteTopicsRespon
             return result;
         }
 
-        private static TopicDeletionResult ofName(String topicName, KafkaFuture<Void> topicDeletionResult) {
+        private static TopicDeletionResult ofName(String topicName, KafkaFuture<Void> topicDeletionResult)
+        {
             if (topicDeletionResult == null)
                 return null;
             var result = new TopicDeletionResult();

@@ -20,7 +20,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class AdminDescribeBrokerConfigsRequest implements AdminConfigRequest {
+public class AdminDescribeBrokerConfigsRequest implements AdminConfigRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

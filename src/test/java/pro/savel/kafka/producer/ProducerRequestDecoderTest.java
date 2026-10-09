@@ -40,12 +40,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ProducerRequestDecoderTest {
-
+class ProducerRequestDecoderTest
+{
     private EmbeddedChannel channel;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         var objectMapper = new ObjectMapper()
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, true)
@@ -58,12 +59,14 @@ class ProducerRequestDecoderTest {
     }
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.finishAndReleaseAll();
     }
 
     @Test
-    void decodeCreate_blankName_returnsBadRequest() {
+    void decodeCreate_blankName_returnsBadRequest()
+    {
         assertFalse(channel.writeInbound(createRequest("   ")));
 
         FullHttpResponse response = channel.readOutbound();
@@ -73,7 +76,8 @@ class ProducerRequestDecoderTest {
     }
 
     @Test
-    void decodeCreate_nonBlankName_passesRequest() {
+    void decodeCreate_nonBlankName_passesRequest()
+    {
         assertTrue(channel.writeInbound(createRequest("orders-producer")));
 
         RequestBearer bearer = channel.readInbound();
@@ -81,7 +85,8 @@ class ProducerRequestDecoderTest {
     }
 
     @Test
-    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost() {
+    void decode_postRouteWithGet_returnsMethodNotAllowedWithAllowPost()
+    {
         assertFalse(channel.writeInbound(
                 new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/producer/create")));
 
@@ -92,7 +97,8 @@ class ProducerRequestDecoderTest {
     }
 
     @Test
-    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet() {
+    void decode_listWithPost_returnsMethodNotAllowedWithAllowGet()
+    {
         assertFalse(channel.writeInbound(
                 new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/producer")));
 
@@ -102,7 +108,8 @@ class ProducerRequestDecoderTest {
         response.release();
     }
 
-    private static FullHttpRequest createRequest(String name) {
+    private static FullHttpRequest createRequest(String name)
+    {
         var body = Unpooled.copiedBuffer("{\"name\":\"" + name + "\",\"config\":{\"bootstrap.servers\":\"kafka:9092\"},"
                 + "\"expirationTimeout\":60000}", StandardCharsets.UTF_8);
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/producer/create", body);

@@ -25,24 +25,27 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class AdminCreateTopicsResponse extends ArrayList<AdminCreateTopicResponse> implements AdminResponse {
-
-    private AdminCreateTopicsResponse(int initialCapacity) {
+public class AdminCreateTopicsResponse extends ArrayList<AdminCreateTopicResponse> implements AdminResponse
+{
+    private AdminCreateTopicsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
     @Getter
-    public static class CreationResult extends AdminCreateTopicResponse {
-
+    public static class CreationResult extends AdminCreateTopicResponse
+    {
         private boolean success = true;
         private String errorMessage = null;
         private String topicName;
 
-        private CreationResult() {
+        private CreationResult()
+        {
             super();
         }
 
-        private static CreationResult of(String topicName, KafkaFuture<Void> statusFuture, KafkaFuture<Uuid> idFuture, KafkaFuture<Integer> numPartitionsFuture, KafkaFuture<Integer> replicationFactorFuture) throws ExecutionException, InterruptedException {
+        private static CreationResult of(String topicName, KafkaFuture<Void> statusFuture, KafkaFuture<Uuid> idFuture, KafkaFuture<Integer> numPartitionsFuture, KafkaFuture<Integer> replicationFactorFuture) throws ExecutionException, InterruptedException
+        {
             var result = new CreationResult();
             result.topicName = topicName;
             try {
@@ -59,7 +62,8 @@ public class AdminCreateTopicsResponse extends ArrayList<AdminCreateTopicRespons
         }
     }
 
-    public static AdminCreateTopicsResponse of(org.apache.kafka.clients.admin.CreateTopicsResult source) throws ExecutionException, InterruptedException {
+    public static AdminCreateTopicsResponse of(org.apache.kafka.clients.admin.CreateTopicsResult source) throws ExecutionException, InterruptedException
+    {
         if (source == null)
             return null;
         var result = new AdminCreateTopicsResponse(source.values().size());

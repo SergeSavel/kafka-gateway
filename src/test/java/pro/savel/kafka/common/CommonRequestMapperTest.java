@@ -21,22 +21,25 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CommonRequestMapperTest {
-
+class CommonRequestMapperTest
+{
     @Test
-    void mapPartitions_null_returnsNull() {
+    void mapPartitions_null_returnsNull()
+    {
         assertNull(CommonRequestMapper.mapPartitions(null));
     }
 
     @Test
-    void mapPartitions_emptyCollection_returnsEmptySet() {
+    void mapPartitions_emptyCollection_returnsEmptySet()
+    {
         var result = CommonRequestMapper.mapPartitions(List.of());
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void mapPartitions_validCollection_returnsMappedSet() {
+    void mapPartitions_validCollection_returnsMappedSet()
+    {
         var dto = pro.savel.kafka.common.contract.TopicPartition.of(new TopicPartition("test-topic", 3));
         var result = CommonRequestMapper.mapPartitions(List.of(dto));
         assertEquals(1, result.size());
@@ -46,12 +49,14 @@ class CommonRequestMapperTest {
     }
 
     @Test
-    void mapTopicPartition_null_returnsNull() {
+    void mapTopicPartition_null_returnsNull()
+    {
         assertNull(CommonRequestMapper.mapTopicPartition(null));
     }
 
     @Test
-    void mapTopicPartition_valid_returnsKafkaTopicPartition() {
+    void mapTopicPartition_valid_returnsKafkaTopicPartition()
+    {
         var dto = pro.savel.kafka.common.contract.TopicPartition.of(new TopicPartition("my-topic", 7));
         var result = CommonRequestMapper.mapTopicPartition(dto);
         assertEquals("my-topic", result.topic());

@@ -25,10 +25,11 @@ import java.util.function.BiConsumer;
  * tests deterministic and avoids the need to pump an {@link io.netty.channel.embedded.EmbeddedChannel}
  * while waiting for a background thread.
  */
-public class SynchronousBlockingTaskExecutor extends BlockingTaskExecutor {
-
+public class SynchronousBlockingTaskExecutor extends BlockingTaskExecutor
+{
     @Override
-    public <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, BiConsumer<T, Throwable> completion) {
+    public <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, BiConsumer<T, Throwable> completion)
+    {
         T result = null;
         Throwable error = null;
         try {

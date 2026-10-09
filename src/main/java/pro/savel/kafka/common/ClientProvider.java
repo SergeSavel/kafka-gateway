@@ -31,8 +31,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-public abstract class ClientProvider<Wrapper extends ClientWrapper> implements AutoCloseable {
-
+public abstract class ClientProvider<Wrapper extends ClientWrapper> implements AutoCloseable
+{
     private static final Logger logger = LoggerFactory.getLogger(ClientProvider.class);
     private static final int DEFAULT_CLOSE_PARALLELISM = 32;
     private static final int CLOSE_PARALLELISM = Math.max(1,
@@ -48,10 +48,12 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         return t;
     });
 
-    public ClientProvider() {
+    public ClientProvider()
+    {
         final var task = new Runnable() {
             @Override
-            public void run() {
+            public void run()
+            {
                 retireClients();
             }
         };
@@ -59,11 +61,13 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         close(ShutdownDeadline.after(DEFAULT_SHUTDOWN_TIMEOUT));
     }
 
-    public void close(ShutdownDeadline deadline) {
+    public void close(ShutdownDeadline deadline)
+    {
         retirer.shutdownNow();
         awaitRetirerTermination(deadline);
 
@@ -86,7 +90,8 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         }
     }
 
-    private void awaitRetirerTermination(ShutdownDeadline deadline) {
+    private void awaitRetirerTermination(ShutdownDeadline deadline)
+    {
         try {
             if (!retirer.awaitTermination(deadline.remainingNanos(), TimeUnit.NANOSECONDS))
                 logger.warn("Failed to terminate client retirer.");
@@ -95,7 +100,8 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         }
     }
 
-    void retireClients() {
+    void retireClients()
+    {
         var now = System.nanoTime();
         var clients = getItems();
         for (var client : clients) {
@@ -108,28 +114,33 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         }
     }
 
-    public Collection<Wrapper> getItems() {
+    public Collection<Wrapper> getItems()
+    {
         return wrappers.values();
     }
 
-    protected void addItem(Wrapper wrapper) {
+    protected void addItem(Wrapper wrapper)
+    {
         wrappers.put(wrapper.getId(), wrapper);
     }
 
-    protected Wrapper getItem(String id) throws NotFoundException {
+    protected Wrapper getItem(String id) throws NotFoundException
+    {
         var wrapper = wrappers.get(id);
         if (wrapper == null)
             throw new NotFoundException("Client not found.", null);
         return wrapper;
     }
 
-    protected void removeItem(String id) {
+    protected void removeItem(String id)
+    {
         var wrapper = wrappers.remove(id);
         if (wrapper != null)
             closeAsync(wrapper).join();
     }
 
-    private void closeInBackground(Wrapper wrapper) {
+    private void closeInBackground(Wrapper wrapper)
+    {
         closeAsync(wrapper).whenComplete((ignored, error) -> {
             if (error != null)
                 logger.warn("Failed to close {} with id '{}'.", wrapper.getClass().getSimpleName(), wrapper.getId(),
@@ -137,7 +148,8 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         });
     }
 
-    private CompletableFuture<Void> closeAsync(Wrapper wrapper) {
+    private CompletableFuture<Void> closeAsync(Wrapper wrapper)
+    {
         try {
             return CompletableFuture.runAsync(() -> closeWrapper(wrapper), closeExecutor);
         } catch (RejectedExecutionException e) {
@@ -150,7 +162,8 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         }
     }
 
-    private void closeWrapper(Wrapper wrapper) {
+    private void closeWrapper(Wrapper wrapper)
+    {
         var acquired = false;
         try {
             closePermits.acquire();
@@ -165,7 +178,8 @@ public abstract class ClientProvider<Wrapper extends ClientWrapper> implements A
         }
     }
 
-    private static Throwable unwrap(Throwable error) {
+    private static Throwable unwrap(Throwable error)
+    {
         var result = error;
         while (result instanceof CompletionException && result.getCause() != null)
             result = result.getCause();

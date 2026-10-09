@@ -18,15 +18,17 @@ import lombok.Getter;
 import pro.savel.kafka.admin.AdminWrapper;
 
 @Getter
-public class AdminCreateResponse implements AdminResponse {
-
+public class AdminCreateResponse implements AdminResponse
+{
     private String id;
     private String token;
 
-    private AdminCreateResponse() {
+    private AdminCreateResponse()
+    {
     }
 
-    public static AdminCreateResponse of(AdminWrapper source) {
+    public static AdminCreateResponse of(AdminWrapper source)
+    {
         if (source == null)
             return null;
         var result = new AdminCreateResponse();

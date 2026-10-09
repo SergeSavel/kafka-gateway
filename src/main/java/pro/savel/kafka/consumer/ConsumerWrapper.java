@@ -25,18 +25,20 @@ import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode(callSuper = false)
-public class ConsumerWrapper extends ClientWrapper {
-
+public class ConsumerWrapper extends ClientWrapper
+{
     private final Consumer<byte[], byte[]> consumer;
     private final String token = UUID.randomUUID().toString();
 
-    ConsumerWrapper(String name, Properties config, Consumer<byte[], byte[]> consumer, int expirationTimeout, String owner) {
+    ConsumerWrapper(String name, Properties config, Consumer<byte[], byte[]> consumer, int expirationTimeout, String owner)
+    {
         super(UUID.randomUUID().toString(), name, config, expirationTimeout, owner);
         this.consumer = consumer;
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         consumer.wakeup();
         consumer.close(CloseOptions.timeout(CLOSE_TIMEOUT));
     }

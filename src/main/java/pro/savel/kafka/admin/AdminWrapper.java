@@ -24,18 +24,20 @@ import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode(callSuper = false)
-public class AdminWrapper extends ClientWrapper {
-
+public class AdminWrapper extends ClientWrapper
+{
     private final Admin admin;
     private final String token = UUID.randomUUID().toString();
 
-    AdminWrapper(String name, Properties config, Admin admin, int expirationTimeout, String owner) {
+    AdminWrapper(String name, Properties config, Admin admin, int expirationTimeout, String owner)
+    {
         super(UUID.randomUUID().toString(), name, config, expirationTimeout, owner);
         this.admin = admin;
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         admin.close(CLOSE_TIMEOUT);
     }
 }

@@ -22,7 +22,8 @@ import lombok.Getter;
 import java.util.List;
 
 @Data
-public class ProducerSendRequest implements ProducerRequest {
+public class ProducerSendRequest implements ProducerRequest
+{
     @NotEmpty
     private String producerId;
     @NotEmpty
@@ -37,12 +38,13 @@ public class ProducerSendRequest implements ProducerRequest {
 
     // A list, not a map: Kafka headers allow duplicate keys.
     @Getter
-    public static class Header {
-
+    public static class Header
+    {
         private final String key;
         private final byte[] value;
 
-        public Header(String key, byte[] value) {
+        public Header(String key, byte[] value)
+        {
             this.key = key;
             this.value = value;
         }

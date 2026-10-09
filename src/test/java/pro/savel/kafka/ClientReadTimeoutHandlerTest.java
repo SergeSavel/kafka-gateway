@@ -27,23 +27,26 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class ClientReadTimeoutHandlerTest {
-
+class ClientReadTimeoutHandlerTest
+{
     private static final int TIMEOUT_SECONDS = 10;
 
     private final ExceptionCapture capture = new ExceptionCapture();
 
-    private EmbeddedChannel newChannel() {
+    private EmbeddedChannel newChannel()
+    {
         return new EmbeddedChannel(new ClientReadTimeoutHandler(TIMEOUT_SECONDS, TimeUnit.SECONDS), capture);
     }
 
-    private static void elapse(EmbeddedChannel channel, int seconds) {
+    private static void elapse(EmbeddedChannel channel, int seconds)
+    {
         channel.advanceTimeBy(seconds, TimeUnit.SECONDS);
         channel.runScheduledPendingTasks();
     }
 
     @Test
-    void idleClient_timesOut() {
+    void idleClient_timesOut()
+    {
         var channel = newChannel();
 
         elapse(channel, TIMEOUT_SECONDS + 1);
@@ -54,7 +57,8 @@ class ClientReadTimeoutHandlerTest {
     }
 
     @Test
-    void readsSuspendedByFlowControl_doesNotTimeOut() {
+    void readsSuspendedByFlowControl_doesNotTimeOut()
+    {
         var channel = newChannel();
         // What HttpRequestFlowControlHandler does for the whole lifetime of a request.
         channel.config().setAutoRead(false);
@@ -67,7 +71,8 @@ class ClientReadTimeoutHandlerTest {
     }
 
     @Test
-    void resumedReads_giveClientFullIdleWindowAgain() {
+    void resumedReads_giveClientFullIdleWindowAgain()
+    {
         var channel = newChannel();
         channel.config().setAutoRead(false);
         elapse(channel, TIMEOUT_SECONDS * 3);
@@ -85,12 +90,13 @@ class ClientReadTimeoutHandlerTest {
         channel.finishAndReleaseAll();
     }
 
-    private static class ExceptionCapture extends ChannelInboundHandlerAdapter {
-
+    private static class ExceptionCapture extends ChannelInboundHandlerAdapter
+    {
         private Throwable cause;
 
         @Override
-        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+        {
             this.cause = cause;
         }
     }

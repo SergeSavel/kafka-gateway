@@ -22,16 +22,18 @@ import pro.savel.kafka.admin.AdminResponseMapper;
 import java.util.concurrent.ExecutionException;
 
 @Getter
-public class AdminCreateTopicResponse implements AdminResponse {
-
+public class AdminCreateTopicResponse implements AdminResponse
+{
     protected String topicId;
     protected Integer numPartitions;
     protected Integer replicationFactor;
 
-    protected AdminCreateTopicResponse() {
+    protected AdminCreateTopicResponse()
+    {
     }
 
-    public static AdminCreateTopicResponse of(KafkaFuture<Uuid> idFuture, KafkaFuture<Integer> numPartitionsFuture, KafkaFuture<Integer> replicationFactorFuture) throws ExecutionException, InterruptedException {
+    public static AdminCreateTopicResponse of(KafkaFuture<Uuid> idFuture, KafkaFuture<Integer> numPartitionsFuture, KafkaFuture<Integer> replicationFactorFuture) throws ExecutionException, InterruptedException
+    {
         var result = new AdminCreateTopicResponse();
         result.topicId = AdminResponseMapper.mapUuid(idFuture.get());
         result.numPartitions = numPartitionsFuture.get();

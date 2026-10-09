@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.responses;
 
 import pro.savel.kafka.common.contract.Response;
 
-public interface AdminResponse extends Response {
+public interface AdminResponse extends Response
+{
 }

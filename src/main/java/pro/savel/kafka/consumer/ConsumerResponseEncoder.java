@@ -32,14 +32,15 @@ import pro.savel.kafka.consumer.responses.ConsumerPollResponse;
 import java.io.IOException;
 
 @ChannelHandler.Sharable
-public class ConsumerResponseEncoder extends ChannelOutboundHandlerAdapter {
-
+public class ConsumerResponseEncoder extends ChannelOutboundHandlerAdapter
+{
     private static final Logger logger = LoggerFactory.getLogger(ConsumerResponseEncoder.class);
 
     private final ObjectMapper objectMapper;
     private final int responseChunkBytes;
 
-    public ConsumerResponseEncoder(ObjectMapper objectMapper, int responseChunkBytes) {
+    public ConsumerResponseEncoder(ObjectMapper objectMapper, int responseChunkBytes)
+    {
         if (responseChunkBytes <= 0)
             throw new IllegalArgumentException("responseChunkBytes must be greater than 0");
         this.objectMapper = objectMapper;
@@ -47,7 +48,8 @@ public class ConsumerResponseEncoder extends ChannelOutboundHandlerAdapter {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
+    {
         if (msg instanceof ConsumerResponseBearer bearer) {
             try {
                 if (bearer.getResponse() instanceof ConsumerPollResponse pollResponse)
@@ -71,7 +73,8 @@ public class ConsumerResponseEncoder extends ChannelOutboundHandlerAdapter {
     }
 
     private void writeFullResponse(ChannelHandlerContext ctx, ConsumerResponseBearer bearer, ChannelPromise promise)
-            throws IOException {
+            throws IOException
+    {
         var httpResponse = createHttpResponse(ctx, bearer);
         var future = ctx.write(httpResponse, promise);
         if (!bearer.isConnectionKeepAlive())
@@ -79,7 +82,8 @@ public class ConsumerResponseEncoder extends ChannelOutboundHandlerAdapter {
     }
 
     private void writePollResponse(ChannelHandlerContext ctx, ConsumerResponseBearer bearer,
-                                   ConsumerPollResponse pollResponse, ChannelPromise promise) {
+                                   ConsumerPollResponse pollResponse, ChannelPromise promise)
+    {
         var httpResponse = new DefaultHttpResponse(HttpVersion.HTTP_1_1, bearer.getStatus());
         if (bearer.getSerializeTo() == Serde.JSON)
             httpResponse.headers().set(HttpUtils.ASCII_CONTENT_TYPE, HttpUtils.ASCII_APPLICATION_JSON_CHARSET_UTF8);
@@ -114,7 +118,8 @@ public class ConsumerResponseEncoder extends ChannelOutboundHandlerAdapter {
     }
 
     private FullHttpResponse createHttpResponse(ChannelHandlerContext ctx, ConsumerResponseBearer bearer)
-            throws IOException {
+            throws IOException
+    {
         FullHttpResponse httpResponse;
         if (bearer.getResponse() == null) {
             httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, bearer.getStatus());

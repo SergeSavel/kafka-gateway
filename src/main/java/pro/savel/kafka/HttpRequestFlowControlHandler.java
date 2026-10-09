@@ -25,13 +25,14 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.RejectedExecutionException;
 
-public class HttpRequestFlowControlHandler extends ChannelDuplexHandler {
-
+public class HttpRequestFlowControlHandler extends ChannelDuplexHandler
+{
     private final Queue<FullHttpRequest> pendingRequests = new ArrayDeque<>();
     private boolean requestInProgress;
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (!(msg instanceof FullHttpRequest request)) {
             ctx.fireChannelRead(msg);
             return;
@@ -48,7 +49,8 @@ public class HttpRequestFlowControlHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
+    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise)
+    {
         if (!(msg instanceof LastHttpContent)) {
             ctx.write(msg, promise);
             return;
@@ -60,14 +62,16 @@ public class HttpRequestFlowControlHandler extends ChannelDuplexHandler {
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
+    public void channelInactive(ChannelHandlerContext ctx)
+    {
         requestInProgress = false;
         releasePendingRequests();
         ctx.fireChannelInactive();
     }
 
     @Override
-    public void handlerRemoved(ChannelHandlerContext ctx) {
+    public void handlerRemoved(ChannelHandlerContext ctx)
+    {
         var resumeReading = requestInProgress;
         requestInProgress = false;
         releasePendingRequests();
@@ -75,7 +79,8 @@ public class HttpRequestFlowControlHandler extends ChannelDuplexHandler {
             ctx.channel().config().setAutoRead(true);
     }
 
-    private void scheduleResponseCompletion(ChannelHandlerContext ctx, boolean success) {
+    private void scheduleResponseCompletion(ChannelHandlerContext ctx, boolean success)
+    {
         try {
             ctx.executor().execute(() -> completeResponse(ctx, success));
         } catch (RejectedExecutionException ignored) {
@@ -83,7 +88,8 @@ public class HttpRequestFlowControlHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void completeResponse(ChannelHandlerContext ctx, boolean success) {
+    private void completeResponse(ChannelHandlerContext ctx, boolean success)
+    {
         if (!success) {
             releasePendingRequests();
             ctx.close();
@@ -104,7 +110,8 @@ public class HttpRequestFlowControlHandler extends ChannelDuplexHandler {
         }
     }
 
-    private void releasePendingRequests() {
+    private void releasePendingRequests()
+    {
         FullHttpRequest request;
         while ((request = pendingRequests.poll()) != null)
             ReferenceCountUtil.release(request);

@@ -20,13 +20,15 @@ import io.netty.handler.codec.http.HttpUtil;
 import pro.savel.kafka.common.contract.Request;
 import pro.savel.kafka.common.contract.Serde;
 
-public record RequestBearer(Request request, Serde serializeTo, boolean connectionKeepAlive) {
-
-    public RequestBearer(HttpRequest httpRequest, Request request) {
+public record RequestBearer(Request request, Serde serializeTo, boolean connectionKeepAlive)
+{
+    public RequestBearer(HttpRequest httpRequest, Request request)
+    {
         this(request, getSerde(httpRequest), HttpUtil.isKeepAlive(httpRequest));
     }
 
-    private static Serde getSerde(HttpRequest httpRequest) {
+    private static Serde getSerde(HttpRequest httpRequest)
+    {
         var headers = httpRequest.headers();
         var accept = HttpUtils.mediaType(headers.get(HttpHeaderNames.ACCEPT));
         if (accept == null || "*/*".equals(accept)) {

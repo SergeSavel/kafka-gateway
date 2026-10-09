@@ -31,10 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class DefaultInboundHandlerTest {
-
+class DefaultInboundHandlerTest
+{
     @Test
-    void lastHttpContent_droppedWithoutClosingChannel() {
+    void lastHttpContent_droppedWithoutClosingChannel()
+    {
         var channel = new EmbeddedChannel(new DefaultInboundHandler());
 
         assertFalse(channel.writeInbound(LastHttpContent.EMPTY_LAST_CONTENT));
@@ -43,7 +44,8 @@ class DefaultInboundHandlerTest {
     }
 
     @Test
-    void httpContent_droppedWithoutClosingChannel() {
+    void httpContent_droppedWithoutClosingChannel()
+    {
         var channel = new EmbeddedChannel(new DefaultInboundHandler());
         var content = new DefaultHttpContent(Unpooled.wrappedBuffer(new byte[4]));
 
@@ -54,7 +56,8 @@ class DefaultInboundHandlerTest {
     }
 
     @Test
-    void unexpectedMessage_closesChannel() {
+    void unexpectedMessage_closesChannel()
+    {
         var channel = new EmbeddedChannel(new DefaultInboundHandler());
 
         assertFalse(channel.writeInbound("unexpected"));
@@ -63,7 +66,8 @@ class DefaultInboundHandlerTest {
     }
 
     @Test
-    void readTimeout_closesChannelWithoutWritingResponse() {
+    void readTimeout_closesChannelWithoutWritingResponse()
+    {
         var channel = new EmbeddedChannel(new DefaultInboundHandler());
 
         channel.pipeline().fireExceptionCaught(ReadTimeoutException.INSTANCE);
@@ -74,7 +78,8 @@ class DefaultInboundHandlerTest {
     }
 
     @Test
-    void writeTimeout_closesChannelWithoutWritingResponse() {
+    void writeTimeout_closesChannelWithoutWritingResponse()
+    {
         var channel = new EmbeddedChannel(new DefaultInboundHandler());
 
         channel.pipeline().fireExceptionCaught(WriteTimeoutException.INSTANCE);
@@ -85,7 +90,8 @@ class DefaultInboundHandlerTest {
     }
 
     @Test
-    void timeoutDuringChunkedResponse_leavesAlreadyWrittenBytesIntact() {
+    void timeoutDuringChunkedResponse_leavesAlreadyWrittenBytesIntact()
+    {
         var channel = new EmbeddedChannel(new DefaultInboundHandler());
         var firstChunk = new DefaultHttpContent(Unpooled.wrappedBuffer("part".getBytes(StandardCharsets.UTF_8)));
         channel.writeOutbound(firstChunk);

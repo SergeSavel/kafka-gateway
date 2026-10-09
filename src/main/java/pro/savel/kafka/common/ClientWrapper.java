@@ -21,8 +21,8 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 @Getter
-public abstract class ClientWrapper implements AutoCloseable {
-
+public abstract class ClientWrapper implements AutoCloseable
+{
     protected static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(30);
 
     private final String id;
@@ -36,7 +36,8 @@ public abstract class ClientWrapper implements AutoCloseable {
     private volatile long expiresAt;
     private volatile long deadlineNanos;
 
-    protected ClientWrapper(String id, String name, Properties config, int expirationTimeout, String owner) {
+    protected ClientWrapper(String id, String name, Properties config, int expirationTimeout, String owner)
+    {
         this.id = id;
         this.name = name;
         this.username = SaslConfigValidator.usernameFromJaasConfig(config);
@@ -45,7 +46,8 @@ public abstract class ClientWrapper implements AutoCloseable {
         touch();
     }
 
-    public void touch() {
+    public void touch()
+    {
         expiresAt = System.currentTimeMillis() + expirationTimeout;
         deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(expirationTimeout);
     }

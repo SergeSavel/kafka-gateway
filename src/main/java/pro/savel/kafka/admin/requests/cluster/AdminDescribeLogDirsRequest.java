@@ -23,7 +23,8 @@ import lombok.Getter;
 import java.util.Collection;
 
 @Getter
-public class AdminDescribeLogDirsRequest implements AdminClusterRequest {
+public class AdminDescribeLogDirsRequest implements AdminClusterRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

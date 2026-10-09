@@ -23,7 +23,8 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.Collection;
 
 @Data
-public abstract class ConsumerSeekToRequest implements ConsumerRequest {
+public abstract class ConsumerSeekToRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

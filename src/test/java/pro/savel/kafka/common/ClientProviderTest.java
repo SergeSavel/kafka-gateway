@@ -25,26 +25,30 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ClientProviderTest {
-
+class ClientProviderTest
+{
     // Test stub — concrete ClientWrapper
-    static class TestWrapper extends ClientWrapper {
+    static class TestWrapper extends ClientWrapper
+    {
         volatile boolean closed = false;
         volatile boolean closedOnVirtualThread = false;
         final boolean shouldThrow;
         final CountDownLatch closedLatch = new CountDownLatch(1);
 
-        TestWrapper(String id, String name, int expirationTimeout) {
+        TestWrapper(String id, String name, int expirationTimeout)
+        {
             this(id, name, expirationTimeout, false);
         }
 
-        TestWrapper(String id, String name, int expirationTimeout, boolean shouldThrow) {
+        TestWrapper(String id, String name, int expirationTimeout, boolean shouldThrow)
+        {
             super(id, name, new Properties(), expirationTimeout, "test-owner");
             this.shouldThrow = shouldThrow;
         }
 
         @Override
-        public void close() {
+        public void close()
+        {
             if (shouldThrow)
                 throw new RuntimeException("close failed");
             closed = true;
@@ -52,27 +56,32 @@ class ClientProviderTest {
             closedLatch.countDown();
         }
 
-        boolean awaitClosed() throws InterruptedException {
+        boolean awaitClosed() throws InterruptedException
+        {
             return closedLatch.await(1, TimeUnit.SECONDS);
         }
     }
 
     // Test stub — concrete ClientProvider
-    static class TestProvider extends ClientProvider<TestWrapper> {
+    static class TestProvider extends ClientProvider<TestWrapper>
+    {
     }
 
-    static class BlockingTestWrapper extends TestWrapper {
+    static class BlockingTestWrapper extends TestWrapper
+    {
         private final CountDownLatch closeStarted;
         private final CountDownLatch allowClose;
 
-        BlockingTestWrapper(String id, CountDownLatch closeStarted, CountDownLatch allowClose) {
+        BlockingTestWrapper(String id, CountDownLatch closeStarted, CountDownLatch allowClose)
+        {
             super(id, id, 60_000);
             this.closeStarted = closeStarted;
             this.allowClose = allowClose;
         }
 
         @Override
-        public void close() {
+        public void close()
+        {
             closeStarted.countDown();
             try {
                 allowClose.await();
@@ -83,18 +92,21 @@ class ClientProviderTest {
         }
     }
 
-    static class UninterruptibleBlockingTestWrapper extends TestWrapper {
+    static class UninterruptibleBlockingTestWrapper extends TestWrapper
+    {
         private final CountDownLatch closeStarted;
         private final CountDownLatch allowClose;
 
-        UninterruptibleBlockingTestWrapper(String id, CountDownLatch closeStarted, CountDownLatch allowClose) {
+        UninterruptibleBlockingTestWrapper(String id, CountDownLatch closeStarted, CountDownLatch allowClose)
+        {
             super(id, id, 60_000);
             this.closeStarted = closeStarted;
             this.allowClose = allowClose;
         }
 
         @Override
-        public void close() {
+        public void close()
+        {
             closeStarted.countDown();
             var interrupted = false;
             while (true) {
@@ -114,31 +126,36 @@ class ClientProviderTest {
     private TestProvider provider = new TestProvider();
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         provider.close();
     }
 
 //region addItem / getItem / getItems
 
     @Test
-    void addItem_and_getItem_returnsWrapper() throws NotFoundException {
+    void addItem_and_getItem_returnsWrapper() throws NotFoundException
+    {
         var wrapper = new TestWrapper("id-1", "test", 60_000);
         provider.addItem(wrapper);
         assertSame(wrapper, provider.getItem("id-1"));
     }
 
     @Test
-    void getItem_notFound_throwsNotFoundException() {
+    void getItem_notFound_throwsNotFoundException()
+    {
         assertThrows(NotFoundException.class, () -> provider.getItem("nonexistent"));
     }
 
     @Test
-    void getItems_empty_returnsEmpty() {
+    void getItems_empty_returnsEmpty()
+    {
         assertTrue(provider.getItems().isEmpty());
     }
 
     @Test
-    void getItems_afterAdd_returnsAll() {
+    void getItems_afterAdd_returnsAll()
+    {
         provider.addItem(new TestWrapper("a", "n1", 60_000));
         provider.addItem(new TestWrapper("b", "n2", 60_000));
         assertEquals(2, provider.getItems().size());
@@ -149,7 +166,8 @@ class ClientProviderTest {
 //region removeItem
 
     @Test
-    void removeItem_existing_closesAndRemoves() {
+    void removeItem_existing_closesAndRemoves()
+    {
         var wrapper = new TestWrapper("id-1", "test", 60_000);
         provider.addItem(wrapper);
         provider.removeItem("id-1");
@@ -159,7 +177,8 @@ class ClientProviderTest {
     }
 
     @Test
-    void removeItem_nonexistent_doesNothing() {
+    void removeItem_nonexistent_doesNothing()
+    {
         assertDoesNotThrow(() -> provider.removeItem("nonexistent"));
     }
 
@@ -168,7 +187,8 @@ class ClientProviderTest {
 //region close
 
     @Test
-    void close_closesAllWrappers() {
+    void close_closesAllWrappers()
+    {
         var w1 = new TestWrapper("a", "n1", 60_000);
         var w2 = new TestWrapper("b", "n2", 60_000);
         provider.addItem(w1);
@@ -179,7 +199,8 @@ class ClientProviderTest {
     }
 
     @Test
-    void close_exceptionInOneWrapper_closesRemaining() {
+    void close_exceptionInOneWrapper_closesRemaining()
+    {
         var good = new TestWrapper("good", "g", 60_000);
         var bad = new TestWrapper("bad", "b", 60_000, true);
 
@@ -191,7 +212,8 @@ class ClientProviderTest {
     }
 
     @Test
-    void close_startsWrapperCloseOperationsConcurrently() throws InterruptedException {
+    void close_startsWrapperCloseOperationsConcurrently() throws InterruptedException
+    {
         var closeStarted = new CountDownLatch(2);
         var allowClose = new CountDownLatch(1);
         provider.addItem(new BlockingTestWrapper("a", closeStarted, allowClose));
@@ -208,7 +230,8 @@ class ClientProviderTest {
     }
 
     @Test
-    void close_returnsAtDeadlineWhenWrapperIgnoresInterruption() throws InterruptedException {
+    void close_returnsAtDeadlineWhenWrapperIgnoresInterruption() throws InterruptedException
+    {
         var closeStarted = new CountDownLatch(1);
         var allowClose = new CountDownLatch(1);
         var wrapper = new UninterruptibleBlockingTestWrapper("a", closeStarted, allowClose);
@@ -229,7 +252,8 @@ class ClientProviderTest {
 //region retireClients (expiration)
 
     @Test
-    void retireClients_expired_removesWrapper() throws InterruptedException {
+    void retireClients_expired_removesWrapper() throws InterruptedException
+    {
         var wrapper = new TestWrapper("id-1", "test", 1); // 1ms expiration
         provider.addItem(wrapper);
 
@@ -243,7 +267,8 @@ class ClientProviderTest {
     }
 
     @Test
-    void retireClients_notExpired_keepsWrapper() {
+    void retireClients_notExpired_keepsWrapper()
+    {
         var wrapper = new TestWrapper("id-1", "test", 60_000); // 60s expiration
         provider.addItem(wrapper);
 
@@ -253,7 +278,8 @@ class ClientProviderTest {
     }
 
     @Test
-    void touch_extendsExpiration() {
+    void touch_extendsExpiration()
+    {
         var wrapper = new TestWrapper("id-1", "test", 50); // 50ms
         provider.addItem(wrapper);
 

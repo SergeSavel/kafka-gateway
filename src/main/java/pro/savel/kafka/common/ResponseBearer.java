@@ -20,14 +20,15 @@ import pro.savel.kafka.common.contract.Response;
 import pro.savel.kafka.common.contract.Serde;
 
 @Data
-public abstract class ResponseBearer<TResponse extends Response> {
-
+public abstract class ResponseBearer<TResponse extends Response>
+{
     private final TResponse response;
     private final HttpResponseStatus status;
     private final Serde serializeTo;
     private final boolean connectionKeepAlive;
 
-    public ResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, TResponse response) {
+    public ResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, TResponse response)
+    {
         this.response = response;
         this.status = status;
         this.serializeTo = requestBearer.serializeTo();

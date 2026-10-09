@@ -17,5 +17,6 @@ package pro.savel.kafka.consumer.requests;
 import lombok.Data;
 
 @Data
-public class ConsumerListRequest implements ConsumerRequest {
+public class ConsumerListRequest implements ConsumerRequest
+{
 }

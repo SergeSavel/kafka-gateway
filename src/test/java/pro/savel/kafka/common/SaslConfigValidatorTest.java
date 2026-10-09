@@ -25,121 +25,140 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class SaslConfigValidatorTest {
-
+class SaslConfigValidatorTest
+{
     private static final String SCRAM_MODULE = "org.apache.kafka.common.security.scram.ScramLoginModule";
 
     @Test
-    void rejectEmptyScramCredentials_scramSha256WithEmptyPassword_throwsBadRequest() {
+    void rejectEmptyScramCredentials_scramSha256WithEmptyPassword_throwsBadRequest()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"u\"", "password=\"\""));
         assertThrows(BadRequestException.class, () -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_scramSha512WithEmptyPassword_throwsBadRequest() {
+    void rejectEmptyScramCredentials_scramSha512WithEmptyPassword_throwsBadRequest()
+    {
         var config = config("SCRAM-SHA-512", jaas("username=\"u\"", "password=\"\""));
         assertThrows(BadRequestException.class, () -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_mechanismInLowerCaseWithEmptyPassword_throwsBadRequest() {
+    void rejectEmptyScramCredentials_mechanismInLowerCaseWithEmptyPassword_throwsBadRequest()
+    {
         var config = config("scram-sha-256", jaas("username=\"u\"", "password=\"\""));
         assertThrows(BadRequestException.class, () -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_emptyUsername_throwsBadRequest() {
+    void rejectEmptyScramCredentials_emptyUsername_throwsBadRequest()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"\"", "password=\"secret\""));
         assertThrows(BadRequestException.class, () -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_emptyUsernameAndEmptyPassword_throwsBadRequest() {
+    void rejectEmptyScramCredentials_emptyUsernameAndEmptyPassword_throwsBadRequest()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"\"", "password=\"\""));
         assertThrows(BadRequestException.class, () -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_nonEmptyCredentials_passes() {
+    void rejectEmptyScramCredentials_nonEmptyCredentials_passes()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"u\"", "password=\"secret\""));
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_passwordOfEscapedQuote_passes() {
+    void rejectEmptyScramCredentials_passwordOfEscapedQuote_passes()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"u\"", "password=\"\\\"\""));
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_plainMechanismWithEmptyCredentials_passes() {
+    void rejectEmptyScramCredentials_plainMechanismWithEmptyCredentials_passes()
+    {
         var config = config("PLAIN",
                 "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"\" password=\"\";");
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_missingUsernameOption_passes() {
+    void rejectEmptyScramCredentials_missingUsernameOption_passes()
+    {
         var config = config("SCRAM-SHA-256", jaas(null, "password=\"secret\""));
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_missingPasswordOption_passes() {
+    void rejectEmptyScramCredentials_missingPasswordOption_passes()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"u\"", null));
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_noJaasConfig_passes() {
+    void rejectEmptyScramCredentials_noJaasConfig_passes()
+    {
         var config = config("SCRAM-SHA-256", null);
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_noMechanism_passes() {
+    void rejectEmptyScramCredentials_noMechanism_passes()
+    {
         var config = config(null, jaas("username=\"\"", "password=\"\""));
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void rejectEmptyScramCredentials_malformedJaasConfig_passes() {
+    void rejectEmptyScramCredentials_malformedJaasConfig_passes()
+    {
         var config = config("SCRAM-SHA-256", "not a jaas config");
         assertDoesNotThrow(() -> SaslConfigValidator.rejectEmptyScramCredentials(config));
     }
 
     @Test
-    void usernameFromJaasConfig_scramModule_returnsUsername() {
+    void usernameFromJaasConfig_scramModule_returnsUsername()
+    {
         var config = config("SCRAM-SHA-256", jaas("username=\"scram-user\"", "password=\"secret\""));
         assertEquals("scram-user", SaslConfigValidator.usernameFromJaasConfig(config));
     }
 
     @Test
-    void usernameFromJaasConfig_plainModule_returnsUsername() {
+    void usernameFromJaasConfig_plainModule_returnsUsername()
+    {
         var config = config("PLAIN",
                 "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"plain-user\" password=\"secret\";");
         assertEquals("plain-user", SaslConfigValidator.usernameFromJaasConfig(config));
     }
 
     @Test
-    void usernameFromJaasConfig_noUsernameOption_returnsNull() {
+    void usernameFromJaasConfig_noUsernameOption_returnsNull()
+    {
         var config = config("SCRAM-SHA-256", jaas(null, "password=\"secret\""));
         assertNull(SaslConfigValidator.usernameFromJaasConfig(config));
     }
 
     @Test
-    void usernameFromJaasConfig_noJaasConfig_returnsNull() {
+    void usernameFromJaasConfig_noJaasConfig_returnsNull()
+    {
         var config = config("SCRAM-SHA-256", null);
         assertNull(SaslConfigValidator.usernameFromJaasConfig(config));
     }
 
     @Test
-    void usernameFromJaasConfig_malformedJaasConfig_returnsNull() {
+    void usernameFromJaasConfig_malformedJaasConfig_returnsNull()
+    {
         var config = config("SCRAM-SHA-256", "not a jaas config");
         assertNull(SaslConfigValidator.usernameFromJaasConfig(config));
     }
 
-    private static Properties config(String mechanism, String jaasConfig) {
+    private static Properties config(String mechanism, String jaasConfig)
+    {
         var config = new Properties();
         if (mechanism != null)
             config.setProperty(SaslConfigs.SASL_MECHANISM, mechanism);
@@ -148,7 +167,8 @@ class SaslConfigValidatorTest {
         return config;
     }
 
-    private static String jaas(String usernameOption, String passwordOption) {
+    private static String jaas(String usernameOption, String passwordOption)
+    {
         var builder = new StringBuilder(SCRAM_MODULE).append(" required ");
         if (usernameOption != null)
             builder.append(usernameOption).append(' ');

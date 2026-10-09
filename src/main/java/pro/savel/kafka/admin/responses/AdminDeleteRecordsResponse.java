@@ -18,14 +18,16 @@ import lombok.Getter;
 import org.apache.kafka.clients.admin.DeletedRecords;
 
 @Getter
-public class AdminDeleteRecordsResponse implements AdminResponse {
-
+public class AdminDeleteRecordsResponse implements AdminResponse
+{
     private long lowWatermark;
 
-    private AdminDeleteRecordsResponse() {
+    private AdminDeleteRecordsResponse()
+    {
     }
 
-    public static AdminDeleteRecordsResponse of(DeletedRecords source) {
+    public static AdminDeleteRecordsResponse of(DeletedRecords source)
+    {
         if (source == null)
             return null;
         var result = new AdminDeleteRecordsResponse();

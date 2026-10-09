@@ -21,7 +21,8 @@ import lombok.Data;
 import java.util.Map;
 
 @Data
-public class ProducerSendStringRequest {
+public class ProducerSendStringRequest
+{
     @NotEmpty
     private String producerId;
     @NotEmpty

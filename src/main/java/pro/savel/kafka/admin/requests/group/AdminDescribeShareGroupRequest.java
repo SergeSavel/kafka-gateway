@@ -19,7 +19,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class AdminDescribeShareGroupRequest implements AdminGroupRequest {
+public class AdminDescribeShareGroupRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

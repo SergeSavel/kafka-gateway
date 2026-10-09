@@ -38,8 +38,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @ChannelHandler.Sharable
-public class ProducerRequestDecoder extends ChannelInboundHandlerAdapter {
-
+public class ProducerRequestDecoder extends ChannelInboundHandlerAdapter
+{
     private static final Logger logger = LoggerFactory.getLogger(ProducerRequestDecoder.class);
 
     public static final String URI_PREFIX = "/producer";
@@ -57,13 +57,15 @@ public class ProducerRequestDecoder extends ChannelInboundHandlerAdapter {
     private final ObjectMapper objectMapper;
     private final Validator validator;
 
-    public ProducerRequestDecoder(ObjectMapper objectMapper, ValidatorFactory validatorFactory) {
+    public ProducerRequestDecoder(ObjectMapper objectMapper, ValidatorFactory validatorFactory)
+    {
         this.objectMapper = objectMapper;
         this.validator = validatorFactory == null ? null : validatorFactory.getValidator();
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest httpRequest && httpRequest.uri().startsWith(URI_PREFIX)) {
             try {
                 decode(ctx, httpRequest);
@@ -82,12 +84,14 @@ public class ProducerRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private static void passBearer(ChannelHandlerContext ctx, FullHttpRequest httpRequest, ProducerRequest request) {
+    private static void passBearer(ChannelHandlerContext ctx, FullHttpRequest httpRequest, ProducerRequest request)
+    {
         var bearer = new RequestBearer(httpRequest, request);
         ctx.fireChannelRead(bearer);
     }
 
-    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException, MethodNotAllowedException {
+    private void decode(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException, MethodNotAllowedException
+    {
         var decoder = new QueryStringDecoder(httpRequest.uri(), StandardCharsets.UTF_8, true);
         var pathMethod = decoder.path().substring(URI_PREFIX.length());
         if (pathMethod.isEmpty()) {
@@ -107,18 +111,21 @@ public class ProducerRequestDecoder extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException {
+    private static void requireMethod(FullHttpRequest httpRequest, HttpMethod method) throws MethodNotAllowedException
+    {
         if (httpRequest.method() != method)
             throw new MethodNotAllowedException("Unsupported HTTP method.", method);
     }
 
-    private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest) {
+    private void decodeListRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest)
+    {
         var request = new ProducerListRequest();
         var bearer = new RequestBearer(httpRequest, request);
         ctx.fireChannelRead(bearer);
     }
 
-    private void decodeSendRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException {
+    private void decodeSendRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest) throws BadRequestException
+    {
         var contentType = HttpUtils.getContentType(httpRequest);
         ProducerSendRequest request;
         if (HttpUtils.isJson(contentType)) {
@@ -138,7 +145,8 @@ public class ProducerRequestDecoder extends ChannelInboundHandlerAdapter {
         passBearer(ctx, httpRequest, request);
     }
 
-    private <T extends ProducerRequest> void decodeRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest, Class<T> clazz) throws BadRequestException {
+    private <T extends ProducerRequest> void decodeRequest(ChannelHandlerContext ctx, FullHttpRequest httpRequest, Class<T> clazz) throws BadRequestException
+    {
         var contentType = HttpUtils.getContentType(httpRequest);
         T request;
         if (HttpUtils.isJson(contentType))

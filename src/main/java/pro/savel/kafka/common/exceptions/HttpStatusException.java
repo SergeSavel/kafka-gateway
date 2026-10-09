@@ -16,13 +16,15 @@ package pro.savel.kafka.common.exceptions;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public abstract class HttpStatusException extends RuntimeException {
-
-    public HttpStatusException(String message, Throwable cause) {
+public abstract class HttpStatusException extends RuntimeException
+{
+    public HttpStatusException(String message, Throwable cause)
+    {
         super(message, cause);
     }
 
-    public HttpStatusException(String message) {
+    public HttpStatusException(String message)
+    {
         super(message);
     }
 

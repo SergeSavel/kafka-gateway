@@ -23,12 +23,13 @@ import io.netty.util.ReferenceCountUtil;
 import pro.savel.kafka.common.HttpUtils;
 
 @ChannelHandler.Sharable
-public class HealthRequestDecoder extends ChannelInboundHandlerAdapter {
-
+public class HealthRequestDecoder extends ChannelInboundHandlerAdapter
+{
     private static final String URI = "/health";
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void channelRead(ChannelHandlerContext ctx, Object msg)
+    {
         if (msg instanceof FullHttpRequest httpRequest && httpRequest.uri().equals(URI)) {
             try {
                 if (httpRequest.method() == HttpMethod.GET) {

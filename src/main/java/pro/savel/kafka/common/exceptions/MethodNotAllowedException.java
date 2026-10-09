@@ -17,26 +17,30 @@ package pro.savel.kafka.common.exceptions;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
-public class MethodNotAllowedException extends HttpStatusException {
-
+public class MethodNotAllowedException extends HttpStatusException
+{
     private final HttpMethod allowedMethod;
 
-    public MethodNotAllowedException(String message, HttpMethod allowedMethod, Throwable cause) {
+    public MethodNotAllowedException(String message, HttpMethod allowedMethod, Throwable cause)
+    {
         super(message, cause);
         this.allowedMethod = allowedMethod;
     }
 
-    public MethodNotAllowedException(String message, HttpMethod allowedMethod) {
+    public MethodNotAllowedException(String message, HttpMethod allowedMethod)
+    {
         super(message);
         this.allowedMethod = allowedMethod;
     }
 
-    public HttpMethod allowedMethod() {
+    public HttpMethod allowedMethod()
+    {
         return allowedMethod;
     }
 
     @Override
-    public HttpResponseStatus status() {
+    public HttpResponseStatus status()
+    {
         return HttpResponseStatus.METHOD_NOT_ALLOWED;
     }
 }

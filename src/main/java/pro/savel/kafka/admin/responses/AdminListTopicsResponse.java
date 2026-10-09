@@ -19,13 +19,15 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AdminListTopicsResponse extends ArrayList<AdminListTopicsResponse.TopicListing> implements AdminResponse {
-
-    private AdminListTopicsResponse(int initialCapacity) {
+public class AdminListTopicsResponse extends ArrayList<AdminListTopicsResponse.TopicListing> implements AdminResponse
+{
+    private AdminListTopicsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminListTopicsResponse of(Collection<org.apache.kafka.clients.admin.TopicListing> source) {
+    public static AdminListTopicsResponse of(Collection<org.apache.kafka.clients.admin.TopicListing> source)
+    {
         if (source == null)
             return null;
         var result = new AdminListTopicsResponse(source.size());
@@ -34,15 +36,18 @@ public class AdminListTopicsResponse extends ArrayList<AdminListTopicsResponse.T
     }
 
     @Getter
-    public static class TopicListing {
+    public static class TopicListing
+    {
         private String id;
         private String name;
         private boolean isInternal;
 
-        private TopicListing() {
+        private TopicListing()
+        {
         }
 
-        public static TopicListing of(org.apache.kafka.clients.admin.TopicListing source) {
+        public static TopicListing of(org.apache.kafka.clients.admin.TopicListing source)
+        {
             if (source == null)
                 return null;
             var result = new TopicListing();

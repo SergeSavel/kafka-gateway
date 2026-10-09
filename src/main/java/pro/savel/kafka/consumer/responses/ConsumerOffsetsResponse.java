@@ -20,13 +20,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ConsumerOffsetsResponse extends ArrayList<ConsumerOffsetsResponse.TopicOffsets> implements ConsumerResponse {
-
-    private ConsumerOffsetsResponse(int size) {
+public class ConsumerOffsetsResponse extends ArrayList<ConsumerOffsetsResponse.TopicOffsets> implements ConsumerResponse
+{
+    private ConsumerOffsetsResponse(int size)
+    {
         super(size);
     }
 
-    public static ConsumerOffsetsResponse of(Map<org.apache.kafka.common.TopicPartition, Long> source) {
+    public static ConsumerOffsetsResponse of(Map<org.apache.kafka.common.TopicPartition, Long> source)
+    {
         if (source == null)
             return null;
         var map = new HashMap<String, TopicOffsets>();
@@ -40,17 +42,19 @@ public class ConsumerOffsetsResponse extends ArrayList<ConsumerOffsetsResponse.T
     }
 
     @Getter
-    public static class TopicOffsets {
-
+    public static class TopicOffsets
+    {
         private final String topic;
         private final ArrayList<PartitionOffset> offsets;
 
-        private TopicOffsets(String topic) {
+        private TopicOffsets(String topic)
+        {
             this.topic = topic;
             this.offsets = new ArrayList<>();
         }
 
-        public record PartitionOffset(int partition, Long offset) {
+        public record PartitionOffset(int partition, Long offset)
+        {
         }
     }
 }

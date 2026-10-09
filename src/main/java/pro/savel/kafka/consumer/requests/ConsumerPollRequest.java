@@ -19,7 +19,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
-public class ConsumerPollRequest implements ConsumerRequest {
+public class ConsumerPollRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty
@@ -37,7 +38,8 @@ public class ConsumerPollRequest implements ConsumerRequest {
      * The effective poll timeout: timeoutMs when present, otherwise the deprecated timeout.
      * Null when neither is set.
      */
-    public Long resolveTimeoutMs() {
+    public Long resolveTimeoutMs()
+    {
         return timeoutMs != null ? timeoutMs : timeout;
     }
 }

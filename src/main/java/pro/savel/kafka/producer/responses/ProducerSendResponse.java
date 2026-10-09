@@ -17,8 +17,8 @@ package pro.savel.kafka.producer.responses;
 import lombok.Getter;
 
 @Getter
-public class ProducerSendResponse implements ProducerResponse {
-
+public class ProducerSendResponse implements ProducerResponse
+{
     private String topic;
     private int partition;
     private long offset;
@@ -26,10 +26,12 @@ public class ProducerSendResponse implements ProducerResponse {
     private int serializedKeySize;
     private int serializedValueSize;
 
-    private ProducerSendResponse() {
+    private ProducerSendResponse()
+    {
     }
 
-    public static ProducerSendResponse of(org.apache.kafka.clients.producer.RecordMetadata source) {
+    public static ProducerSendResponse of(org.apache.kafka.clients.producer.RecordMetadata source)
+    {
         if (source == null)
             return null;
         var result = new ProducerSendResponse();

@@ -16,5 +16,6 @@ package pro.savel.kafka.admin.requests.topic;
 
 import pro.savel.kafka.admin.requests.AdminRequest;
 
-public interface AdminTopicRequest extends AdminRequest {
+public interface AdminTopicRequest extends AdminRequest
+{
 }

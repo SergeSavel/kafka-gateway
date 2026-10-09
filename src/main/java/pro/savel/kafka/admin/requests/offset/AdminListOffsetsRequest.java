@@ -24,7 +24,8 @@ import pro.savel.kafka.common.contract.TopicPartition;
 import java.util.Collection;
 
 @Data
-public abstract class AdminListOffsetsRequest implements AdminOffsetRequest {
+public abstract class AdminListOffsetsRequest implements AdminOffsetRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

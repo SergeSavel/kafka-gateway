@@ -20,13 +20,15 @@ import pro.savel.kafka.admin.data.AdminAclBinding;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AdminDescribeAclsResponse extends ArrayList<AdminAclBinding> implements AdminResponse {
-
-    private AdminDescribeAclsResponse(int initialCapacity) {
+public class AdminDescribeAclsResponse extends ArrayList<AdminAclBinding> implements AdminResponse
+{
+    private AdminDescribeAclsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static AdminDescribeAclsResponse of(Collection<AclBinding> source) {
+    public static AdminDescribeAclsResponse of(Collection<AclBinding> source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeAclsResponse(source.size());

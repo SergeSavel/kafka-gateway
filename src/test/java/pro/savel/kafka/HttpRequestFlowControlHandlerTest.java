@@ -25,10 +25,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class HttpRequestFlowControlHandlerTest {
-
+class HttpRequestFlowControlHandlerTest
+{
     @Test
-    void pipelinedRequests_areProcessedOneAtATime() {
+    void pipelinedRequests_areProcessedOneAtATime()
+    {
         var channel = new EmbeddedChannel(new HttpRequestFlowControlHandler());
         var firstRequest = request("/first");
         var secondRequest = request("/second");
@@ -66,7 +67,8 @@ class HttpRequestFlowControlHandlerTest {
     }
 
     @Test
-    void channelClose_releasesQueuedRequests() {
+    void channelClose_releasesQueuedRequests()
+    {
         var channel = new EmbeddedChannel(new HttpRequestFlowControlHandler());
         var activeRequest = request("/active");
         var queuedRequest = request("/queued");
@@ -82,11 +84,13 @@ class HttpRequestFlowControlHandlerTest {
         channel.finishAndReleaseAll();
     }
 
-    private static DefaultFullHttpRequest request(String uri) {
+    private static DefaultFullHttpRequest request(String uri)
+    {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, uri);
     }
 
-    private static DefaultFullHttpResponse response() {
+    private static DefaultFullHttpResponse response()
+    {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
     }
 }

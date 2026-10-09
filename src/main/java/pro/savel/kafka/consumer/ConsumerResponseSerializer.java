@@ -26,10 +26,11 @@ import pro.savel.kafka.consumer.responses.*;
 import java.io.IOException;
 import java.io.OutputStream;
 
-public class ConsumerResponseSerializer {
-
+public class ConsumerResponseSerializer
+{
     public static ByteBuf serializeJson(ObjectMapper objectMapper, ByteBufAllocator allocator,
-                                        ConsumerResponse response) throws IOException {
+                                        ConsumerResponse response) throws IOException
+    {
         if (response == null)
             return null;
         var responseClass = response.getClass();
@@ -38,7 +39,8 @@ public class ConsumerResponseSerializer {
         return JsonUtils.serializeJson(objectMapper, allocator, response);
     }
 
-    public static ByteBuf serializeBinary(ByteBufAllocator allocator, ConsumerResponse response) {
+    public static ByteBuf serializeBinary(ByteBufAllocator allocator, ConsumerResponse response)
+    {
         if (response == null)
             return null;
         var responseClass = response.getClass();
@@ -48,7 +50,8 @@ public class ConsumerResponseSerializer {
     }
 
     private static ByteBuf serializePollJson(ObjectMapper objectMapper, ByteBufAllocator allocator,
-                                             ConsumerPollResponse response) throws IOException {
+                                             ConsumerPollResponse response) throws IOException
+    {
         var buf = allocator.buffer();
         try {
             try (var outputStream = new ByteBufOutputStream(buf);
@@ -67,7 +70,8 @@ public class ConsumerResponseSerializer {
     }
 
     static ByteBuf serializePollJsonMessage(ObjectMapper objectMapper, ByteBufAllocator allocator,
-                                            ConsumerPollResponse.Message message, boolean first) throws IOException {
+                                            ConsumerPollResponse.Message message, boolean first) throws IOException
+    {
         var buf = allocator.buffer();
         try {
             buf.writeByte(first ? '[' : ',');
@@ -83,7 +87,8 @@ public class ConsumerResponseSerializer {
     }
 
     private static void writePollJsonMessage(JsonGenerator generator, ConsumerPollResponse.Message message)
-            throws IOException {
+            throws IOException
+    {
         if (message == null) {
             generator.writeNull();
             return;
@@ -117,7 +122,8 @@ public class ConsumerResponseSerializer {
     }
 
     private static void writeUtf8Field(JsonGenerator generator, String name, byte[] value)
-            throws IOException {
+            throws IOException
+    {
         generator.writeFieldName(name);
         if (value == null)
             generator.writeNull();
@@ -125,7 +131,8 @@ public class ConsumerResponseSerializer {
             generator.writeUTF8String(value, 0, value.length);
     }
 
-    private static ByteBuf serializePollBinary(ByteBufAllocator allocator, ConsumerPollResponse response) {
+    private static ByteBuf serializePollBinary(ByteBufAllocator allocator, ConsumerPollResponse response)
+    {
         var buf = allocator.buffer(Math.toIntExact(calculatePollBinarySize(response)));
         try {
             buf.writeShort(1); //version
@@ -139,14 +146,16 @@ public class ConsumerResponseSerializer {
         }
     }
 
-    static ByteBuf serializePollBinaryHeader(ByteBufAllocator allocator, int messageCount) {
+    static ByteBuf serializePollBinaryHeader(ByteBufAllocator allocator, int messageCount)
+    {
         var buf = allocator.buffer(Short.BYTES + Integer.BYTES);
         buf.writeShort(1); // version
         buf.writeInt(messageCount);
         return buf;
     }
 
-    static ByteBuf serializePollBinaryMessage(ByteBufAllocator allocator, ConsumerPollResponse.Message message) {
+    static ByteBuf serializePollBinaryMessage(ByteBufAllocator allocator, ConsumerPollResponse.Message message)
+    {
         var buf = allocator.buffer(calculatePollBinaryMessageCapacity(message));
         try {
             writePollBinaryMessage(buf, message);
@@ -157,7 +166,8 @@ public class ConsumerResponseSerializer {
         }
     }
 
-    private static void writePollBinaryMessage(ByteBuf buf, ConsumerPollResponse.Message message) {
+    private static void writePollBinaryMessage(ByteBuf buf, ConsumerPollResponse.Message message)
+    {
         writeBytes(buf, message.getTopic());
         buf.writeInt(message.getPartition());
         buf.writeLong(message.getOffset());
@@ -189,25 +199,29 @@ public class ConsumerResponseSerializer {
         }
     }
 
-    private static void writeBytes(ByteBuf buf, String value) {
+    private static void writeBytes(ByteBuf buf, String value)
+    {
         var length = ByteBufUtil.utf8Bytes(value);
         buf.writeInt(length);
         ByteBufUtil.writeUtf8(buf, value);
     }
 
-    private static void writeBytes(ByteBuf buf, byte[] bytes) {
+    private static void writeBytes(ByteBuf buf, byte[] bytes)
+    {
         buf.writeInt(bytes.length);
         buf.writeBytes(bytes);
     }
 
-    static long calculatePollBinarySize(ConsumerPollResponse response) {
+    static long calculatePollBinarySize(ConsumerPollResponse response)
+    {
         long capacity = Short.BYTES + Integer.BYTES;
         for (var message : response)
             capacity += calculatePollBinaryMessageCapacity(message);
         return capacity;
     }
 
-    private static int calculatePollBinaryMessageCapacity(ConsumerPollResponse.Message message) {
+    private static int calculatePollBinaryMessageCapacity(ConsumerPollResponse.Message message)
+    {
         long capacity = serializedStringSize(message.getTopic())
                 + Integer.BYTES + Long.BYTES + Long.BYTES + Integer.BYTES;
         if (message.getHeaders() != null) {
@@ -226,11 +240,13 @@ public class ConsumerResponseSerializer {
         return Math.toIntExact(capacity);
     }
 
-    private static long serializedStringSize(String value) {
+    private static long serializedStringSize(String value)
+    {
         return Integer.BYTES + ByteBufUtil.utf8Bytes(value);
     }
 
-    private static long serializedBytesSize(byte[] value) {
+    private static long serializedBytesSize(byte[] value)
+    {
         return Integer.BYTES + value.length;
     }
 }

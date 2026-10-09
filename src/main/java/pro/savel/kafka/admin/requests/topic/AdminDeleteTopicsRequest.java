@@ -22,7 +22,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class AdminDeleteTopicsRequest implements AdminTopicRequest {
+public class AdminDeleteTopicsRequest implements AdminTopicRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

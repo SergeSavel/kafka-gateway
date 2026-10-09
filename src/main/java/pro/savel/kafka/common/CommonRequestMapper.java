@@ -20,9 +20,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class CommonRequestMapper {
-
-    public static Set<TopicPartition> mapPartitions(Collection<pro.savel.kafka.common.contract.TopicPartition> source) {
+public abstract class CommonRequestMapper
+{
+    public static Set<TopicPartition> mapPartitions(Collection<pro.savel.kafka.common.contract.TopicPartition> source)
+    {
         if (source == null)
             return null;
         var result = new HashSet<TopicPartition>(source.size());
@@ -30,7 +31,8 @@ public abstract class CommonRequestMapper {
         return result;
     }
 
-    public static TopicPartition mapTopicPartition(pro.savel.kafka.common.contract.TopicPartition source) {
+    public static TopicPartition mapTopicPartition(pro.savel.kafka.common.contract.TopicPartition source)
+    {
         if (source == null)
             return null;
         return new TopicPartition(source.getTopic(), source.getPartition());

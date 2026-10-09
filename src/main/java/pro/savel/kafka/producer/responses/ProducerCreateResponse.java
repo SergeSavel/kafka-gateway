@@ -18,15 +18,17 @@ import lombok.Getter;
 import pro.savel.kafka.producer.ProducerWrapper;
 
 @Getter
-public class ProducerCreateResponse implements ProducerResponse {
-
+public class ProducerCreateResponse implements ProducerResponse
+{
     private String id;
     private String token;
 
-    private ProducerCreateResponse() {
+    private ProducerCreateResponse()
+    {
     }
 
-    public static ProducerCreateResponse of(ProducerWrapper source) {
+    public static ProducerCreateResponse of(ProducerWrapper source)
+    {
         if (source == null)
             return null;
         var result = new ProducerCreateResponse();

@@ -56,17 +56,19 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-public class AdminRequestProcessor extends AbstractRequestProcessor {
-
+public class AdminRequestProcessor extends AbstractRequestProcessor
+{
     private final AdminProvider provider;
 
-    public AdminRequestProcessor(BlockingTaskExecutor blockingTaskExecutor, AdminProvider provider) {
+    public AdminRequestProcessor(BlockingTaskExecutor blockingTaskExecutor, AdminProvider provider)
+    {
         super("admin", AdminRequest.class, blockingTaskExecutor);
         this.provider = provider;
     }
 
     @Override
-    protected void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    protected void processRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         switch (requestBearer.request()) {
             case AdminDescribeTopicRequest ignored -> processDescribeTopic(ctx, requestBearer);
             case AdminCreateTopicRequest ignored -> processCreateTopic(ctx, requestBearer);
@@ -127,14 +129,16 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Management
 
-    private void processList(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processList(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var wrappers = provider.getItems();
         var response = AdminListResponse.of(wrappers);
         var responseBearer = new AdminResponseBearer(requestBearer, HttpResponseStatus.OK, response);
         ctx.writeAndFlush(responseBearer);
     }
 
-    private void processCreate(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreate(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminCreateRequest) requestBearer.request();
         var owner = ctx.channel().attr(NettyAttributes.USERNAME).get();
         execute(ctx,
@@ -147,7 +151,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 });
     }
 
-    private void processRemove(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processRemove(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminRemoveRequest) requestBearer.request();
         execute(ctx, () -> {
             provider.removeAdmin(request.getAdminId(), request.getToken());
@@ -158,7 +163,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         });
     }
 
-    private void processTouch(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processTouch(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminTouchRequest) requestBearer.request();
         var wrapper = provider.getAdmin(request.getAdminId(), request.getToken());
         wrapper.touch();
@@ -170,7 +176,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Cluster
 
-    private void processDescribeCluster(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeCluster(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeClusterRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeClusterOptions();
@@ -197,7 +204,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 });
     }
 
-    private void processDescribeFeatures(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeFeatures(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeFeaturesRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeFeaturesOptions();
@@ -208,7 +216,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "describe features", AdminDescribeFeaturesResponse::of);
     }
 
-    private void processDescribeLogDirs(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeLogDirs(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeLogDirsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var brokers = request.getBrokerIds();
@@ -220,7 +229,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "get log dir descriptions", AdminDescribeLogDirsResponse::of);
     }
 
-    private void processUpdateFeature(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processUpdateFeature(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminUpdateFeatureRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         FeatureUpdate.UpgradeType upgradeType;
@@ -246,7 +256,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Topics
 
-    private void processListTopics(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListTopics(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminListTopicsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         final Pattern pattern;
@@ -273,7 +284,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 });
     }
 
-    private void processDescribeTopic(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeTopic(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeTopicRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeTopicsOptions();
@@ -299,7 +311,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminDescribeTopicResponse.of(topicDescriptions.values().iterator().next()));
     }
 
-    private void processCreateTopic(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreateTopic(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminCreateTopicRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var newTopic = new NewTopic(request.getTopicName(), Optional.ofNullable(request.getNumPartitions()),
@@ -326,7 +339,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         });
     }
 
-    private void processCreateTopics(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreateTopics(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminCreateTopicsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var topicsSource = request.getTopics();
@@ -348,7 +362,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         });
     }
 
-    private void processDeleteTopic(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteTopic(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteTopicRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         TopicCollection topics;
@@ -367,7 +382,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         respondWith(deleteResult.all(), ctx, requestBearer, HttpResponseStatus.NO_CONTENT, "delete topic", ignore -> null);
     }
 
-    private void processDeleteTopics(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteTopics(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteTopicsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         TopicCollection topics;
@@ -393,7 +409,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         });
     }
 
-    private void processDeleteRecords(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteRecords(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteRecordsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var topicPartition = new TopicPartition(request.getTopic(), request.getPartition());
@@ -406,7 +423,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete records", AdminDeleteRecordsResponse::of);
     }
 
-    private void processCreatePartitions(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreatePartitions(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminCreatePartitionsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var newPartitions = NewPartitions.increaseTo(request.getIncreaseTo());
@@ -421,21 +439,24 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Configs
 
-    private void processDescribeBrokerConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeBrokerConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeBrokerConfigsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var resource = new ConfigResource(ConfigResource.Type.BROKER, String.valueOf(request.getBrokerId()));
         processDescribeConfigs(ctx, requestBearer, admin, resource, "Broker not found.", request.getTimeoutMs());
     }
 
-    private void processDescribeTopicConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeTopicConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeTopicConfigsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var resource = new ConfigResource(ConfigResource.Type.TOPIC, request.getTopicName());
         processDescribeConfigs(ctx, requestBearer, admin, resource, "Topic not found.", request.getTimeoutMs());
     }
 
-    private void processDescribeGroupConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeGroupConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeGroupConfigsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var resource = new ConfigResource(ConfigResource.Type.GROUP, request.getGroupId());
@@ -443,7 +464,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
     }
 
     private void processDescribeConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer, Admin admin,
-                                               ConfigResource resource, String notFoundMessage, Integer timeoutMs) {
+                                               ConfigResource resource, String notFoundMessage, Integer timeoutMs)
+    {
         var options = new DescribeConfigsOptions();
         if (timeoutMs != null)
             options.timeoutMs(timeoutMs);
@@ -453,7 +475,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminConfigResponse.of(configs.values().iterator().next()));
     }
 
-    private void processAlterTopicConfig(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processAlterTopicConfig(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminAlterTopicConfigRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var configResource = new ConfigResource(ConfigResource.Type.TOPIC, request.getTopicName());
@@ -462,7 +485,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         processIncrementalAlterConfig(ctx, requestBearer, admin, configResource, alterConfigOp, request.getTimeoutMs());
     }
 
-    private void processAlterGroupConfig(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processAlterGroupConfig(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminAlterGroupConfigRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var configResource = new ConfigResource(ConfigResource.Type.GROUP, request.getGroupId());
@@ -471,7 +495,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         processIncrementalAlterConfig(ctx, requestBearer, admin, configResource, alterConfigOp, request.getTimeoutMs());
     }
 
-    private void processDeleteTopicConfig(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteTopicConfig(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteTopicConfigRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var configResource = new ConfigResource(ConfigResource.Type.TOPIC, request.getTopicName());
@@ -480,7 +505,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         processIncrementalAlterConfig(ctx, requestBearer, admin, configResource, alterConfigOp, request.getTimeoutMs());
     }
 
-    private void processDeleteGroupConfig(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteGroupConfig(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteGroupConfigRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var configResource = new ConfigResource(ConfigResource.Type.GROUP, request.getGroupId());
@@ -490,7 +516,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
     }
 
     private void processIncrementalAlterConfig(ChannelHandlerContext ctx, RequestBearer requestBearer, Admin admin,
-                                               ConfigResource resource, AlterConfigOp op, Integer timeoutMs) {
+                                               ConfigResource resource, AlterConfigOp op, Integer timeoutMs)
+    {
         Collection<AlterConfigOp> alterConfigOps = Collections.singleton(op);
         var configs = Collections.singletonMap(resource, alterConfigOps);
         processIncrementalAlterConfigs(ctx, requestBearer, admin, configs, timeoutMs);
@@ -498,7 +525,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     private void processIncrementalAlterConfigs(ChannelHandlerContext ctx, RequestBearer requestBearer,
                                                        Admin admin, Map<ConfigResource, Collection<AlterConfigOp>> configs,
-                                                       Integer timeoutMs) {
+                                                       Integer timeoutMs)
+    {
         var options = new AlterConfigsOptions();
         if (timeoutMs != null)
             options.timeoutMs(timeoutMs);
@@ -510,7 +538,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region User SCRAM credentials
 
-    private void processDescribeUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeUserScramCredentialsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeUserScramCredentialsOptions();
@@ -521,7 +550,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "describe user SCRAM credentials", AdminDescribeUserScramCredentialsResponse::of);
     }
 
-    private void processUpsertUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processUpsertUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminUpsertUserScramCredentialsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var iterations = request.getIterations() == null ? 4096 : request.getIterations();
@@ -531,7 +561,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         processAlterUserScramCredentials(ctx, requestBearer, admin, alteration, request.getTimeoutMs());
     }
 
-    private void processDeleteUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteUserScramCredentialsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var alteration = new UserScramCredentialDeletion(request.getUser(),
@@ -541,7 +572,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     private void processAlterUserScramCredentials(ChannelHandlerContext ctx, RequestBearer requestBearer,
                                                          Admin admin, UserScramCredentialAlteration alteration,
-                                                         Integer timeoutMs) {
+                                                         Integer timeoutMs)
+    {
         var options = new AlterUserScramCredentialsOptions();
         if (timeoutMs != null)
             options.timeoutMs(timeoutMs);
@@ -554,7 +586,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Acls
 
-    private void processDescribeAcls(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeAcls(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeAclsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var filter = AdminRequestMapper.mapAclBindingFilter(request.getFilter());
@@ -566,7 +599,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "describe ACLs", AdminDescribeAclsResponse::of);
     }
 
-    private void processCreateAcls(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processCreateAcls(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminCreateAclsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var acls = AdminRequestMapper.mapAclBindings(request.getAcls());
@@ -577,7 +611,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         respondWith(createAclsResult.all(), ctx, requestBearer, HttpResponseStatus.NO_CONTENT, "create ACLs", ignore -> null);
     }
 
-    private void processDeleteAcls(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteAcls(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteAclsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var filters = AdminRequestMapper.mapAclBindingFilters(request.getFilters());
@@ -592,7 +627,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Producers
 
-    private void processDescribeProducers(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeProducers(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeProducersRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var partitions = CommonRequestMapper.mapPartitions(request.getPartitions());
@@ -604,7 +640,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "describe producers", AdminDescribeProducersResponse::of);
     }
 
-    private void processAbortTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processAbortTransaction(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminAbortTransactionRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var partition = CommonRequestMapper.mapTopicPartition(request.getPartition());
@@ -620,7 +657,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Groups
 
-    private void processListGroups(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListGroups(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminListGroupsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new ListGroupsOptions();
@@ -659,7 +697,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "get group listings", AdminListGroupsResponse::of);
     }
 
-    private void processDescribeClassicGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeClassicGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeClassicGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeClassicGroupsOptions();
@@ -675,7 +714,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminDescribeClassicGroupResponse.of(descriptions.values().iterator().next()));
     }
 
-    private void processDescribeConsumerGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeConsumerGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeConsumerGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeConsumerGroupsOptions();
@@ -691,7 +731,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminDescribeConsumerGroupResponse.of(descriptions.values().iterator().next()));
     }
 
-    private void processDescribeShareGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeShareGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeShareGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeShareGroupsOptions();
@@ -707,7 +748,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminDescribeShareGroupResponse.of(descriptions.values().iterator().next()));
     }
 
-    private void processDescribeStreamsGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDescribeStreamsGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDescribeStreamsGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var options = new DescribeStreamsGroupsOptions();
@@ -723,7 +765,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminDescribeStreamsGroupResponse.of(descriptions.values().iterator().next()));
     }
 
-    private void processListConsumerGroupOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListConsumerGroupOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminListConsumerGroupOffsetsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupId = request.getGroupId();
@@ -739,7 +782,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                         : AdminListConsumerGroupOffsetsResponse.of(offsets.values().iterator().next()));
     }
 
-    private void processAlterConsumerGroupOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processAlterConsumerGroupOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminAlterConsumerGroupOffsetsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupId = request.getGroupId();
@@ -752,7 +796,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "alter consumer group offsets", ignore -> null);
     }
 
-    private void processDeleteConsumerGroupOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteConsumerGroupOffsets(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteConsumerGroupOffsetsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupId = request.getGroupId();
@@ -765,7 +810,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete consumer group offsets", ignore -> null);
     }
 
-    private void processRemoveMembersFromConsumerGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processRemoveMembersFromConsumerGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminRemoveMembersFromConsumerGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupId = request.getGroupId();
@@ -788,7 +834,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "remove members from consumer group", ignore -> null);
     }
 
-    private void processDeleteConsumerGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteConsumerGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteConsumerGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupIds = Collections.singleton(request.getGroupId());
@@ -800,7 +847,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete consumer group", ignore -> null);
     }
 
-    private void processDeleteConsumerGroups(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteConsumerGroups(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteConsumerGroupsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupIds = request.getGroupIds();
@@ -812,7 +860,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete consumer groups", ignore -> null);
     }
 
-    private void processDeleteShareGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteShareGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteShareGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupIds = Collections.singleton(request.getGroupId());
@@ -824,7 +873,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete share group", ignore -> null);
     }
 
-    private void processDeleteShareGroups(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteShareGroups(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteShareGroupsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupIds = request.getGroupIds();
@@ -836,7 +886,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete share groups", ignore -> null);
     }
 
-    private void processDeleteStreamsGroup(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteStreamsGroup(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteStreamsGroupRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupIds = Collections.singleton(request.getGroupId());
@@ -848,7 +899,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
                 "delete streams group", ignore -> null);
     }
 
-    private void processDeleteStreamsGroups(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processDeleteStreamsGroups(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminDeleteStreamsGroupsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var groupIds = request.getGroupIds();
@@ -864,39 +916,46 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // region Offsets
 
-    private void processListEarliestOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListEarliestOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var offsetSpec = OffsetSpec.earliest();
         processListOffsetsRequest(ctx, requestBearer, offsetSpec);
     }
 
-    private void processListEarliestLocalOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListEarliestLocalOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var offsetSpec = OffsetSpec.earliestLocal();
         processListOffsetsRequest(ctx, requestBearer, offsetSpec);
     }
 
-    private void processListLatestOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListLatestOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var offsetSpec = OffsetSpec.latest();
         processListOffsetsRequest(ctx, requestBearer, offsetSpec);
     }
 
-    private void processListLatestTieredOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListLatestTieredOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var offsetSpec = OffsetSpec.latestTiered();
         processListOffsetsRequest(ctx, requestBearer, offsetSpec);
     }
 
-    private void processListMaxTimestampOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListMaxTimestampOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var offsetSpec = OffsetSpec.maxTimestamp();
         processListOffsetsRequest(ctx, requestBearer, offsetSpec);
     }
 
-    private void processListTimestampOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer) {
+    private void processListTimestampOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer)
+    {
         var request = (AdminListTimestampOffsetsRequest) requestBearer.request();
         var offsetSpec = OffsetSpec.forTimestamp(request.getTimestamp());
         processListOffsetsRequest(ctx, requestBearer, offsetSpec);
     }
 
     private void processListOffsetsRequest(ChannelHandlerContext ctx, RequestBearer requestBearer,
-                                           OffsetSpec offsetSpec) {
+                                           OffsetSpec offsetSpec)
+    {
         var request = (AdminListOffsetsRequest) requestBearer.request();
         var admin = getAdmin(request.getAdminId(), request.getToken());
         var topicPartitionOffsets = request.getPartitions().stream()
@@ -920,7 +979,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
 
     // endregion
 
-    private Admin getAdmin(String id, String token) {
+    private Admin getAdmin(String id, String token)
+    {
         var wrapper = provider.getAdmin(id, token);
         wrapper.touch();
         return wrapper.getAdmin();
@@ -931,11 +991,13 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
      * the completion itself would otherwise be swallowed by the future, leaving the client without
      * a response and the connection stuck with reading disabled.
      */
-    private <T> void whenComplete(KafkaFuture<T> future, ChannelHandlerContext ctx, Completion<T> completion) {
+    private <T> void whenComplete(KafkaFuture<T> future, ChannelHandlerContext ctx, Completion<T> completion)
+    {
         future.whenComplete((result, error) -> ensureResponse(ctx, () -> completion.complete(result, error)));
     }
 
-    private <T> void whenComplete(CompletableFuture<T> future, ChannelHandlerContext ctx, Completion<T> completion) {
+    private <T> void whenComplete(CompletableFuture<T> future, ChannelHandlerContext ctx, Completion<T> completion)
+    {
         future.whenComplete((result, error) -> ensureResponse(ctx, () -> completion.complete(result, error)));
     }
 
@@ -944,7 +1006,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
      * it or report the failure. A null response means an empty body.
      */
     private <T> void respondWith(KafkaFuture<T> future, ChannelHandlerContext ctx, RequestBearer requestBearer,
-                                 HttpResponseStatus status, String action, Function<T, AdminResponse> mapper) {
+                                 HttpResponseStatus status, String action, Function<T, AdminResponse> mapper)
+    {
         whenComplete(future, ctx, (result, error) -> {
             if (error == null)
                 ctx.writeAndFlush(new AdminResponseBearer(requestBearer, status, mapper.apply(result)));
@@ -958,7 +1021,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
      * is not there, answered with 404.
      */
     private <T> void respondWithOrNotFound(KafkaFuture<T> future, ChannelHandlerContext ctx, RequestBearer requestBearer,
-                                           String action, String notFoundMessage, Function<T, AdminResponse> mapper) {
+                                           String action, String notFoundMessage, Function<T, AdminResponse> mapper)
+    {
         whenComplete(future, ctx, (result, error) -> {
             if (error == null) {
                 var response = mapper.apply(result);
@@ -971,7 +1035,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         });
     }
 
-    private void handleCompletionError(ChannelHandlerContext ctx, String action, Throwable error) {
+    private void handleCompletionError(ChannelHandlerContext ctx, String action, Throwable error)
+    {
         if (!handleError(ctx, error)) {
             logger.error("Unable to {}.", action, error);
             HttpUtils.writeInternalServerErrorAndClose(ctx, error.getMessage());
@@ -979,7 +1044,8 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
     }
 
     @FunctionalInterface
-    private interface Completion<T> {
+    private interface Completion<T>
+    {
         void complete(T result, Throwable error) throws Exception;
     }
 }

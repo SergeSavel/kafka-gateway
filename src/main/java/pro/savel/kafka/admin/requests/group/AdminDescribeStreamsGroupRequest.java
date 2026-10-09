@@ -19,7 +19,8 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class AdminDescribeStreamsGroupRequest implements AdminGroupRequest {
+public class AdminDescribeStreamsGroupRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

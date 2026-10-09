@@ -25,8 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public class AdminDescribeStreamsGroupResponse implements AdminResponse {
-
+public class AdminDescribeStreamsGroupResponse implements AdminResponse
+{
     private String groupId;
     private int groupEpoch;
     private int targetAssignmentEpoch;
@@ -37,10 +37,12 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
     private Node coordinator;
     private Collection<String> authorizedOperations;
 
-    private AdminDescribeStreamsGroupResponse() {
+    private AdminDescribeStreamsGroupResponse()
+    {
     }
 
-    public static AdminDescribeStreamsGroupResponse of(org.apache.kafka.clients.admin.StreamsGroupDescription source) {
+    public static AdminDescribeStreamsGroupResponse of(org.apache.kafka.clients.admin.StreamsGroupDescription source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeStreamsGroupResponse();
@@ -57,8 +59,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
     }
 
     @Getter
-    public static class StreamsGroupMemberDescription {
-
+    public static class StreamsGroupMemberDescription
+    {
         private String memberId;
         private int memberEpoch;
         private String instanceId;
@@ -76,15 +78,17 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
         private boolean isClassic;
 
         @Getter
-        public static class Endpoint {
-
+        public static class Endpoint
+        {
             private String host;
             private int port;
 
-            private Endpoint() {
+            private Endpoint()
+            {
             }
 
-            private static Endpoint of(org.apache.kafka.clients.admin.StreamsGroupMemberDescription.Endpoint source) {
+            private static Endpoint of(org.apache.kafka.clients.admin.StreamsGroupMemberDescription.Endpoint source)
+            {
                 if (source == null)
                     return null;
                 var result = new Endpoint();
@@ -95,16 +99,18 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
         }
 
         @Getter
-        public static class TaskOffset {
-
+        public static class TaskOffset
+        {
             private String subtopologyId;
             private int partition;
             private long offset;
 
-            private TaskOffset() {
+            private TaskOffset()
+            {
             }
 
-            private static Collection<TaskOffset> of(Collection<org.apache.kafka.clients.admin.StreamsGroupMemberDescription.TaskOffset> source) {
+            private static Collection<TaskOffset> of(Collection<org.apache.kafka.clients.admin.StreamsGroupMemberDescription.TaskOffset> source)
+            {
                 if (source == null)
                     return null;
                 var result = new ArrayList<TaskOffset>(source.size());
@@ -112,7 +118,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
                 return result;
             }
 
-            private static TaskOffset of(org.apache.kafka.clients.admin.StreamsGroupMemberDescription.TaskOffset source) {
+            private static TaskOffset of(org.apache.kafka.clients.admin.StreamsGroupMemberDescription.TaskOffset source)
+            {
                 if (source == null)
                     return null;
                 var result = new TaskOffset();
@@ -124,22 +131,24 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
         }
 
         @Getter
-        public static class StreamsGroupMemberAssignment {
-
+        public static class StreamsGroupMemberAssignment
+        {
             private Collection<TaskIds> activeTasks;
             private Collection<TaskIds> standbyTasks;
             private Collection<TaskIds> warmupTasks;
 
             @Getter
-            public static class TaskIds {
-
+            public static class TaskIds
+            {
                 private String subtopologyId;
                 private Collection<Integer> partitions;
 
-                private TaskIds() {
+                private TaskIds()
+                {
                 }
 
-                private static TaskIds of(org.apache.kafka.clients.admin.StreamsGroupMemberAssignment.TaskIds source) {
+                private static TaskIds of(org.apache.kafka.clients.admin.StreamsGroupMemberAssignment.TaskIds source)
+                {
                     if (source == null)
                         return null;
                     var result = new TaskIds();
@@ -148,7 +157,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
                     return result;
                 }
 
-                private static Collection<TaskIds> of(Collection<org.apache.kafka.clients.admin.StreamsGroupMemberAssignment.TaskIds> source) {
+                private static Collection<TaskIds> of(Collection<org.apache.kafka.clients.admin.StreamsGroupMemberAssignment.TaskIds> source)
+                {
                     if (source == null)
                         return null;
                     var result = new ArrayList<TaskIds>(source.size());
@@ -157,10 +167,12 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
                 }
             }
 
-            private StreamsGroupMemberAssignment() {
+            private StreamsGroupMemberAssignment()
+            {
             }
 
-            private static StreamsGroupMemberAssignment of(org.apache.kafka.clients.admin.StreamsGroupMemberAssignment source) {
+            private static StreamsGroupMemberAssignment of(org.apache.kafka.clients.admin.StreamsGroupMemberAssignment source)
+            {
                 if (source == null)
                     return null;
                 var result = new StreamsGroupMemberAssignment();
@@ -171,10 +183,12 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
             }
         }
 
-        private StreamsGroupMemberDescription() {
+        private StreamsGroupMemberDescription()
+        {
         }
 
-        private static Collection<StreamsGroupMemberDescription> of(Collection<org.apache.kafka.clients.admin.StreamsGroupMemberDescription> source) {
+        private static Collection<StreamsGroupMemberDescription> of(Collection<org.apache.kafka.clients.admin.StreamsGroupMemberDescription> source)
+        {
             if (source == null)
                 return null;
             var result = new ArrayList<StreamsGroupMemberDescription>(source.size());
@@ -182,7 +196,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
             return result;
         }
 
-        private static StreamsGroupMemberDescription of(org.apache.kafka.clients.admin.StreamsGroupMemberDescription source) {
+        private static StreamsGroupMemberDescription of(org.apache.kafka.clients.admin.StreamsGroupMemberDescription source)
+        {
             if (source == null)
                 return null;
             var result = new StreamsGroupMemberDescription();
@@ -206,8 +221,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
     }
 
     @Getter
-    public static class StreamsGroupSubtopologyDescription {
-
+    public static class StreamsGroupSubtopologyDescription
+    {
         private String subtopologyId;
         private Collection<String> sourceTopics;
         private Collection<String> repartitionSinkTopics;
@@ -215,16 +230,18 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
         private Map<String, TopicInfo> repartitionSourceTopics;
 
         @Getter
-        public static class TopicInfo {
-
+        public static class TopicInfo
+        {
             private int partitions;
             private int replicationFactor;
             private Map<String, String> topicConfigs;
 
-            private TopicInfo() {
+            private TopicInfo()
+            {
             }
 
-            private static TopicInfo of(org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription.TopicInfo source) {
+            private static TopicInfo of(org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription.TopicInfo source)
+            {
                 if (source == null)
                     return null;
                 var result = new TopicInfo();
@@ -234,7 +251,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
                 return result;
             }
 
-            private static Map<String, TopicInfo> of(Map<String, org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription.TopicInfo> source) {
+            private static Map<String, TopicInfo> of(Map<String, org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription.TopicInfo> source)
+            {
                 if (source == null)
                     return null;
                 var result = new HashMap<String, TopicInfo>(source.size());
@@ -243,10 +261,12 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
             }
         }
 
-        private StreamsGroupSubtopologyDescription() {
+        private StreamsGroupSubtopologyDescription()
+        {
         }
 
-        private static Collection<StreamsGroupSubtopologyDescription> of(Collection<org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription> source) {
+        private static Collection<StreamsGroupSubtopologyDescription> of(Collection<org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription> source)
+        {
             if (source == null)
                 return null;
             var result = new ArrayList<StreamsGroupSubtopologyDescription>(source.size());
@@ -254,7 +274,8 @@ public class AdminDescribeStreamsGroupResponse implements AdminResponse {
             return result;
         }
 
-        private static StreamsGroupSubtopologyDescription of(org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription source) {
+        private static StreamsGroupSubtopologyDescription of(org.apache.kafka.clients.admin.StreamsGroupSubtopologyDescription source)
+        {
             if (source == null)
                 return null;
             var result = new StreamsGroupSubtopologyDescription();

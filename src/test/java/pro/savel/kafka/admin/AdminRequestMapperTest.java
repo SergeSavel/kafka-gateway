@@ -39,15 +39,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class AdminRequestMapperTest {
-
+class AdminRequestMapperTest
+{
     @Test
-    void mapAclBindingFilter_null_returnsAny() {
+    void mapAclBindingFilter_null_returnsAny()
+    {
         assertEquals(AclBindingFilter.ANY, AdminRequestMapper.mapAclBindingFilter(null));
     }
 
     @Test
-    void mapAclBindingFilter_fullFilter_mapsAllFields() {
+    void mapAclBindingFilter_fullFilter_mapsAllFields()
+    {
         var patternFilter = new AdminAclBindingFilter.ResourcePatternFilter();
         patternFilter.setResourceType("TOPIC");
         patternFilter.setName("test-topic");
@@ -70,7 +72,8 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapAclBindingFilter_nullNestedFilters_mapToAny() {
+    void mapAclBindingFilter_nullNestedFilters_mapToAny()
+    {
         var source = new AdminAclBindingFilter();
 
         var result = AdminRequestMapper.mapAclBindingFilter(source);
@@ -80,7 +83,8 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapAclBindingFilter_invalidResourceType_throwsIllegalArgument() {
+    void mapAclBindingFilter_invalidResourceType_throwsIllegalArgument()
+    {
         var patternFilter = new AdminAclBindingFilter.ResourcePatternFilter();
         patternFilter.setResourceType("NOT_A_TYPE");
         patternFilter.setPatternType("LITERAL");
@@ -91,7 +95,8 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapAclBindingFilter_invalidOperation_throwsIllegalArgument() {
+    void mapAclBindingFilter_invalidOperation_throwsIllegalArgument()
+    {
         var entryFilter = new AdminAclBindingFilter.AccessControlEntryFilter();
         entryFilter.setOperation("NOT_AN_OPERATION");
         entryFilter.setPermissionType("ALLOW");
@@ -102,12 +107,14 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapAclBindingFilters_null_returnsNull() {
+    void mapAclBindingFilters_null_returnsNull()
+    {
         assertNull(AdminRequestMapper.mapAclBindingFilters(null));
     }
 
     @Test
-    void mapAclBindingFilters_collection_mapsEachElement() {
+    void mapAclBindingFilters_collection_mapsEachElement()
+    {
         var source = List.of(new AdminAclBindingFilter(), new AdminAclBindingFilter());
 
         var result = AdminRequestMapper.mapAclBindingFilters(source);
@@ -117,12 +124,14 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapAclBindings_null_returnsNull() {
+    void mapAclBindings_null_returnsNull()
+    {
         assertNull(AdminRequestMapper.mapAclBindings(null));
     }
 
     @Test
-    void mapAclBindings_fullBinding_mapsAllFields() {
+    void mapAclBindings_fullBinding_mapsAllFields()
+    {
         var pattern = new AdminAclBinding.ResourcePattern();
         pattern.setResourceType("GROUP");
         pattern.setName("test-group");
@@ -144,29 +153,34 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapGroupState_null_returnsNull() {
+    void mapGroupState_null_returnsNull()
+    {
         assertNull(AdminRequestMapper.mapGroupState(null));
     }
 
     @Test
-    void mapGroupState_kafkaName_mapsCaseInsensitively() {
+    void mapGroupState_kafkaName_mapsCaseInsensitively()
+    {
         assertEquals(GroupState.PREPARING_REBALANCE, AdminRequestMapper.mapGroupState("PreparingRebalance"));
         assertEquals(GroupState.STABLE, AdminRequestMapper.mapGroupState("stable"));
     }
 
     @Test
-    void mapGroupState_responseEnumName_mapsCaseInsensitively() {
+    void mapGroupState_responseEnumName_mapsCaseInsensitively()
+    {
         assertEquals(GroupState.PREPARING_REBALANCE, AdminRequestMapper.mapGroupState("PREPARING_REBALANCE"));
         assertEquals(GroupState.NOT_READY, AdminRequestMapper.mapGroupState("not_ready"));
     }
 
     @Test
-    void mapGroupState_unknownName_returnsUnknown() {
+    void mapGroupState_unknownName_returnsUnknown()
+    {
         assertEquals(GroupState.UNKNOWN, AdminRequestMapper.mapGroupState("not-a-real-state"));
     }
 
     @Test
-    void mapGroupState_responseEnumName_isLocaleIndependent() {
+    void mapGroupState_responseEnumName_isLocaleIndependent()
+    {
         // Turkish uppercases 'i' to dotted 'İ', which would turn "preparing_rebalance" into a name
         // that matches no enum constant.
         var previousDefault = Locale.getDefault();
@@ -179,12 +193,14 @@ class AdminRequestMapperTest {
     }
 
     @Test
-    void mapTopicPartitionOffsetMetadata_null_returnsNull() {
+    void mapTopicPartitionOffsetMetadata_null_returnsNull()
+    {
         assertNull(AdminRequestMapper.mapTopicPartitionOffsetMetadata(null));
     }
 
     @Test
-    void mapTopicPartitionOffsetMetadata_items_mappedToMap() {
+    void mapTopicPartitionOffsetMetadata_items_mappedToMap()
+    {
         var first = new AdminAlterConsumerGroupOffsetsRequest.TopicPartitionOffsetMetadata();
         first.setTopic("topic-a");
         first.setPartition(0);

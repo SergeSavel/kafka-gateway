@@ -21,8 +21,8 @@ import pro.savel.kafka.common.contract.Node;
 import java.util.Collection;
 
 @Getter
-public class AdminDescribeClassicGroupResponse implements AdminResponse {
-
+public class AdminDescribeClassicGroupResponse implements AdminResponse
+{
     private String groupId;
     private String protocol;
     private String protocolData;
@@ -32,10 +32,12 @@ public class AdminDescribeClassicGroupResponse implements AdminResponse {
     private boolean isSimpleConsumerGroup;
     private Collection<String> authorizedOperations;
 
-    private AdminDescribeClassicGroupResponse() {
+    private AdminDescribeClassicGroupResponse()
+    {
     }
 
-    public static AdminDescribeClassicGroupResponse of(org.apache.kafka.clients.admin.ClassicGroupDescription source) {
+    public static AdminDescribeClassicGroupResponse of(org.apache.kafka.clients.admin.ClassicGroupDescription source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeClassicGroupResponse();

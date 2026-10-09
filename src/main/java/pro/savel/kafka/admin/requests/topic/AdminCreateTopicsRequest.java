@@ -24,7 +24,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class AdminCreateTopicsRequest implements AdminTopicRequest {
+public class AdminCreateTopicsRequest implements AdminTopicRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty
@@ -37,7 +38,8 @@ public class AdminCreateTopicsRequest implements AdminTopicRequest {
     private Integer timeoutMs;
 
     @Data
-    public static class TopicSpec {
+    public static class TopicSpec
+    {
         @NotEmpty
         private String topicName;
         @Positive

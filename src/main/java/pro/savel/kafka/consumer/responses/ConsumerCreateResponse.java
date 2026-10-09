@@ -18,15 +18,17 @@ import lombok.Getter;
 import pro.savel.kafka.consumer.ConsumerWrapper;
 
 @Getter
-public class ConsumerCreateResponse implements ConsumerResponse {
-
+public class ConsumerCreateResponse implements ConsumerResponse
+{
     private String id;
     private String token;
 
-    private ConsumerCreateResponse() {
+    private ConsumerCreateResponse()
+    {
     }
 
-    public static ConsumerCreateResponse of(ConsumerWrapper source) {
+    public static ConsumerCreateResponse of(ConsumerWrapper source)
+    {
         if (source == null)
             return null;
         var result = new ConsumerCreateResponse();

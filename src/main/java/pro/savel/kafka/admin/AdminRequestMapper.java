@@ -32,9 +32,10 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class AdminRequestMapper {
-
-    public static Collection<AclBindingFilter> mapAclBindingFilters(Collection<AdminAclBindingFilter> source) {
+public class AdminRequestMapper
+{
+    public static Collection<AclBindingFilter> mapAclBindingFilters(Collection<AdminAclBindingFilter> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<AclBindingFilter>(source.size());
@@ -42,7 +43,8 @@ public class AdminRequestMapper {
         return result;
     }
 
-    public static AclBindingFilter mapAclBindingFilter(AdminAclBindingFilter source) {
+    public static AclBindingFilter mapAclBindingFilter(AdminAclBindingFilter source)
+    {
         if (source == null)
             return AclBindingFilter.ANY;
         var patternFilter = mapResourcePatternFilter(source.getPatternFilter());
@@ -50,7 +52,8 @@ public class AdminRequestMapper {
         return new AclBindingFilter(patternFilter, entryFilter);
     }
 
-    private static ResourcePatternFilter mapResourcePatternFilter(AdminAclBindingFilter.ResourcePatternFilter source) {
+    private static ResourcePatternFilter mapResourcePatternFilter(AdminAclBindingFilter.ResourcePatternFilter source)
+    {
         if (source == null)
             return ResourcePatternFilter.ANY;
         var resourceType = ResourceType.valueOf(source.getResourceType());
@@ -59,7 +62,8 @@ public class AdminRequestMapper {
         return new ResourcePatternFilter(resourceType, name, patternType);
     }
 
-    private static AccessControlEntryFilter mapAccessControlEntryFilter(AdminAclBindingFilter.AccessControlEntryFilter source) {
+    private static AccessControlEntryFilter mapAccessControlEntryFilter(AdminAclBindingFilter.AccessControlEntryFilter source)
+    {
         if (source == null)
             return AccessControlEntryFilter.ANY;
         var principal = source.getPrincipal();
@@ -69,7 +73,8 @@ public class AdminRequestMapper {
         return new AccessControlEntryFilter(principal, host, operation, permissionType);
     }
 
-    public static Collection<AclBinding> mapAclBindings(Collection<AdminAclBinding> source) {
+    public static Collection<AclBinding> mapAclBindings(Collection<AdminAclBinding> source)
+    {
         if (source == null)
             return null;
         var result = new ArrayList<AclBinding>(source.size());
@@ -77,7 +82,8 @@ public class AdminRequestMapper {
         return result;
     }
 
-    private static AclBinding mapAclBinding(AdminAclBinding source) {
+    private static AclBinding mapAclBinding(AdminAclBinding source)
+    {
         if (source == null)
             return null;
         var pattern = mapResourcePattern(source.getPattern());
@@ -85,7 +91,8 @@ public class AdminRequestMapper {
         return new AclBinding(pattern, entry);
     }
 
-    private static ResourcePattern mapResourcePattern(AdminAclBinding.ResourcePattern source) {
+    private static ResourcePattern mapResourcePattern(AdminAclBinding.ResourcePattern source)
+    {
         if (source == null)
             return null;
         var resourceType = ResourceType.valueOf(source.getResourceType());
@@ -94,7 +101,8 @@ public class AdminRequestMapper {
         return new ResourcePattern(resourceType, name, patternType);
     }
 
-    private static AccessControlEntry mapAccessControlEntry(AdminAclBinding.AccessControlEntry source) {
+    private static AccessControlEntry mapAccessControlEntry(AdminAclBinding.AccessControlEntry source)
+    {
         if (source == null)
             return null;
         var principal = source.getPrincipal();
@@ -109,7 +117,8 @@ public class AdminRequestMapper {
      * enum names the list-groups response carries ({@code PREPARING_REBALANCE}), so that a state read
      * from a response can be passed back as a filter.
      */
-    public static GroupState mapGroupState(String source) {
+    public static GroupState mapGroupState(String source)
+    {
         if (source == null)
             return null;
         var state = GroupState.parse(source);
@@ -122,7 +131,8 @@ public class AdminRequestMapper {
         }
     }
 
-    public static Map<TopicPartition, OffsetAndMetadata> mapTopicPartitionOffsetMetadata(Collection<AdminAlterConsumerGroupOffsetsRequest.TopicPartitionOffsetMetadata> source) {
+    public static Map<TopicPartition, OffsetAndMetadata> mapTopicPartitionOffsetMetadata(Collection<AdminAlterConsumerGroupOffsetsRequest.TopicPartitionOffsetMetadata> source)
+    {
         if (source == null)
             return null;
         var result = new HashMap<TopicPartition, OffsetAndMetadata>(source.size());

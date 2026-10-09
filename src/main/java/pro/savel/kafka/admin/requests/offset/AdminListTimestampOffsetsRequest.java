@@ -20,7 +20,8 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class AdminListTimestampOffsetsRequest extends AdminListOffsetsRequest {
+public class AdminListTimestampOffsetsRequest extends AdminListOffsetsRequest
+{
     @Positive
     private long timestamp;
 }

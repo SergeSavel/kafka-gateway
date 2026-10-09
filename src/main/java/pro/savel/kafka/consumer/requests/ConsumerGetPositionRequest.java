@@ -19,7 +19,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
-public class ConsumerGetPositionRequest implements ConsumerRequest {
+public class ConsumerGetPositionRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

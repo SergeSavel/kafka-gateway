@@ -20,12 +20,14 @@ import java.util.Collection;
 
 @Deprecated
 @Data
-public class ConsumerListPartitionsResponse implements ConsumerResponse {
+public class ConsumerListPartitionsResponse implements ConsumerResponse
+{
     private String topic;
     private Collection<ConsumerListPartitionsResponse.PartitionInfo> partitions;
 
     @Data
-    public static class PartitionInfo {
+    public static class PartitionInfo
+    {
         private int partition;
     }
 }

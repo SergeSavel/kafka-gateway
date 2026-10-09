@@ -20,8 +20,10 @@ import org.apache.kafka.common.errors.*;
 import pro.savel.kafka.common.exceptions.HttpStatusException;
 import pro.savel.kafka.common.exceptions.MethodNotAllowedException;
 
-public abstract class CommonErrors {
-    public static boolean handle(ChannelHandlerContext ctx, Throwable error) {
+public abstract class CommonErrors
+{
+    public static boolean handle(ChannelHandlerContext ctx, Throwable error)
+    {
         var handled = true;
         switch (error) {
             case MethodNotAllowedException me ->

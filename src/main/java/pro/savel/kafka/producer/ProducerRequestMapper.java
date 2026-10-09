@@ -20,10 +20,10 @@ import pro.savel.kafka.producer.requests.ProducerSendStringRequest;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
-public class ProducerRequestMapper {
-
-    public static ProducerSendRequest mapProduceRequest(ProducerSendStringRequest stringRequest) {
-
+public class ProducerRequestMapper
+{
+    public static ProducerSendRequest mapProduceRequest(ProducerSendStringRequest stringRequest)
+    {
         var request = new ProducerSendRequest();
         request.setProducerId(stringRequest.getProducerId());
         request.setToken(stringRequest.getToken());

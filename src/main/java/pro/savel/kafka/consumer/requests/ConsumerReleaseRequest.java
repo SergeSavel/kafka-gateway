@@ -18,7 +18,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class ConsumerReleaseRequest implements ConsumerRequest {
+public class ConsumerReleaseRequest implements ConsumerRequest
+{
     @NotEmpty
     private String consumerId;
     @NotEmpty

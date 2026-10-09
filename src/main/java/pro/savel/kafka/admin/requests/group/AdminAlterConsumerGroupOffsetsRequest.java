@@ -24,8 +24,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class AdminAlterConsumerGroupOffsetsRequest implements AdminGroupRequest {
-
+public class AdminAlterConsumerGroupOffsetsRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty
@@ -38,7 +38,8 @@ public class AdminAlterConsumerGroupOffsetsRequest implements AdminGroupRequest 
     private Integer timeoutMs;
 
     @Data
-    public static class TopicPartitionOffsetMetadata {
+    public static class TopicPartitionOffsetMetadata
+    {
         @NotEmpty
         private String topic;
         @PositiveOrZero

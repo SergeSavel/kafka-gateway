@@ -21,7 +21,8 @@ import lombok.Data;
 import java.util.Collection;
 
 @Data
-public class AdminRemoveMembersFromConsumerGroupRequest implements AdminGroupRequest {
+public class AdminRemoveMembersFromConsumerGroupRequest implements AdminGroupRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

@@ -19,15 +19,17 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ServerConfigTest {
-
+class ServerConfigTest
+{
     @Test
-    void validConfig_isAccepted() {
+    void validConfig_isAccepted()
+    {
         assertDoesNotThrow(() -> config("0.0.0.0", 8086, 0, 1024, 300, 300, 32, 4));
     }
 
     @Test
-    void invalidNetworkSettings_areRejected() {
+    void invalidNetworkSettings_areRejected()
+    {
         assertThrows(IllegalArgumentException.class, () -> config(" ", 8086, 0, 1024, 300, 300, 32, 4));
         assertThrows(IllegalArgumentException.class, () -> config("0.0.0.0", 0, 0, 1024, 300, 300, 32, 4));
         assertThrows(IllegalArgumentException.class, () -> config("0.0.0.0", 65_536, 0, 1024, 300, 300, 32, 4));
@@ -36,7 +38,8 @@ class ServerConfigTest {
     }
 
     @Test
-    void invalidTimeoutsAndRequestLimits_areRejected() {
+    void invalidTimeoutsAndRequestLimits_areRejected()
+    {
         assertThrows(IllegalArgumentException.class, () -> config("0.0.0.0", 8086, 0, 1024, 0, 300, 32, 4));
         assertThrows(IllegalArgumentException.class, () -> config("0.0.0.0", 8086, 0, 1024, 300, 0, 32, 4));
         assertThrows(IllegalArgumentException.class, () -> config("0.0.0.0", 8086, 0, 1024, 300, 300, 0, 4));
@@ -54,7 +57,8 @@ class ServerConfigTest {
             int readTimeoutSeconds,
             int writeTimeoutSeconds,
             int maxRequestBytes,
-            int maxJsonRequestBytes) {
+            int maxJsonRequestBytes)
+    {
         return new ServerConfig(
                 host,
                 port,

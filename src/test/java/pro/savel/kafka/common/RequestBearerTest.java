@@ -23,21 +23,24 @@ import pro.savel.kafka.common.contract.Serde;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RequestBearerTest {
-
-    private static DefaultHttpRequest request() {
+class RequestBearerTest
+{
+    private static DefaultHttpRequest request()
+    {
         return new DefaultHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/test");
     }
 
     @Test
-    void serde_noHeaders_defaultsToJson() {
+    void serde_noHeaders_defaultsToJson()
+    {
         var httpRequest = request();
         var bearer = new RequestBearer(httpRequest, null);
         assertEquals(Serde.JSON, bearer.serializeTo());
     }
 
     @Test
-    void serde_acceptJson_returnsJson() {
+    void serde_acceptJson_returnsJson()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "application/json");
         var bearer = new RequestBearer(httpRequest, null);
@@ -45,7 +48,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_acceptBinary_returnsBinary() {
+    void serde_acceptBinary_returnsBinary()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "application/octet-stream");
         var bearer = new RequestBearer(httpRequest, null);
@@ -53,7 +57,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_acceptWildcard_fallsBackToContentType() {
+    void serde_acceptWildcard_fallsBackToContentType()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "*/*");
         httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
@@ -62,7 +67,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_acceptNull_fallsBackToContentType() {
+    void serde_acceptNull_fallsBackToContentType()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
         var bearer = new RequestBearer(httpRequest, null);
@@ -70,7 +76,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_unknownAccept_defaultsToJson() {
+    void serde_unknownAccept_defaultsToJson()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "text/html");
         var bearer = new RequestBearer(httpRequest, null);
@@ -78,7 +85,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_acceptJsonWithCharset_returnsJson() {
+    void serde_acceptJsonWithCharset_returnsJson()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "application/json; charset=utf-8");
         var bearer = new RequestBearer(httpRequest, null);
@@ -86,7 +94,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_acceptBinaryWithParameters_returnsBinary() {
+    void serde_acceptBinaryWithParameters_returnsBinary()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "application/octet-stream; q=1");
         var bearer = new RequestBearer(httpRequest, null);
@@ -94,7 +103,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void serde_acceptWildcardWithParameters_fallsBackToContentType() {
+    void serde_acceptWildcardWithParameters_fallsBackToContentType()
+    {
         var httpRequest = request();
         httpRequest.headers().set(HttpHeaderNames.ACCEPT, "*/*; q=0.8");
         httpRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/octet-stream");
@@ -103,7 +113,8 @@ class RequestBearerTest {
     }
 
     @Test
-    void keepAlive_http11_defaultsToTrue() {
+    void keepAlive_http11_defaultsToTrue()
+    {
         var httpRequest = request();
         var bearer = new RequestBearer(httpRequest, null);
         assertTrue(bearer.connectionKeepAlive());

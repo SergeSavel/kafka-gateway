@@ -20,7 +20,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
-public class AdminDeleteRecordsRequest implements AdminTopicRequest {
+public class AdminDeleteRecordsRequest implements AdminTopicRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

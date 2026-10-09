@@ -19,13 +19,15 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ProducerPartitionsResponse extends ArrayList<ProducerPartitionsResponse.PartitionInfo> implements ProducerResponse {
-
-    private ProducerPartitionsResponse(int initialCapacity) {
+public class ProducerPartitionsResponse extends ArrayList<ProducerPartitionsResponse.PartitionInfo> implements ProducerResponse
+{
+    private ProducerPartitionsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
-    public static ProducerPartitionsResponse of(Collection<org.apache.kafka.common.PartitionInfo> source) {
+    public static ProducerPartitionsResponse of(Collection<org.apache.kafka.common.PartitionInfo> source)
+    {
         if (source == null)
             return null;
         var result =  new ProducerPartitionsResponse(source.size());
@@ -34,14 +36,16 @@ public class ProducerPartitionsResponse extends ArrayList<ProducerPartitionsResp
     }
 
     @Getter
-    public static class PartitionInfo {
-
+    public static class PartitionInfo
+    {
         private int partition;
 
-        private PartitionInfo() {
+        private PartitionInfo()
+        {
         }
 
-        private static PartitionInfo of(org.apache.kafka.common.PartitionInfo source) {
+        private static PartitionInfo of(org.apache.kafka.common.PartitionInfo source)
+        {
             if (source == null)
                 return null;
             var result = new PartitionInfo();

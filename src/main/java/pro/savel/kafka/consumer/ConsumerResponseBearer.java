@@ -19,9 +19,10 @@ import pro.savel.kafka.common.RequestBearer;
 import pro.savel.kafka.common.ResponseBearer;
 import pro.savel.kafka.consumer.responses.ConsumerResponse;
 
-public class ConsumerResponseBearer extends ResponseBearer<ConsumerResponse> {
-
-    public ConsumerResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, ConsumerResponse response) {
+public class ConsumerResponseBearer extends ResponseBearer<ConsumerResponse>
+{
+    public ConsumerResponseBearer(RequestBearer requestBearer, HttpResponseStatus status, ConsumerResponse response)
+    {
         super(requestBearer, status, response);
     }
 }

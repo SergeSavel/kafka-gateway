@@ -27,14 +27,16 @@ import java.util.concurrent.TimeUnit;
  * {@link ReadTimeoutHandler} would count that as client inactivity and kill the connection while
  * its response is still being written.
  */
-public class ClientReadTimeoutHandler extends ReadTimeoutHandler {
-
-    public ClientReadTimeoutHandler(long timeout, TimeUnit unit) {
+public class ClientReadTimeoutHandler extends ReadTimeoutHandler
+{
+    public ClientReadTimeoutHandler(long timeout, TimeUnit unit)
+    {
         super(timeout, unit);
     }
 
     @Override
-    public void read(ChannelHandlerContext ctx) {
+    public void read(ChannelHandlerContext ctx)
+    {
         // Reached when auto-read is turned back on after a response completes, and once per read
         // cycle otherwise: the point where the gateway starts waiting on the client again.
         resetReadTimeout();
@@ -42,7 +44,8 @@ public class ClientReadTimeoutHandler extends ReadTimeoutHandler {
     }
 
     @Override
-    protected void readTimedOut(ChannelHandlerContext ctx) throws Exception {
+    protected void readTimedOut(ChannelHandlerContext ctx) throws Exception
+    {
         if (!ctx.channel().config().isAutoRead())
             return;
         super.readTimedOut(ctx);

@@ -53,8 +53,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-class ProducerRequestProcessorTest {
-
+class ProducerRequestProcessorTest
+{
     @SuppressWarnings("unchecked")
     private final ProducerProvider provider = new ProducerProvider(config -> mock(Producer.class));
     private final ProducerRequestProcessor processor =
@@ -62,23 +62,27 @@ class ProducerRequestProcessorTest {
     private final EmbeddedChannel channel = new EmbeddedChannel(processor);
 
     @AfterEach
-    void tearDown() {
+    void tearDown()
+    {
         channel.finishAndReleaseAll();
         provider.close();
     }
 
-    private static RequestBearer bearer(ProducerRequest request) {
+    private static RequestBearer bearer(ProducerRequest request)
+    {
         return new RequestBearer(request, Serde.JSON, true);
     }
 
-    private ProducerWrapper addWrapper() {
+    private ProducerWrapper addWrapper()
+    {
         return provider.createProducer("test-producer", new Properties(), 60_000, null);
     }
 
     //region Management
 
     @Test
-    void processCreate_success_returnsCreatedWithIdAndToken() {
+    void processCreate_success_returnsCreatedWithIdAndToken()
+    {
         var request = new ProducerCreateRequest();
         request.setName("my-producer");
         request.setConfig(new Properties());
@@ -96,7 +100,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processCreate_emptyScramPassword_returnsBadRequest() {
+    void processCreate_emptyScramPassword_returnsBadRequest()
+    {
         var request = new ProducerCreateRequest();
         request.setName("my-producer");
         var config = new Properties();
@@ -115,7 +120,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processCreate_kafkaRejectsConfig_returnsBadRequest() {
+    void processCreate_kafkaRejectsConfig_returnsBadRequest()
+    {
         // The real client constructor is what raises ConfigException on a malformed property, and
         // the shared provider hands back a mock instead - so this test needs its own failing one.
         var rejectingProvider = new ProducerProvider(config -> {
@@ -140,7 +146,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processRemove_validToken_removesAndReturnsNoContent() {
+    void processRemove_validToken_removesAndReturnsNoContent()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
 
@@ -157,7 +164,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processRemove_invalidToken_returnsBadRequest() {
+    void processRemove_invalidToken_returnsBadRequest()
+    {
         var wrapper = addWrapper();
 
         var request = new ProducerRemoveRequest();
@@ -173,7 +181,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processRemove_unknownId_isNoOpAndReturnsNoContent() {
+    void processRemove_unknownId_isNoOpAndReturnsNoContent()
+    {
         var request = new ProducerRemoveRequest();
         request.setProducerId("does-not-exist");
         request.setToken("any-token");
@@ -185,7 +194,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processTouch_updatesExpirationAndReturnsNoContent() throws InterruptedException {
+    void processTouch_updatesExpirationAndReturnsNoContent() throws InterruptedException
+    {
         var wrapper = addWrapper();
         var expiresBefore = wrapper.getExpiresAt();
         Thread.sleep(5);
@@ -202,7 +212,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processTouch_unknownId_returnsNotFound() {
+    void processTouch_unknownId_returnsNotFound()
+    {
         var request = new ProducerTouchRequest();
         request.setProducerId("does-not-exist");
         request.setToken("token");
@@ -215,7 +226,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processList_returnsAllProducers() {
+    void processList_returnsAllProducers()
+    {
         addWrapper();
         addWrapper();
 
@@ -232,7 +244,8 @@ class ProducerRequestProcessorTest {
     //region Producer operations
 
     @Test
-    void processSend_success_returnsCreatedWithMetadata() {
+    void processSend_success_returnsCreatedWithMetadata()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
         doAnswer(invocation -> {
@@ -259,7 +272,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processSend_kafkaError_mapsToHttpStatus() {
+    void processSend_kafkaError_mapsToHttpStatus()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
         doAnswer(invocation -> {
@@ -281,7 +295,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processSend_duplicateHeaderKeys_bothReachTheRecord() {
+    void processSend_duplicateHeaderKeys_bothReachTheRecord()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
         var sentRecord = new AtomicReference<ProducerRecord<byte[], byte[]>>();
@@ -310,7 +325,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processGetPartitions_success_returnsPartitions() {
+    void processGetPartitions_success_returnsPartitions()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
         var node = new org.apache.kafka.common.Node(1, "host", 9092);
@@ -332,7 +348,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processBeginTransaction_success_returnsNoContent() {
+    void processBeginTransaction_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
 
@@ -348,7 +365,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processCommitTransaction_success_returnsNoContent() {
+    void processCommitTransaction_success_returnsNoContent()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
 
@@ -364,7 +382,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void processAbortTransaction_producerThrowsIllegalState_returnsConflict() {
+    void processAbortTransaction_producerThrowsIllegalState_returnsConflict()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
         doThrow(new IllegalStateException("no active transaction")).when(producer).abortTransaction();
@@ -383,7 +402,8 @@ class ProducerRequestProcessorTest {
     //endregion
 
     @Test
-    void processRequest_unknownRequestType_returnsInternalServerError() {
+    void processRequest_unknownRequestType_returnsInternalServerError()
+    {
         channel.writeInbound(bearer(new UnknownProducerRequest()));
 
         FullHttpResponse response = channel.readOutbound();
@@ -391,13 +411,15 @@ class ProducerRequestProcessorTest {
         response.release();
     }
 
-    private record UnknownProducerRequest() implements ProducerRequest {
+    private record UnknownProducerRequest() implements ProducerRequest
+    {
     }
 
     //region Response guarantee
 
     @Test
-    void processSend_callbackThrows_returnsInternalServerErrorInsteadOfHanging() {
+    void processSend_callbackThrows_returnsInternalServerErrorInsteadOfHanging()
+    {
         var wrapper = addWrapper();
         var producer = wrapper.getProducer();
         var callbackRef = new AtomicReference<Callback>();
@@ -426,7 +448,8 @@ class ProducerRequestProcessorTest {
     }
 
     @Test
-    void execute_completionThrows_returnsInternalServerErrorInsteadOfHanging() {
+    void execute_completionThrows_returnsInternalServerErrorInsteadOfHanging()
+    {
         var executor = new DeferredBlockingTaskExecutor();
         var deferredChannel = new EmbeddedChannel(new ProducerRequestProcessor(executor, provider));
         var wrapper = addWrapper();
@@ -456,12 +479,13 @@ class ProducerRequestProcessorTest {
      * a throwing completion from unwinding back into channelRead, which is what makes the guard in
      * {@code execute} observable at all.
      */
-    private static class DeferredBlockingTaskExecutor extends BlockingTaskExecutor {
-
+    private static class DeferredBlockingTaskExecutor extends BlockingTaskExecutor
+    {
         private final Queue<Runnable> completions = new ArrayDeque<>();
 
         @Override
-        public <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, BiConsumer<T, Throwable> completion) {
+        public <T> void execute(ChannelHandlerContext ctx, Callable<T> operation, BiConsumer<T, Throwable> completion)
+        {
             T result = null;
             Throwable error = null;
             try {
@@ -474,7 +498,8 @@ class ProducerRequestProcessorTest {
             completions.add(() -> completion.accept(result_, error_));
         }
 
-        void runCompletions() {
+        void runCompletions()
+        {
             Runnable next;
             while ((next = completions.poll()) != null)
                 next.run();

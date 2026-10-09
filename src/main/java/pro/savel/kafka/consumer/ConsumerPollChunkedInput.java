@@ -22,8 +22,8 @@ import io.netty.handler.stream.ChunkedInput;
 import pro.savel.kafka.common.contract.Serde;
 import pro.savel.kafka.consumer.responses.ConsumerPollResponse;
 
-final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf> {
-
+final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf>
+{
     private final ObjectMapper objectMapper;
     private final Serde serde;
     private final int chunkSize;
@@ -35,7 +35,8 @@ final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf> {
     private boolean complete;
     private long progress;
 
-    ConsumerPollChunkedInput(ObjectMapper objectMapper, ConsumerPollResponse response, Serde serde, int chunkSize) {
+    ConsumerPollChunkedInput(ObjectMapper objectMapper, ConsumerPollResponse response, Serde serde, int chunkSize)
+    {
         if (objectMapper == null)
             throw new IllegalArgumentException("objectMapper must not be null");
         if (response == null)
@@ -51,12 +52,14 @@ final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf> {
     }
 
     @Override
-    public boolean isEndOfInput() {
+    public boolean isEndOfInput()
+    {
         return complete && currentBuffer == null;
     }
 
     @Override
-    public void close() {
+    public void close()
+    {
         if (currentBuffer != null) {
             currentBuffer.release();
             currentBuffer = null;
@@ -67,12 +70,14 @@ final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf> {
 
     @Deprecated
     @Override
-    public ByteBuf readChunk(ChannelHandlerContext ctx) throws Exception {
+    public ByteBuf readChunk(ChannelHandlerContext ctx) throws Exception
+    {
         return readChunk(ctx.alloc());
     }
 
     @Override
-    public ByteBuf readChunk(ByteBufAllocator allocator) throws Exception {
+    public ByteBuf readChunk(ByteBufAllocator allocator) throws Exception
+    {
         if (isEndOfInput())
             return null;
         if (currentBuffer == null)
@@ -90,23 +95,27 @@ final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf> {
     }
 
     @Override
-    public long length() {
+    public long length()
+    {
         return -1;
     }
 
     @Override
-    public long progress() {
+    public long progress()
+    {
         return progress;
     }
 
-    private ByteBuf serializeNext(ByteBufAllocator allocator) throws Exception {
+    private ByteBuf serializeNext(ByteBufAllocator allocator) throws Exception
+    {
         return switch (serde) {
             case JSON -> serializeNextJson(allocator);
             case BINARY -> serializeNextBinary(allocator);
         };
     }
 
-    private ByteBuf serializeNextJson(ByteBufAllocator allocator) throws Exception {
+    private ByteBuf serializeNextJson(ByteBufAllocator allocator) throws Exception
+    {
         if (messageIndex < response.size()) {
             var message = response.get(messageIndex);
             var result = ConsumerResponseSerializer.serializePollJsonMessage(
@@ -124,7 +133,8 @@ final class ConsumerPollChunkedInput implements ChunkedInput<ByteBuf> {
         return suffix;
     }
 
-    private ByteBuf serializeNextBinary(ByteBufAllocator allocator) {
+    private ByteBuf serializeNextBinary(ByteBufAllocator allocator)
+    {
         if (!started) {
             started = true;
             if (response.isEmpty())

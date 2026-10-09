@@ -93,7 +93,7 @@ These are intentional design choices — do not flag as issues:
 
 ## Code Conventions
 
-- **Style:** Braces on new lines (Allman style), 4-space indent, no tabs
+- **Style:** K&R braces — the opening brace of a type, constructor or method declaration goes on its own line at the declaration's indent; every other block (`if`, `for`, `while`, `switch`, `try`, lambdas, anonymous classes, array initializers) opens at the end of its line, with `} else {`, `} catch (...) {` and `} finally {`; 4-space indent, no tabs
 - **HTTP response headers:** names are always written in canonical case (`Content-Type`, `Content-Length`,
   `Connection`, `Transfer-Encoding`, `Allow`) via the constants in `HttpUtils` — never via Netty's lowercase
   `HttpHeaderNames` or helpers like `HttpUtil.setTransferEncodingChunked`; a major client matches header names

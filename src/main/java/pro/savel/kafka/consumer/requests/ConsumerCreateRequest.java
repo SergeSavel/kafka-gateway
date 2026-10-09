@@ -23,7 +23,8 @@ import lombok.Data;
 import java.util.Properties;
 
 @Data
-public class ConsumerCreateRequest implements ConsumerRequest {
+public class ConsumerCreateRequest implements ConsumerRequest
+{
     @NotBlank
     private String name;
     @NotEmpty

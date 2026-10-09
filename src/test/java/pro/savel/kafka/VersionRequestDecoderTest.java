@@ -30,10 +30,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class VersionRequestDecoderTest {
-
+class VersionRequestDecoderTest
+{
     @Test
-    void get_returnsOkWithNonEmptyBody() {
+    void get_returnsOkWithNonEmptyBody()
+    {
         var channel = new EmbeddedChannel(new VersionRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/version");
         assertFalse(channel.writeInbound(request));
@@ -47,7 +48,8 @@ class VersionRequestDecoderTest {
     }
 
     @Test
-    void get_keepAliveRequest_leavesConnectionOpen() {
+    void get_keepAliveRequest_leavesConnectionOpen()
+    {
         var channel = new EmbeddedChannel(new VersionRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/version");
         assertFalse(channel.writeInbound(request));
@@ -61,7 +63,8 @@ class VersionRequestDecoderTest {
     }
 
     @Test
-    void get_connectionCloseRequest_announcesAndClosesConnection() {
+    void get_connectionCloseRequest_announcesAndClosesConnection()
+    {
         var channel = new EmbeddedChannel(new VersionRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/version");
         request.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.CLOSE);
@@ -81,7 +84,8 @@ class VersionRequestDecoderTest {
     }
 
     @Test
-    void post_returnsMethodNotAllowed() {
+    void post_returnsMethodNotAllowed()
+    {
         var channel = new EmbeddedChannel(new VersionRequestDecoder());
         var request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "/version");
         assertFalse(channel.writeInbound(request));

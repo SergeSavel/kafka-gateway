@@ -18,7 +18,8 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Data
-public class AdminRemoveRequest implements AdminManageRequest {
+public class AdminRemoveRequest implements AdminManageRequest
+{
     @NotEmpty
     private String adminId;
     @NotEmpty

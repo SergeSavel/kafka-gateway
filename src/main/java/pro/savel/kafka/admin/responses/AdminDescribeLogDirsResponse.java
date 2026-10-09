@@ -22,14 +22,16 @@ import java.util.Map;
 
 @Getter
 public class AdminDescribeLogDirsResponse extends ArrayList<AdminDescribeLogDirsResponse.BrokersLogDirsDescription>
-        implements AdminResponse {
-
-    private AdminDescribeLogDirsResponse(int initialCapacity) {
+        implements AdminResponse
+{
+    private AdminDescribeLogDirsResponse(int initialCapacity)
+    {
         super(initialCapacity);
     }
 
     public static AdminDescribeLogDirsResponse of(
-            Map<Integer, Map<String, org.apache.kafka.clients.admin.LogDirDescription>> source) {
+            Map<Integer, Map<String, org.apache.kafka.clients.admin.LogDirDescription>> source)
+    {
         if (source == null)
             return null;
         var result = new AdminDescribeLogDirsResponse(source.size());
@@ -39,16 +41,18 @@ public class AdminDescribeLogDirsResponse extends ArrayList<AdminDescribeLogDirs
     }
 
     @Getter
-    public static class BrokersLogDirsDescription {
-
+    public static class BrokersLogDirsDescription
+    {
         private Integer brokerId;
         private Collection<LogDirDescription> logDirs;
 
-        private BrokersLogDirsDescription() {
+        private BrokersLogDirsDescription()
+        {
         }
 
         private static BrokersLogDirsDescription of(Integer brokerId,
-                Map<String, org.apache.kafka.clients.admin.LogDirDescription> descriptionsSource) {
+                Map<String, org.apache.kafka.clients.admin.LogDirDescription> descriptionsSource)
+        {
             var result = new BrokersLogDirsDescription();
             result.brokerId = brokerId;
             if (descriptionsSource != null) {
@@ -61,16 +65,18 @@ public class AdminDescribeLogDirsResponse extends ArrayList<AdminDescribeLogDirs
     }
 
     @Getter
-    public static class LogDirDescription {
-
+    public static class LogDirDescription
+    {
         private String path;
         private String errorMessage;
         private Collection<TopicPartitionReplicaInfo> replicaInfos;
 
-        private LogDirDescription() {
+        private LogDirDescription()
+        {
         }
 
-        private static LogDirDescription of(String path, org.apache.kafka.clients.admin.LogDirDescription source) {
+        private static LogDirDescription of(String path, org.apache.kafka.clients.admin.LogDirDescription source)
+        {
             var result = new LogDirDescription();
             result.path = path;
             if (source != null) {
@@ -90,19 +96,21 @@ public class AdminDescribeLogDirsResponse extends ArrayList<AdminDescribeLogDirs
     }
 
     @Getter
-    public static class TopicPartitionReplicaInfo {
-
+    public static class TopicPartitionReplicaInfo
+    {
         private String topic;
         private int partition;
         private long size;
         private long offsetLag;
         private boolean isFuture;
 
-        private TopicPartitionReplicaInfo() {
+        private TopicPartitionReplicaInfo()
+        {
         }
 
         private static TopicPartitionReplicaInfo of(String topic, int partition,
-                org.apache.kafka.clients.admin.ReplicaInfo source) {
+                org.apache.kafka.clients.admin.ReplicaInfo source)
+        {
             if (source == null)
                 return null;
             var result = new TopicPartitionReplicaInfo();
