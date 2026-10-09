@@ -5,7 +5,7 @@ plugins {
     java
 }
 
-val nettyVersion = "4.2.17.Final"
+val nettyVersion = "4.2.19.Final"
 
 group = "pro.savel.kafka"
 version = "5.1.1"
