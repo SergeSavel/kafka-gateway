@@ -484,7 +484,6 @@ class AdminRequestProcessorTest {
         var admin = wrapper.getAdmin();
         var result = mock(CreateTopicsResult.class);
         when(result.all()).thenReturn(KafkaFuture.completedFuture(null));
-        when(result.values()).thenReturn(Map.of("topic-a", KafkaFuture.completedFuture(null)));
         when(result.topicId("topic-a")).thenReturn(KafkaFuture.completedFuture(Uuid.randomUuid()));
         when(result.numPartitions("topic-a")).thenReturn(KafkaFuture.completedFuture(3));
         when(result.replicationFactor("topic-a")).thenReturn(KafkaFuture.completedFuture(1));
@@ -503,6 +502,32 @@ class AdminRequestProcessorTest {
         assertEquals(HttpResponseStatus.OK, response.getStatus());
         var body = (AdminCreateTopicResponse) response.getResponse();
         assertEquals(3, body.getNumPartitions());
+    }
+
+    @Test
+    void processCreateTopic_emptyResultValues_stillWritesResponse() {
+        // The response used to be written from inside a loop over values(), so an empty map left
+        // the request unanswered and the connection stuck with reading suspended.
+        var wrapper = addWrapper();
+        var admin = wrapper.getAdmin();
+        var result = mock(CreateTopicsResult.class);
+        when(result.all()).thenReturn(KafkaFuture.completedFuture(null));
+        when(result.values()).thenReturn(Map.of());
+        when(result.topicId("topic-a")).thenReturn(KafkaFuture.completedFuture(Uuid.randomUuid()));
+        when(result.numPartitions("topic-a")).thenReturn(KafkaFuture.completedFuture(3));
+        when(result.replicationFactor("topic-a")).thenReturn(KafkaFuture.completedFuture(1));
+        when(admin.createTopics(anyCollection(), any(CreateTopicsOptions.class))).thenReturn(result);
+
+        var request = new AdminCreateTopicRequest();
+        request.setAdminId(wrapper.getId());
+        request.setToken(wrapper.getToken());
+        request.setTopicName("topic-a");
+
+        channel.writeInbound(bearer(request));
+
+        AdminResponseBearer response = channel.readOutbound();
+        assertNotNull(response, "a response must be written regardless of the result map");
+        assertEquals(HttpResponseStatus.OK, response.getStatus());
     }
 
     @Test

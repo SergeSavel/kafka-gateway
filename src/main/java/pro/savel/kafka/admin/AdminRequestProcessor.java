@@ -312,21 +312,17 @@ public class AdminRequestProcessor extends AbstractRequestProcessor {
         if (request.getTimeoutMs() != null)
             options.timeoutMs(request.getTimeoutMs());
         var createResult = admin.createTopics(Collections.singleton(newTopic), options);
-        whenComplete(createResult.all(), ctx, (topics, error) -> {
+        var topicName = newTopic.name();
+        whenComplete(createResult.all(), ctx, (ignored, error) -> {
             if (error == null) {
-                for (var topicName : createResult.values().keySet()) {
-                    var response = AdminCreateTopicResponse.of(
-                            createResult.topicId(topicName),
-                            createResult.numPartitions(topicName),
-                            createResult.replicationFactor(topicName)
-                    );
-                    ctx.writeAndFlush(new AdminResponseBearer(requestBearer, HttpResponseStatus.OK, response));
-                    return;
-                }
-            } else if (!handleError(ctx, error)) {
-                logger.error("Unable to create topic.", error);
-                HttpUtils.writeInternalServerErrorAndClose(ctx, error.getMessage());
-            }
+                var response = AdminCreateTopicResponse.of(
+                        createResult.topicId(topicName),
+                        createResult.numPartitions(topicName),
+                        createResult.replicationFactor(topicName)
+                );
+                ctx.writeAndFlush(new AdminResponseBearer(requestBearer, HttpResponseStatus.OK, response));
+            } else
+                handleCompletionError(ctx, "create topic", error);
         });
     }
 
