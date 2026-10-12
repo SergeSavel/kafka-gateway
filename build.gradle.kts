@@ -9,7 +9,7 @@ val nettyVersion = "4.2.19.Final"
 val mockitoVersion = "5.24.0"
 
 group = "pro.savel.kafka"
-version = "5.1.1"
+version = "5.1.2"
 
 java {
     toolchain {
